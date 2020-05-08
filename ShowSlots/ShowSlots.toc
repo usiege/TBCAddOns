@@ -1,0 +1,8 @@
+## Interface: 11302
+## Title: ShowSlots
+## Title-zhCN: ShowSlots-背包剩余空间
+## Version: 1.00
+## Author: prozhong
+## Notes: Count empty slots and show on bag icon.
+## Notes-zhCN: 显示背包空格数量。
+ShowSlots.lua

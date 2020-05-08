@@ -1,0 +1,9 @@
+## Interface: 11302
+## Title: NameplateDistance
+## Title-zhCN: NameplateDistance-敌对姓名版显示距离增强
+## Notes: Increases the nameplate distance.
+## Author: Wardz
+## Version: 0.0.1
+## SavedVariables: NameplateDistanceDB
+## Q-CAT-Version: 000100
+NameplateDistance.lua

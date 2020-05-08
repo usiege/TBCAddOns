@@ -1,0 +1,7 @@
+## Interface: 30300   
+## Title: Groupinviter
+## Author: Wildo
+## Notes: Invites people to your party when they whisper the word "invite"
+## Dependencies:
+Groupinviter.lua
+Groupinviter.xml

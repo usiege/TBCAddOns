@@ -1,0 +1,11 @@
+﻿## Interface: 11302
+## Title: |cFF0dea38EZ|r Quest
+## Title-zhCN: |cFF0dea38EZ|r 自动接受任务
+## Author: thisbarker
+## Notes: Automatically accepts quests
+## Version: 0.0.4
+
+Main.lua
+Main.xml
+
+# 无可用界面

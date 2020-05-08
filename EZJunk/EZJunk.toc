@@ -1,0 +1,10 @@
+﻿## Interface: 11302
+## Title: |cFF0dea38EZ|r Junk
+## Title-zhCN: |cFF0dea38EZ|r 自动贩卖垃圾、物品售价
+## Author: thisbarker
+## Notes: Automatically sells junk
+## Version: 0.0.2
+
+Main.lua
+
+# 无可用界面

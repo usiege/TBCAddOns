@@ -1,0 +1,11 @@
+## Interface: 80200
+## Title: Blizzmove
+## Title-zhCN: Blizzmove-暴雪框架移动
+## Notes: Move those blizzard windows
+## Author: yess
+## X-WoWI-ID: 23875
+## Version: 1.9
+
+
+Handle.lua
+BlizzMove.lua

@@ -1,0 +1,108 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <Include file="templates.lua"/>
+    <Frame name="ClassicGarrisonFollowerPortraitTemplate" virtual="true">
+		<Size x="52" y="60"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture parentKey="PortraitRing" atlas="GarrMission_PortraitRing" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOP"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="-1">
+				<Texture parentKey="Portrait">
+					<Size x="44" y="44"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.PortraitRing" y="5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="1">
+				<Texture parentKey="PortraitRingQuality" atlas="GarrMission_PortraitRing_Quality" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOP"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="2">
+				<Texture parentKey="LevelBorder" atlas="GarrMission_PortraitRing_LevelBorder" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="BOTTOM" y="-3"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Level" inherits="GameFontHighlightSmall" justifyH="CENTER" text="95">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.LevelBorder"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="PortraitRingCover" atlas="GarrMission_PortraitRing_Darkener" useAtlasSize="true" hidden="true" alpha="0.6">
+					<Anchors>
+						<Anchor point="TOP" x="0" y="-1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+    <Frame name="ClassicStatsFrameTemplate" inherits="InsetFrameTemplate3" hidden="true" virtual="true">
+        <Size x="168" y="200"/>
+        <Frames>
+            <Frame parentKey="ItemLevelFrame">
+                <Size x="168" y="29"/>
+                <Anchors>
+                    <Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-2"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="BORDER">
+                        <Texture parentKey="Background" atlas="UI-Character-Info-ItemLevel-Bounce" useAtlasSize="true" alpha="0.3">
+                            <Anchors>
+                                <Anchor point="CENTER"/>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Value" inherits="ChatFontNormal">
+                            <Anchors>
+                                <Anchor point="CENTER" relativeKey="$parent.Background" x="0" y="1"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+            <Frame parentKey="AttributesCategory" inherits="CharacterStatFrameCategoryTemplate">
+                <KeyValues>
+                    <KeyValue key="titleText" value="STAT_CATEGORY_ATTRIBUTES" type="global"/>
+                </KeyValues>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ItemLevelFrame" relativePoint="BOTTOMLEFT" x="0" y="8"/>
+                </Anchors>
+            </Frame>
+            <Frame parentKey="ResistanceCategory" inherits="CharacterStatFrameCategoryTemplate">
+                <KeyValues>
+                    <KeyValue key="titleText" value="STAT_RESISTANCE_ATTRIBUTES" type="global"/>
+                </KeyValues>
+            </Frame>
+            <Frame parentKey="EnhancementsCategory" inherits="CharacterStatFrameCategoryTemplate">
+                <KeyValues>
+                    <KeyValue key="titleText" value="STAT_CATEGORY_ENHANCEMENTS" type="global"/>
+                </KeyValues>
+            </Frame>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                ClassicStatsFrameTemplate_Onload(self)
+            </OnLoad>
+            <OnShow>
+                ClassicStatsFrameTemplate_OnShow(self)
+            </OnShow>
+            <OnHide>
+                ClassicStatsFrameTemplate_OnHide(self)
+            </OnHide>
+        </Scripts>
+    </Frame>
+</Ui>

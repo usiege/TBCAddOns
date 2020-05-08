@@ -1,0 +1,6 @@
+## Interface: 11302
+## Title: BlueShamans
+## Title-zhCN: BlueShamans-框架萨满蓝色修复
+## Notes: Makes shamans blue.
+## Author: Vidget
+BlueShamans.lua

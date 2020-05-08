@@ -1,0 +1,14 @@
+## Interface: 11302
+## Title: Moncaí's |cff00ff00Equipment Compare|r
+## Title-zhCN: MoncaiCompare-装备比较
+## Notes: Replacement for Equip Compare, by Moncaí
+## Author: Moncaí
+## Version: 7.2.0
+## X-Website: http://www.curse.com/addons/wow/moncaicompare
+## URL: http://www.curse.com/addons/wow/moncaicompare
+## RequiredDeps:
+## OptionalDeps: 
+## Q-CAT-Version: 000100
+!MoncaiCompare.lua
+##EncounterJournal.lua
+##LootJournal.lua
