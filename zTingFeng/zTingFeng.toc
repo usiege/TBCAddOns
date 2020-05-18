@@ -8,8 +8,8 @@
 # first function for testing
 
 TingFeng.lua
-#TingFeng.xml
+TingFeng.xml
 
-CombatTracker/CombatTracker.lua
-CombatTracker/CombatTracker.xml
+#CombatTracker/CombatTracker.lua
+#CombatTracker/CombatTracker.xml
 

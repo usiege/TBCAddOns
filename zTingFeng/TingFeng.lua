@@ -1,6 +1,9 @@
 local tingfeng = ...;
 
 -- 
+DEFAULT_CHAT_FRAME:AddMessage("TingFeng addons load...")
+DEFAULT_CHAT_FRAME:AddMessage(...)
+
 
 function fish()
     T,F=T or 0, F or CreateFrame("frame")
@@ -44,23 +47,21 @@ function talk(channel, time_pad, msg)
 end
 
 
-
-_G.SLASH_RandomLS1 = "/randomLS"
-_G.SlashCmdList.RandomLS = function()
-    local a = {172179,93672,162973,163045,165802,165670,166746,166747,168907}
-    r = r or CreateFrame("Button","r",UIParent,"SecureActionButtonTemplate")
-    r:SetAttribute("type","item")
-    r:SetAttribute("item",GetItemInfo(a[random(#a)]))
-    r:Click()
-end
-
-
-function HelloWorldCommand(frame)
+isTesting = true
+function HelloWorldCommand(...)
     -- body
-    if (not frame:IsShown()) then
-        frame:Show()
+    param = ...
+    print(param)
+    DEFAULT_CHAT_FRAME:AddMessage(param)
+    
+    if isTesting then
+        SendChatMessage("cast 恶魔皮肤","SAY",nil,nil)
+        isTesting = false
+        print("is true testing")
     else
-        frame:Hide()
+        SendChatMessage("/cast 恶魔皮肤","SAY",nil,nil)
+        isTesting = true
+        print("is false testing")
     end
 end
 
@@ -69,3 +70,10 @@ _G.SLASH_HELLOWORLD2 = "/ha";
 _G.SlashCmdList["HELLOWORLD"] = HelloWorldCommand;
 
 
+DEFAULT_CHAT_FRAME:AddMessage("TingFeng addons script end ---")
+
+DEFAULT_CHAT_FRAME:AddMessage("/y 这是一个测试")
+DEFAULT_CHAT_FRAME:AddMessage("/cast 恶魔皮肤")
+
+--SendChatMessage("cast 恶魔皮肤","channel",nil,"SAY")
+SendChatMessage("/cast 恶魔皮肤","SAY",nil)

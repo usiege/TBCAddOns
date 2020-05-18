@@ -1,5 +1,19 @@
 ﻿local C, G = unpack(select(2, ...))
 
+-- for k,v in pairs((select(2, ...))) do
+--     print(k, v)
+-- end
+
+-- DEFAULT_CHAT_FRAME:AddMessage(...)
+-- DEFAULT_CHAT_FRAME:AddMessage("C")
+-- for k,v in pairs(C) do
+-- 	print(k,v)
+-- end
+
+-- DEFAULT_CHAT_FRAME:AddMessage("G")
+-- for k,v in pairs(G) do
+-- 	print(k,v)
+-- end
 --====================================================--
 -----------------    [[ Function ]]    -----------------
 --====================================================--
