@@ -5,7 +5,7 @@ DEFAULT_CHAT_FRAME:AddMessage("TingFeng addons load...")
 DEFAULT_CHAT_FRAME:AddMessage(...)
 
 
-function fish()
+function TFFish()
     T,F=T or 0, F or CreateFrame("frame")
     if X then 
         X=nil 
@@ -20,13 +20,13 @@ function fish()
             end 
         end 
     end 
-    F:SetScript ("OnUpdate",X)
+    F:SetScript("OnUpdate",X)
 end
 
 
 -- 
 -- /script talk(1, 5, "内容")
-function talk(channel, time_pad, msg)
+function TFTalk(channel, time_pad, msg)
     T,F=T or 0,F or CreateFrame("frame")
     if TALK then 
         TALK=nil
