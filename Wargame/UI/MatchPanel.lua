@@ -11,7 +11,7 @@ function MatchPanel:Constructor()
     self.titleTex = {}
     self.gameId = 0
 
-    self.Description.More.Text:SetText(L['全部规则'])
+    self.Description.More.Text:SetText(L['详细规则'])
 
     local function OnClick()
         if self.MatchTimer then
@@ -45,9 +45,7 @@ function MatchPanel:Constructor()
         ns.Addon:OpenBlocker({
             text = L['比赛规则'],
             acceptText = CLOSE,
-            editText = game.zone == ns.ZONE.Warsong and
-                string.format(L.WARSONG_RULES, game.mode, game.combatCount, game.combatCount, game.backupCount,
-                              game.backupCount + game.combatCount) or L.ALX_RULES,
+            editText = game.zone == ns.ZONE.Warsong and ns.FormatSummary(L.WARSONG_RULES, game) or L.ALX_RULES,
             cancelHidden = true,
             editBox = true,
         })
@@ -82,7 +80,7 @@ function MatchPanel:Clear()
         self.NotStartTimer = nil
     end
 
-    self.Description.Text:SetText('')
+    self:UpdateDescription()
     self.Param.Mode:SetText('')
     self.Param.Time:SetText('')
     self.Duration:SetText('')
@@ -133,8 +131,8 @@ function MatchPanel:Update()
         return
     end
 
-    self.Description.Text:SetText(string.format(L.MATCH_DESCRIPTION, game.backupCount,
-                                                game.combatCount + game.backupCount))
+    -- self.Description.Text:SetText(ns.FormatSummary(L.MATCH_DESCRIPTION, game))
+    self:UpdateDescription(game)
     self.Param.Mode:SetText(string.format(L['比赛模式：%s'], game.mode))
     self.Param.Time:SetText(game:GetStartTimeText())
     self.ProgressBar:SetMinMaxValues(0, game.maxRoundCount or 0)
@@ -163,6 +161,11 @@ function MatchPanel:Update()
     tex.Text:SetText(game.title)
 
     self:UpdateButtons()
+end
+
+function MatchPanel:UpdateDescription(game)
+    self.Description.Text:SetText(game and ns.FormatSummary(L.MATCH_DESCRIPTION, game) or '')
+    self.Description:SetHeight(max(105, self.Description.Text:GetStringHeight() + 30))
 end
 
 ---@param game NeteaseWargameGame

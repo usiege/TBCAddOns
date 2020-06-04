@@ -6,7 +6,6 @@ DEBUG = true
 -- global things
 _G.OOPrint = OOPrint
 _G.OOIsInTable = OOIsInTable
-
 _G.DEBUG = DEBUG
 
 
@@ -27,7 +26,8 @@ end
 
 
 -- addon utils
--- Raid for commander
+-- Raid struct
+
 local OORaid = {
 	member_list = {}, --OOMember list 
 	username_list = {}, 	-- username list, use this name recognize member, username -> member one by one
@@ -41,8 +41,10 @@ local OOMember = {
 	class_id = "",
 	random_key = ""
 }
+
 local OORecord = {
-	item_list = {}
+	raid_id = "",	-- uuid
+	item_list = {}	-- list for OOAccount
 }
 
 local OOAccount = {
@@ -54,12 +56,41 @@ local OOAccount = {
 	costcache = "",
 	detail = {},
 	item_id = ""
-}	
+}
 
 local OOGoods = {
 	displayname = "",
 	code_id = ""
 }
+
+-- class init
+
+function OORecord:new(o)
+	-- body
+	local o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+
+	return o
+end
+
+function OOAccount:new(o)
+	-- body
+	local o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+
+	return o
+end
+
+function OOGoods:new(o)
+	-- body
+	local o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+
+	return o
+end
 
 
 function OORaid:new(o)
@@ -71,6 +102,7 @@ function OORaid:new(o)
 	return o
 end
 
+-- function for raid
 
 function OORaid:MemberCount( ... )
 	-- body
@@ -121,6 +153,11 @@ function OORaid:AssignRandomKey( member )
 	return code
 end
 
+
+local function user_class_id( filename )
+	return tostring(CAREER_ID[filename])
+end
+
 -- 根据成员所在队伍中的索引更新成员信息
 function OORaid:UpdateMember( username, index )
 	-- body
@@ -128,9 +165,13 @@ function OORaid:UpdateMember( username, index )
 	if memeber == nil then return end
 	memeber.index = index
 
-	local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML
+	local name, rank, subgroup, level, class, filename, zone, online, isDead, role, isML
 	= GetRaidRosterInfo(index)
 
+	-- 各字段见oolib
+	memeber.is_commander = (index == 1)
+	memeber.user_lv = tostring(level)
+	memeber.class_id = user_class_id(filename)
 
 
 
@@ -186,6 +227,10 @@ function OORaid:ClearMembers()
 	end
 end
 
+-- record for Raid
+function OORaid:GetRecord( ... )
+	
+end
 
 -- member 
 
@@ -201,12 +246,13 @@ function OOMember:new( username )
 end
 
 
--- record for Raid
 
 
 -- oo game main event code
-local ooraid = OORaid:new()
-ADDONSELF.CURRENT_RAID = ooraid
+do
+	local ooraid = OORaid:new()
+	ADDONSELF.CURRENT_RAID = ooraid
+end
 
 
 -- dubug code 

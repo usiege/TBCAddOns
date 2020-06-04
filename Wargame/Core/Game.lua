@@ -25,6 +25,8 @@ function Game:OnProto()
             tinsert(self.timeList, {start = t + self.startMonment, finish = t + self.endMonment})
         end
     end
+
+    self.maxMemberCount = self.combatCount + self.backupCount
 end
 
 function Game:HasRule(rule)

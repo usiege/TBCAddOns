@@ -272,7 +272,7 @@ ADDONSELF.genexport = function(items, n, conf)
     end
 
     local s = L["Raid Ledger"] .. CRLF
-    s = s .. L["Feedback"] .. ": farmer1992@gmail.com" .. CRLF
+    s = s .. L["Feedback"] .. ": wufaquhui@gmail.com" .. CRLF
     s = s .. CRLF
 
     local l = function(item, c)

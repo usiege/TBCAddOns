@@ -35,6 +35,7 @@ function MainPanel:Constructor()
     BlockDialog:SetPoint('TOPLEFT', 3, -22)
     BlockDialog:SetPoint('BOTTOMRIGHT', -3, 3)
     BlockDialog:SetFrameLevel(self:GetFrameLevel() + 100)
+    BlockDialog.EditBox:Disable()
     self.BlockDialog = BlockDialog
 
     self.FeedBackButton:SetScript('OnClick', function()
@@ -100,7 +101,6 @@ function MainPanel:SetupTabs(tabs)
         local tab = self.Tabs[i] or self:CreateTabButton(tabIndex)
         tab:SetText(v[1])
         tab.frame = v[2]
-        tab.isDisabled = v[3]
         tab:HookScript('OnClick', UpdateTabs)
         tab:Show()
     end
@@ -121,12 +121,11 @@ function MainPanel:NETEASE_WARGAME_GAMES_UPDATE()
     end
 
     -- tab
-    local start = game.startTime <= ns.time()
     self.selectedTab = 1
     self:SetupTabs({
         {L['匹配'], self.Match}, --
-        {L['队伍'], self.Team, not start}, --
-        {L['排行'], self.Rank, not start}, --
+        {L['队伍'], self.Team}, --
+        {L['排行'], self.Rank}, --
     })
 
     self:UpdateTabs()

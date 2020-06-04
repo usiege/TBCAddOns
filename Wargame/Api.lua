@@ -244,3 +244,9 @@ function ns.GetError(error)
     local err = ns.ErrorCode[error]
     return err and L[err] or string.format(L['未知错误：%s'], error)
 end
+
+function ns.FormatSummary(text, game)
+    return text:gsub('{{([%w_]+)}}', function(key)
+        return game[key]
+    end)
+end

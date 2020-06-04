@@ -105,7 +105,7 @@ L["Subgroup total"] = true
 L["Summary"] = true
 L["Time left"] = true
 L["TITLE"] = "Raid Ledger"
-L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"
+L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"
 L["toggle Auto recording on/off"] = true
 L["Top [%d] contributors"] = true
 L["Value"] = true
@@ -233,7 +233,7 @@ L["Subgroup total"] = "Untergruppe Gesamt"
 --[[Translation missing --]]
 --[[ L["Time left"] = "Time left"--]] 
 L["TITLE"] = "Titel"
-L["TOC_NOTES"] = "Ein Kassenbuch für GDKP Raids. Feedback: farmer1992@gmail.com"
+L["TOC_NOTES"] = "Ein Kassenbuch für GDKP Raids. Feedback: wufaquhui@gmail.com"
 L["toggle Auto recording on/off"] = "Toggle automatische Aufzeichnung an/aus"
 L["Top [%d] contributors"] = "Top [%d] Spender"
 L["Value"] = "Wert"
@@ -416,7 +416,7 @@ elseif locale == 'esES' then
 --[[Translation missing --]]
 --[[ L["TITLE"] = "Raid Ledger"--]] 
 --[[Translation missing --]]
---[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"--]] 
+--[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"--]] 
 --[[Translation missing --]]
 --[[ L["toggle Auto recording on/off"] = "toggle Auto recording on/off"--]] 
 --[[Translation missing --]]
@@ -602,7 +602,7 @@ elseif locale == 'esMX' then
 --[[Translation missing --]]
 --[[ L["TITLE"] = "Raid Ledger"--]] 
 --[[Translation missing --]]
---[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"--]] 
+--[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"--]] 
 --[[Translation missing --]]
 --[[ L["toggle Auto recording on/off"] = "toggle Auto recording on/off"--]] 
 --[[Translation missing --]]
@@ -788,7 +788,7 @@ elseif locale == 'frFR' then
 --[[Translation missing --]]
 --[[ L["TITLE"] = "Raid Ledger"--]] 
 --[[Translation missing --]]
---[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"--]] 
+--[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"--]] 
 --[[Translation missing --]]
 --[[ L["toggle Auto recording on/off"] = "toggle Auto recording on/off"--]] 
 --[[Translation missing --]]
@@ -974,7 +974,7 @@ elseif locale == 'itIT' then
 --[[Translation missing --]]
 --[[ L["TITLE"] = "Raid Ledger"--]] 
 --[[Translation missing --]]
---[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"--]] 
+--[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"--]] 
 --[[Translation missing --]]
 --[[ L["toggle Auto recording on/off"] = "toggle Auto recording on/off"--]] 
 --[[Translation missing --]]
@@ -1073,7 +1073,7 @@ L["Subgroup total"] = "하위 그룹 합계"
 L["Summary"] = "요약"
 L["Time left"] = "남은 시간"
 L["TITLE"] = "공격대 장부"
-L["TOC_NOTES"] = "공격대의 골드 분배 시행에 대한 장부, 피드백: farmer1992@gmail.com"
+L["TOC_NOTES"] = "공격대의 골드 분배 시행에 대한 장부, 피드백: wufaquhui@gmail.com"
 L["toggle Auto recording on/off"] = "자동 기록 켬/끔 전환"
 L["Top [%d] contributors"] = "상위 [%d] 기부"
 L["Value"] = "가격"
@@ -1255,7 +1255,7 @@ elseif locale == 'ptBR' then
 --[[Translation missing --]]
 --[[ L["TITLE"] = "Raid Ledger"--]] 
 --[[Translation missing --]]
---[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: farmer1992@gmail.com"--]] 
+--[[ L["TOC_NOTES"] = "A ledger for GDKP/gold run raid. Feedback: wufaquhui@gmail.com"--]] 
 --[[Translation missing --]]
 --[[ L["toggle Auto recording on/off"] = "toggle Auto recording on/off"--]] 
 --[[Translation missing --]]
@@ -1353,7 +1353,7 @@ L["Subgroup total"] = "Всего подгрупп"
 L["Summary"] = "Резюме"
 L["Time left"] = "Времени осталось"
 L["TITLE"] = "Рейдовая книга"
-L["TOC_NOTES"] = "Книга для ГДКП/разделения золота в рейде. Обратная связь: farmer1992@gmail.com"
+L["TOC_NOTES"] = "Книга для ГДКП/разделения золота в рейде. Обратная связь: wufaquhui@gmail.com"
 L["toggle Auto recording on/off"] = "включение/выключение автоматической записи"
 L["Top [%d] contributors"] = "Лучшие [%d] участники"
 L["Value"] = "Значение"
@@ -1453,13 +1453,20 @@ L["toggle Auto recording on/off"] = "开启/关闭自动拾取记录"
 L["Top [%d] contributors"] = "贡献钱 [%d] 的老板"
 L["Value"] = "费用"
 L["Winner"] = "赢家"
+
 -- OO Game
+L["Payment"] = "支付状态"
+L["UnPaid"] = "|cffff0000未支付|r"
+L["Paid"] = "|cff00ff00已支付|r"
 L["OO Game Data Synchro"] = "OO GAME 数据同步"
 L["Data synchro"] = "数据同步"
 L["OO Game Arrow item 1"] = "复制数据同步链接"
 L["OO Game Arrow item 2"] = "复制团队数据"
 L["OO Game Arrow item 3"] = "入团密码播报"
-L["OO Game secret code record"] = "您可以使用微信小程序OOGAME查收自己的金团帐本，您本次的团队帐本密码为 "
+L["OO Game secret code record"] = "您可以使用微信小程序OOGAME查收自己的金团帐本，您本次的团队帐本密码为: "
+L['OO Game Web utl more'] = "请按<|cff00ff00Ctrl+C|r>复制网址到浏览器打开OO GAME Web查看更多"
+L['OO Game Web record'] = "请按<|cff00ff00Ctrl+C|r>复制数据上传到网站"
+L["OO Game Web url"] = "https://xxxxx.com"
 
 elseif locale == 'zhTW' then
 L["# line starts with # will be ignored"] = "# 以 # 開頭的行自動被忽略"
@@ -1549,7 +1556,7 @@ L["Subgroup total"] = "小隊總和"
 L["Summary"] = "彙總"
 L["Time left"] = "剩餘時間"
 L["TITLE"] = "Raid Ledger 金團賬本"
-L["TOC_NOTES"] = "金團賬本，幫你在金團中記賬 反饋問題 farmer1992@gmail.com"
+L["TOC_NOTES"] = "金團賬本，幫你在金團中記賬 反饋問題 wufaquhui@gmail.com"
 L["toggle Auto recording on/off"] = "開啟/關閉自動拾取記錄"
 L["Top [%d] contributors"] = "貢獻錢 [%d] 的老板"
 L["Value"] = "費用"

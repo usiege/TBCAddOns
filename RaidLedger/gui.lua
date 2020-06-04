@@ -171,6 +171,10 @@ local function CreateBidFrame()
 
 end
 
+
+
+
+
 function GUI:Init()
 
 
@@ -1478,8 +1482,9 @@ function GUI:Init()
         local entryUpdate = CreateCellUpdate(function(cellFrame, entry)
 
             if not (cellFrame.textBox) then
+                -- 支出或收入明细说明
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 0, 0)
                 cellFrame.textBox:SetWidth(120)
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
@@ -1552,7 +1557,7 @@ function GUI:Init()
         local beneficiaryUpdate = CreateCellUpdate(function(cellFrame, entry)
             if not cellFrame.textBox then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 0, 0)
                 cellFrame.textBox:SetWidth(120)
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
@@ -1602,7 +1607,6 @@ function GUI:Init()
                 cellFrame.bidButton:Show()
             end
         end)
-
 
         local valueTypeMenuCtx = {}
         local setCostType = function(t)
@@ -1658,7 +1662,7 @@ function GUI:Init()
             local tooltip = self.commtooltip
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 20, 0)
                 cellFrame.textBox:SetWidth(70)
                 cellFrame.textBox:SetHeight(30)
                 -- cellFrame.textBox:SetNumeric(true)
@@ -1733,6 +1737,33 @@ function GUI:Init()
 
         end)
 
+        -- 添加是否支付UI
+        local paymentUpdate = CreateCellUpdate(function(cellFrame, entry)
+            -- body
+            if not cellFrame.paymentUpdate then
+
+                local b = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
+                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
+                b:SetPoint("LEFT", cellFrame, -30, 0)
+                --b:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
+                local cost_number = 0
+                b.text:SetText((cost_number > 0) and L["Paid"] or L["UnPaid"])
+                b:SetChecked((cost_number > 0)) -- should from db
+                -- 
+
+                b:SetScript("OnClick", function()
+                    b.text:SetText(b:GetChecked() and L["Paid"] or L["UnPaid"])
+
+                end)
+
+                cellFrame.paymentUpdate = b
+            end
+
+            cellFrame.paymentUpdate:Show()
+        end)
+
+
         self.lootLogFrame = ScrollingTable:CreateST({
             {
                 ["name"] = "",
@@ -1745,12 +1776,17 @@ function GUI:Init()
             },
             {
                 ["name"] = L["Entry"],
-                ["width"] = 250,
+                ["width"] = 200,
                 ["DoCellUpdate"] = entryUpdate,
             },
             {
+                ["name"] = L["Payment"],
+                ["width"] = 80,
+                ["DoCellUpdate"] = paymentUpdate,
+            },
+            {
                 ["name"] = L["Beneficiary"],
-                ["width"] = 150,
+                ["width"] = 120,
                 ["DoCellUpdate"] = beneficiaryUpdate,
             },
             {
@@ -1758,7 +1794,7 @@ function GUI:Init()
                 ["width"] = 100,
                 ["align"] = "RIGHT",
                 ["DoCellUpdate"] = valueUpdate,
-            }
+            },
         }, 12, 30, nil, f)
 
         self.lootLogFrame.head:SetHeight(15)
@@ -2259,17 +2295,59 @@ function GUI:Init()
 
 end
 
+
+-- oolib GUI
+function InputBox(title, text, accept, data)
+    StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX'] = StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX'] or {}
+    local dlg = StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX']
+    wipe(dlg)
+    dlg.text = title
+    dlg.button1 = L['确定']
+    dlg.OnAccept = accept
+    dlg.hideOnEscape = 1
+    dlg.timeout = 0
+    dlg.exclusive = 1
+    dlg.whileDead = 1
+    dlg.hasEditBox = true
+    dlg.editBoxWidth = 260
+    dlg.EditBoxOnTextChanged = function(editBox, t)
+        if t ~= text then
+            editBox:SetMaxBytes(nil)
+            editBox:SetMaxLetters(nil)
+            editBox:SetText(text)
+            editBox:HighlightText()
+            editBox:SetCursorPosition(0)
+            editBox:SetFocus()
+        end
+    end
+
+    StaticPopup_Show('NETEASE_WARGAME_MSG_BOX', nil, nil, data)
+end
+
+
 -- local oolib event 
-local function OOEventDataSyncButton01( ... )
+function OOEventDataSyncButton01( ... )
     -- body
+    InputBox(L['OO Game Web record'], L["OO Game Web url"])
 end
 
-local function OOEventDataSyncButton02( ... )
+function OOEventDataSyncButton02( ... )
     -- body
+    local text = CURRENT_RAID:GetRecord()
+    InputBox(L['OO Game Web record'], text)
 end
 
-local function OOEventDataSyncButton03( ... )
+
+function OOEventDataSyncButton03( ... )
     -- body
+    for i,v in ipairs(current_group_user_names()) do
+        repeat
+            local member = CURRENT_RAID:GetMember(v)
+            if member == nil then break end
+            SendChatMessage(L["OO Game secret code record"] .. member.random_key, 
+                "whisper", nil, v)
+        until true
+    end
 end
 
 -- deprecated 5.0.4
@@ -2298,11 +2376,11 @@ local function get_userinraid_index(username)
 end
 
 
-local function current_group_user_names( ... )
+function current_group_user_names( ... )
 
     local member_count = GetNumGroupMembers()
     local names = {}
-    for i=1,member_count do
+    for i=2,member_count do
         local name = GetRaidRosterInfo(i)
         table.insert(names, name)
     end
@@ -2368,12 +2446,19 @@ local function group_bulided( member_count )
             end
         end
         for i=1,member_count do
-            local name = GetRaidRosterInfo(i)
-            print("index:" .. i .. " ---> " .. "name:" .. name)
+            repeat
+                local name = GetRaidRosterInfo(i)
+                local member = CURRENT_RAID:GetMember(name)
+                if member == nil then break end
+                local key = member.random_key
 
+                if DEBUG then
+                    print("index: " .. i .. " ---> " .. "name: " .. 
+                        name .. " ---> " .. "random key: " .. key)
+                end
+            until true
             -- local member = CURRENT_RAID:GetMember(name)
             --CURRENT_RAID:UpdateMember(name, i)
-            
         end
 
     elseif last_member_count > member_count then

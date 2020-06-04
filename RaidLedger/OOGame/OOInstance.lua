@@ -1,17 +1,24 @@
 OOPrint("OOInstance")
 -- OO instance data
 
+-- public
+CAREER_ID = {}
+_G.CAREER_ID = CAREER_ID
+
 
 -- 职业
-OOCAREER_WARRIOR = "WARRIOR"  		-- 战士
-OOCAREER_PALADIN = "PALADIN"		-- 圣骑士
-OOCAREER_HUNTER = "HUNTER" 		-- 猎人
-OOCAREER_ROGUE = "ROGUE" 		-- 潜行者
-OOCAREER_PRIEST = "PRIEST" 		-- 牧师
-OOCAREER_SHAMAN = "SHAMAN"		-- 萨满
-OOCAREER_MAGE = "MAGE"			-- 法师
-OOCAREER_WARLOCK = "WARLOCK"		-- 术士
-OOCAREER_DRUID = "DRUID"		-- 德鲁伊
+OOCAREER_WARRIOR = "WARRIOR"  		-- 战士1
+OOCAREER_PALADIN = "PALADIN"		-- 圣骑士2
+OOCAREER_HUNTER = "HUNTER" 		-- 猎人3
+OOCAREER_ROGUE = "ROGUE" 		-- 潜行者4
+OOCAREER_PRIEST = "PRIEST" 		-- 牧师5
+-- 死亡骑士6
+OOCAREER_SHAMAN = "SHAMAN"		-- 萨满7
+OOCAREER_MAGE = "MAGE"			-- 法师8
+OOCAREER_WARLOCK = "WARLOCK"		-- 术士9
+--武僧10
+OOCAREER_DRUID = "DRUID"		-- 德鲁伊11
+--恶魔猎手12
 
 -- 阵营
 OOCAMP_HORDE = "HORDE"
@@ -39,6 +46,7 @@ local career_id = {
 	[OOCAREER_WARRIOR] = 9,
 	[OOCAREER_DRUID] = 11
 }
+CAREER_ID = career_id
 
 
 local server_area_1 = {

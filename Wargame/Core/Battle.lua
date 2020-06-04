@@ -38,6 +38,8 @@ function Battle:CommitPoints(event)
     local enemyPoints, enemyMax = GetBattlegroundPoints(self.enemy)
     local time = ns.time()
 
+    Log:Debug('points', time, allyPoints, allyMax, enemyPoints, enemyMax, UnitInBattleground('player'))
+
     ns.Client:SendServer('CPOINTS', self.game.id, allyPoints, allyMax, enemyPoints, enemyMax, time, not not event,
                          GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE))
 end
