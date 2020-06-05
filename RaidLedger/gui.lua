@@ -103,6 +103,13 @@ function GUI:UpdateLootTableFromDatabase()
         end
     end
 
+    -- for k,v in pairs(data) do
+    --     print(k, v.cols)
+    --     for k,v in pairs(v.cols) do
+    --         print(k,v.value)
+    --     end
+    -- end
+
     self.lootLogFrame:SetData(data)
     self:UpdateSummary()
 end
@@ -117,17 +124,17 @@ local function GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, col
     local idx = rowdata["cols"][1].value
 
     local ledger = Database:GetCurrentLedger()
-    local entry = ledger["items"][idx]
+    local entry = ledger["items"][idx] 
     return entry, idx
 end
 
 local function CreateCellUpdate(cb)
-    return function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+    return function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, ttable, ...)
         if not fShow then
             return
         end
 
-        local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
+        local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, ttable)
 
         if entry then
             cb(cellFrame, entry, idx, rowFrame)
@@ -1749,14 +1756,17 @@ function GUI:Init()
                 b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
                 b:SetPoint("LEFT", cellFrame, -30, 0)
                 --b:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
-                local cost_number = 0
-                b.text:SetText((cost_number > 0) and L["Paid"] or L["UnPaid"])
-                b:SetChecked((cost_number > 0)) -- should from db
+                local paid = entry["payment"] or false -- (cost_number > 0
+                b.text:SetText(paid and L["Paid"] or L["UnPaid"])
+                b:SetChecked(paid) -- should from db
                 -- 
 
                 b:SetScript("OnClick", function()
-                    b.text:SetText(b:GetChecked() and L["Paid"] or L["UnPaid"])
+                    local paid = b:GetChecked()
+                    b.text:SetText(paid and L["Paid"] or L["UnPaid"])
 
+                    entry["payment"] = paid
+                    GUI:UpdateLootTableFromDatabase()
                 end)
 
                 cellFrame.paymentUpdate = b
@@ -2376,6 +2386,7 @@ local function get_userinraid_index(username)
         local name = GetRaidRosterInfo(i)
         if name == username then
             index = i
+            break
         end
     end
     return index
@@ -2456,6 +2467,8 @@ local function group_bulided( member_count )
                 local name = GetRaidRosterInfo(i)
                 local member = CURRENT_RAID:GetMember(name)
                 if member == nil then break end
+
+                CURRENT_RAID:UpdateMember(member, i)
                 local key = member.random_key
 
                 if DEBUG then
@@ -2483,7 +2496,7 @@ local function group_bulided( member_count )
         local names = current_group_user_names()
 
         local new_username = find_diff_name(names, CURRENT_RAID.username_list)
-        local index = get_userinraid_index(username)   -- 新成员在团队中的索引，该索引在调整队伍时会发生变化
+        local index = get_userinraid_index(new_username)   -- 新成员在团队中的索引，该索引在调整队伍时会发生变化
         CURRENT_RAID:AddMember(new_username, index) -- 去重复,注意索引
         if DEBUG then
             print("添加新成员： " .. new_username)

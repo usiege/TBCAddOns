@@ -117,6 +117,7 @@ function db:AddEntry(type, detail, beneficiary, cost, costtype)
         detail = detail or {},
         beneficiary = beneficiary or "",
         cost = cost or 0,
+        payment = (cost > 0),
         costtype = costtype or "GOLD",
     })
 
@@ -190,6 +191,7 @@ function db:AddLoot(item, count, beneficiary, cost, force)
         return
     end
 
+    
     if force then
         self:AddEntry(TYPE_CREDIT, {
             item = itemLink,

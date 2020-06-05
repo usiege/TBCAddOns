@@ -1,4 +1,4 @@
-OOPrint("OOData")
+--OOPrint("OOData")
 
 
 local OOLeaderInfo = {} -- 队长信息

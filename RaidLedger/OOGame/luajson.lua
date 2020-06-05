@@ -121,7 +121,14 @@ local function array2json(key, value)
     for k, v in pairs(value) do
         str = str .. luaJson.table2json(v) .. ","
     end
-    str = string.sub(str, 1, string.len(str) - 1) .. "]"
+
+    if (string.len(str) > 1) then
+        str = string.sub(str, 1, string.len(str) - 1)
+    end
+
+    str = str .. "]"
+    -- print('array2json')
+    -- print(str)
     return string.format("\"%s\":%s,", key, str)
 end
 

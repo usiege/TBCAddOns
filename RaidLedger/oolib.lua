@@ -1,7 +1,6 @@
 local _, ADDONSELF = ...
-print(ADDONSELF)
 
-DEBUG = true
+DEBUG = false
 
 -- global things
 _G.OOPrint = OOPrint
@@ -163,9 +162,10 @@ end
 function OORaid:UpdateMember( memeber, index )
 	-- body
 	if memeber == nil then return end
+	if index == nil then return end
 	local username = memeber.username
 	
-	memeber.index = index
+	memeber.index = index 
 	memeber.username = username
 
 	local name, rank, subgroup, level, class, filename, zone, online, isDead, role, isML
@@ -237,8 +237,8 @@ function OORaid:GetRecord( ... )
 	local record = self.record or OORecord:new()
 	--print("uuid ----> " .. record.g_raid_id)
 	record.g_raid_id 				= record.g_raid_id -- why need this ?
-	record.g_raid_number_of_people 	= #self:MemberNames()
-	record.g_member_list 			= self.member_list
+	record.g_raid_number_of_people 	= #self:MemberNames() or 0
+	record.g_member_list 			= self.member_list or {}
 	
 	local db_items = OO.db:GetCurrentLedger()["items"]
 	if db_items == nil then return luajson.table2json(record) end
@@ -251,12 +251,10 @@ function OORaid:GetRecord( ... )
 		account.beneficiary 	= v.beneficiary
 		account.type 			= v.type
 		account.costtype 		= v.costtype
-		account.cost 			= v.cost
+		account.cost 			= v.cost or 0
 		account.costcache		= v.costcache
-		account.payment			= false
-		-- account.detail			= {
-
-		-- }
+		account.payment			= v.payment				-- account.cost > 0
+		account.detail			= v.detail
 		account_lsit[k] = account
 	end
 

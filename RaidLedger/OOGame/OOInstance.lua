@@ -1,4 +1,4 @@
-OOPrint("OOInstance")
+--OOPrint("OOInstance")
 -- OO instance data
 
 -- public
