@@ -16,6 +16,8 @@
 ## Version: v1.8.4
 
 # oo game
+OOGame\uuid.lua
+OOGame\luajson.lua
 oolib.lua
 OOGame\OOData.lua
 OOGame\OOInstance.lua

@@ -25,13 +25,20 @@ function OOIsInTable(value, tbl)
 end
 
 
--- addon utils
--- Raid struct
 
+-- addon utils
 local OORaid = {
-	member_list = {}, --OOMember list 
-	username_list = {}, 	-- username list, use this name recognize member, username -> member one by one
-	-- random_num_list = {} 	-- random key code list 
+	member_list = {}, 						-- OOMember list 
+	username_list = {}, 					-- username list, use this name recognize member, username -> member one by one
+	-- random_num_list = {} 				-- random key code list 
+	record = nil
+}
+
+local OORecord = {
+	g_raid_id = "",							-- raid uuid
+	g_raid_number_of_people  = 0,			-- number of member 
+	g_raid_record = {},						-- OOAccount list
+	g_member_list = {}						-- OOMember list
 }
 
 local OOMember = {
@@ -42,34 +49,43 @@ local OOMember = {
 	random_key = ""
 }
 
-local OORecord = {
-	raid_id = "",	-- uuid
-	item_list = {}	-- list for OOAccount
-}
 
 local OOAccount = {
+	payment = false,
 	beneficiary = "",
 	type = "",
 	costtype = "",
-	cost = "",
+	cost = 0,
 	Id = "",
-	costcache = "",
-	detail = {},
-	item_id = ""
+	costcache = 0,
+	detail = {
+		displayname = "",
+		count = 1,
+		type = "",
+		item = "",
+		item_id = "",
+	},
 }
 
-local OOGoods = {
-	displayname = "",
-	code_id = ""
-}
 
 -- class init
+function OORaid:new(o)
+	-- body
+	local o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+
+	return o
+end
+
 
 function OORecord:new(o)
 	-- body
 	local o = o or {}
 	setmetatable(o, self)
 	self.__index = self
+
+	self.g_raid_id = uuid()
 
 	return o
 end
@@ -83,24 +99,9 @@ function OOAccount:new(o)
 	return o
 end
 
-function OOGoods:new(o)
-	-- body
-	local o = o or {}
-	setmetatable(o, self)
-	self.__index = self
 
-	return o
-end
+-- function for record
 
-
-function OORaid:new(o)
-	-- body
-	local o = o or {}
-	setmetatable(o, self)
-	self.__index = self
-
-	return o
-end
 
 -- function for raid
 
@@ -159,11 +160,13 @@ local function user_class_id( filename )
 end
 
 -- 根据成员所在队伍中的索引更新成员信息
-function OORaid:UpdateMember( username, index )
+function OORaid:UpdateMember( memeber, index )
 	-- body
-	local memeber = self:GetMember(username)
 	if memeber == nil then return end
+	local username = memeber.username
+	
 	memeber.index = index
+	memeber.username = username
 
 	local name, rank, subgroup, level, class, filename, zone, online, isDead, role, isML
 	= GetRaidRosterInfo(index)
@@ -173,8 +176,7 @@ function OORaid:UpdateMember( username, index )
 	memeber.user_lv = tostring(level)
 	memeber.class_id = user_class_id(filename)
 
-
-
+	self.member_list[username] = memeber
 end
 
 -- 添加团队成员
@@ -185,7 +187,7 @@ function OORaid:AddMember( ... )
 
 	local new_member = OOMember:new(username)
 	self:AssignRandomKey(new_member)
-	self:UpdateMember(username, index)
+	self:UpdateMember(new_member, index)
 
 	--print(new_member.username, index)
 	--
@@ -230,10 +232,43 @@ end
 -- record for Raid
 function OORaid:GetRecord( ... )
 	
+	local result = ""
+
+	local record = self.record or OORecord:new()
+	--print("uuid ----> " .. record.g_raid_id)
+	record.g_raid_id 				= record.g_raid_id -- why need this ?
+	record.g_raid_number_of_people 	= #self:MemberNames()
+	record.g_member_list 			= self.member_list
+	
+	local db_items = OO.db:GetCurrentLedger()["items"]
+	if db_items == nil then return luajson.table2json(record) end
+
+	local account_lsit = {}
+	for k,v in pairs(db_items) do
+		--print(v)
+		local account = OOAccount:new()
+		account.Id 				= k
+		account.beneficiary 	= v.beneficiary
+		account.type 			= v.type
+		account.costtype 		= v.costtype
+		account.cost 			= v.cost
+		account.costcache		= v.costcache
+		account.payment			= false
+		-- account.detail			= {
+
+		-- }
+		account_lsit[k] = account
+	end
+
+	record.g_raid_record = account_lsit
+	-- to json result
+	result = luajson.table2json(record)
+
+	if DEBUG then print(result) end
+	return result
 end
 
 -- member 
-
 function OOMember:new( username )
 
 	local o = {}
@@ -246,17 +281,20 @@ function OOMember:new( username )
 end
 
 
-
-
 -- oo game main event code
 do
 	local ooraid = OORaid:new()
-	ADDONSELF.CURRENT_RAID = ooraid
+	local record = OORecord:new()
+	ooraid.record = record
+
+
+	_G.OO = ooraid
 end
 
 
 -- dubug code 
 if DEBUG then
+	print(OO.record.g_raid_id)
 	print("this should run only one time.")
 	-- local raid = OORaid:new()
 	-- raid:AddMember("ddd")

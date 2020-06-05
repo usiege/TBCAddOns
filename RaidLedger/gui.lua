@@ -16,7 +16,9 @@ local GenReport = ADDONSELF.genreport
 local SendToChatSlowly = ADDONSELF.sendchat
 local GetMoneyStringL = ADDONSELF.GetMoneyStringL
 
-local CURRENT_RAID = ADDONSELF.CURRENT_RAID
+-- global
+local CURRENT_RAID = OO
+OO.db = Database
 
 local function GetRosterNumber()
     local all = {}
@@ -2238,6 +2240,7 @@ function GUI:Init()
                 b:SetText(L["Close text export"])
             end
 
+            -- 导出战报
             exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), opt))
         end
 
@@ -2335,6 +2338,9 @@ function OOEventDataSyncButton02( ... )
     -- body
     local text = CURRENT_RAID:GetRecord()
     InputBox(L['OO Game Web record'], text)
+
+    -- store to Database
+    OO.db.record = text
 end
 
 
@@ -2457,8 +2463,6 @@ local function group_bulided( member_count )
                         name .. " ---> " .. "random key: " .. key)
                 end
             until true
-            -- local member = CURRENT_RAID:GetMember(name)
-            --CURRENT_RAID:UpdateMember(name, i)
         end
 
     elseif last_member_count > member_count then
