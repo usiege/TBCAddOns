@@ -15,12 +15,6 @@
 ## Author: Tingfeng (wufaquhui@gmail.com)
 ## Version: v1.8.4
 
-# oo game
-OOGame\uuid.lua
-OOGame\luajson.lua
-oolib.lua
-OOGame\OOData.lua
-OOGame\OOInstance.lua
 
 # lib
 lib\LibStub\LibStub.lua
@@ -32,12 +26,20 @@ lib\LibDBIcon-1.0\LibDBIcon-1.0.lua
 lib\lib-st\Core.lua
 lib\LibDeformat-3.0\LibDeformat-3.0.lua
 
-
-# core
+#
 locales.lua
 utils.lua
 event.lua
 
+# oo game
+OOGame\uuid.lua
+OOGame\luajson.lua
+oolib.lua
+OOGame\OOData.lua
+OOGame\OOInstance.lua
+
+
+# core
 db.lua
 options.lua
 gui.lua

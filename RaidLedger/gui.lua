@@ -17,8 +17,8 @@ local SendToChatSlowly = ADDONSELF.sendchat
 local GetMoneyStringL = ADDONSELF.GetMoneyStringL
 
 -- global
-local CURRENT_RAID = OO
 OO.db = Database
+local CURRENT_RAID = OO
 
 local function GetRosterNumber()
     local all = {}
@@ -2397,7 +2397,7 @@ function current_group_user_names( ... )
 
     local member_count = GetNumGroupMembers()
     local names = {}
-    for i=2,member_count do
+    for i=1,member_count do
         local name = GetRaidRosterInfo(i)
         table.insert(names, name)
     end
@@ -2443,7 +2443,7 @@ end
 
 local function group_deprecated( ... )
     -- body
-    CURRENT_RAID:ClearMembers()
+    CURRENT_RAID:ClearAll()
     last_member_count = 0
 end
 
@@ -2482,10 +2482,16 @@ local function group_bulided( member_count )
         -- 有队员离队
         -- 当前所有队员名称
         local names = current_group_user_names()
-
-
+        for i,v in ipairs(names) do
+            print(v)
+        end
+        for i,v in ipairs(CURRENT_RAID.username_list) do
+            print(i,v)
+        end
         -- 找到刚刚离队的人
         local leave_username = find_diff_name(CURRENT_RAID.username_list, names)
+
+
         -- 移除掉离队的人
         CURRENT_RAID:RemoveMember(leave_username)
         if DEBUG then
@@ -2545,6 +2551,11 @@ RegEvent("ADDON_LOADED", function()
     
 
     -- ooraid Init
+    -- raid 
+    CURRENT_RAID:AssignRaidID()
+    print("oolib")
+    print(CURRENT_RAID.raid_id)
+    -- member 
     local num_group_member = GetNumGroupMembers()
     for i=1,num_group_member do
         local new_username = GetRaidRosterInfo(i)
@@ -2662,6 +2673,7 @@ StaticPopupDialogs["RAIDLEDGER_CLEARMSG"] = {
     multiple = 0,
     OnAccept = function()
         Database:NewLedger()
+        group_deprecated()
     end,
 }
 
