@@ -1,4 +1,4 @@
-﻿-- Version : English
+-- Version : English
 -- Last Update : 07/20/2008
 
 -- Start Not Localized --
@@ -43,11 +43,13 @@ CASTINGBAR_DELETE_BUTTON    = "Delete"
 CASTING_BAR_BUTTONS = {
   ["Locked"] = "Hide Outline",
   ["Enabled"] = "Enabled",
-  ["ShowTime"] = "Show Time",
+  ["ShowTime"] = "Show Current Cast Time",
   ["HideBorder"] = "Hide Border",
-  ["ShowDelay"] = "Show Delay",
+  ["ShowTotalTime"] = "Show Total Cast Time",
   ["ShowSpellName"] = "Show Spell Name",
-	["ShowSpellRank"] = "Show Spell Rank",
+  ["ShowLatency"] = "Show Latency",
+  ["ShowDelay"] = "Show Delay",
+  ["ShowTicks"] = "Show Channeled Ticks",
   ["MirrorLocked"] = "Hide Outline",
   ["MirrorEnabled"] = "Enabled",
   ["MirrorShowTime"] = "Show Time",
@@ -76,6 +78,7 @@ CASTINGBAR_COLOR_LABEL = {
   ["SuccessColor"] = "Success",
   ["FailedColor"] = "Failed",
   ["TimeColor"] = "Time",
+  ["LagColor"] = "Latency",
   ["DelayColor"] = "Delay",
   ["FlashBorderColor"] = "Flash Border",
   ["FeignDeathColor"] = "Feign Death",
@@ -133,9 +136,8 @@ CASTING_BAR_BUTTONS = {
   ["Enabled"]                 = " 시전바 사용",
   ["ShowTime"]                = " 시전 시간 표시",
   ["HideBorder"]              = " 외곽선 숨기기",
-  ["ShowDelay"]               = " 시전 지연 시간 표시",
   ["ShowSpellName"]           = " 주문 이름 표시",
-  ["ShowSpellRank"]           = " 주문 레벨 표시",
+  ["ShowLatency"]           = " 시전 지연 시간 표시",
   ["MirrorLocked"]            = " 타이머바 위치 잠금",
   ["MirrorEnabled"]           = " 타이머바 사용",
   ["MirrorShowTime"]          = " 남은 시간 표시",
@@ -217,9 +219,8 @@ CASTING_BAR_BUTTONS = {
   ["Enabled"] = "Activ\195\169",
   ["ShowTime"] = "Afficher le temps",
   ["HideBorder"] = "Cacher la Bordure",
-  ["ShowDelay"] = "Afficher le D\195\169lai",
   ["ShowSpellName"] = "Afficher le Nom du Sort",
-  ["ShowSpellRank"] = "Afficher le Rang du Sort",
+  ["ShowLatency"] = "Afficher le D\195\169lai",
   ["MirrorLocked"] = "Cacher les contours",
   ["MirrorEnabled"] = "Activ\195\169",
   ["MirrorShowTime"] = "Afficher le temps",
@@ -301,9 +302,8 @@ CASTING_BAR_BUTTONS = {
   ["Enabled"] = "启用",
   ["ShowTime"] = "显示时间",
   ["HideBorder"] = "隐藏边框",
-  ["ShowDelay"] = "显示延迟",
   ["ShowSpellName"] = "显示法术名称",
-  ["ShowSpellRank"] = "显示法术等级",
+  ["ShowLatency"] = "显示延迟",
   ["MirrorLocked"] = "锁定",
   ["MirrorEnabled"] = "启用",
   ["MirrorShowTime"] = "显示时间",

@@ -21,19 +21,19 @@ function CallTimer(self, guid)
 end
 
 function RefreshTimer(self)
-	local guid = GUID.New()
+	local guid = Guid()
 	self._GUID = guid
 	return self.Interval > 0 and self.Enabled and DelayCall(self.Interval, CallTimer, self, guid)
 end
 
 __Doc__[[Timer is used to fire an event on a specified interval]]
+__AutoProperty__()
 class "Timer"
 	inherit "VirtualUIObject"
 
-	__StructType__(StructType.Custom)
 	__Default__( 0 )
 	struct "TimerInterval"
-		function TimerInterval(value)
+		function __init(value)
 			if type(value) ~= "number" or value < 0 then
 				value = 0
 			elseif value > 0 and value < 0.1 then

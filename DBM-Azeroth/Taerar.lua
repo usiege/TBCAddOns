@@ -1,10 +1,9 @@
 local mod	= DBM:NewMod("Taerar", "DBM-Azeroth")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20190815234726")
+mod:SetRevision("20200805234921")
 mod:SetCreatureID(14890)--121911 TW ID, 14890 classic ID
 --mod:SetModelID(17887)
-mod:SetZone()
 
 mod:RegisterCombat("combat_yell", L.Pull)
 
@@ -23,7 +22,7 @@ local warnNoxiousBreath			= mod:NewStackAnnounce(24818, 2, nil, "Tank")
 
 local specWarnSleepingFog		= mod:NewSpecialWarningDodge(24814, nil, nil, nil, 2, 2)
 
---local timerNoxiousBreathCD		= mod:NewCDTimer(19.4, 24818, nil, "Tank", nil, 5, nil, DBM_CORE_TANK_ICON)--Iffy
+--local timerNoxiousBreathCD		= mod:NewCDTimer(19.4, 24818, nil, "Tank", nil, 5, nil, DBM_CORE_L.TANK_ICON)--Iffy
 local timerSleepingFogCD		= mod:NewCDTimer(21.9, 24814, nil, nil, nil, 3)
 --local timerBellowingRoarCD		= mod:NewCDTimer(7.2, 243661, nil, nil, nil, 2)
 

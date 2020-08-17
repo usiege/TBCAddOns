@@ -35,6 +35,14 @@ _Addon_SavedVariables = setmetatable({}, _MetaWK)
 _Addon_NoAutoWrapper = setmetatable({}, _MetaWK)
 _Addon_MetaData = setmetatable({}, _MetaWK)
 
+geterrorhandler = geterrorhandler or function()
+	return print
+end
+
+errorhandler = errorhandler or function(err)
+	return geterrorhandler()(err)
+end
+
 ------------------------------------------------------
 -- _EventManager
 --
@@ -52,7 +60,7 @@ do
 	-- Register
 	function _EventManager:Register(event, obj)
 		if type(event) == "string" and event ~= "" then
-			self:RegisterEvent(event)
+			pcall(self.RegisterEvent, self, event)
 
 			if self:IsEventRegistered(event) then
 				_EventDistribution[event] = _EventDistribution[event] or setmetatable({}, _MetaWK)
@@ -124,12 +132,8 @@ do
 		local function loading(self)
 			fireEvent(self, "OnLoad")
 
-			local mdls = self:GetModules()
-
-			if mdls then
-				for _, mdl in ipairs(mdls) do
-					loading(mdl)
-				end
+			for _, mdl in self:GetModules() do
+				loading(mdl)
 			end
 		end
 
@@ -138,12 +142,8 @@ do
 			if not _Addon_Disabled[self] then
 				fireEvent(self, "OnEnable")
 
-				local mdls = self:GetModules()
-
-				if mdls then
-					for _, mdl in ipairs(mdls) do
-						enabling(mdl)
-					end
+				for _, mdl in self:GetModules() do
+					enabling(mdl)
 				end
 			end
 		end
@@ -152,12 +152,8 @@ do
 		local function quit(self)
 			fireEvent(self, "OnQuit")
 
-			local mdls = self:GetModules()
-
-			if mdls then
-				for _, mdl in ipairs(mdls) do
-					quit(mdl)
-				end
+			for _, mdl in self:GetModules() do
+				quit(mdl)
 			end
 		end
 
@@ -526,6 +522,69 @@ interface "IFModule"
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
+    __Doc__[[
+        <desc>Get the class type of the object</desc>
+        <return type="class">the object's class</return>
+    ]]
+    GetClass = Reflector.GetObjectClass
+
+    __Doc__[[
+        <desc>Check if the object is an instance of the class</desc>
+        <param name="class"></param>
+        <return type="boolean">true if the object is an instance of the class</return>
+    ]]
+    IsClass = Reflector.ObjectIsClass
+
+    __Doc__[[
+        <desc>Check if the object is extend from the interface</desc>
+        <param name="interface"></param>
+        <return type="boolean">true if the object is extend from the interface</return>
+    ]]
+    IsInterface = Reflector.ObjectIsInterface
+
+	__Doc__[[
+		<desc>Fire an object's event, to trigger the object's event handlers</desc>
+		<param name="event">the event name</param>
+		<param name="...">the event's arguments</param>
+	]]
+	Fire = Reflector.FireObjectEvent
+
+	__Doc__[[
+		<desc>Check if the event type is supported by the object</desc>
+		<param name="name">the event's name</param>
+		<return type="boolean">true if the object has that event type</return>
+	]]
+	function HasEvent(self, name)
+		if type(name) ~= "string" then
+			error(("Usage : object:HasEvent(name) : 'name' - string expected, got %s."):format(type(name)), 2)
+		end
+		return Reflector.HasEvent(Reflector.GetObjectClass(self), name) or false
+	end
+
+	__Doc__[[
+		<desc>Block some events for the object</desc>
+		<param name="...">the event's name list</param>
+	]]
+	BlockEvent = Reflector.BlockEvent
+
+	__Doc__[[
+		<desc>Check if the event is blocked for the object</desc>
+		<param name="event">the event's name</param>
+		<return type="boolean">true if th event is blocked</return>
+	]]
+	IsEventBlocked = Reflector.IsEventBlocked
+
+	__Doc__[[
+		<desc>Un-Block some events for the object</desc>
+		<param name="...">the event's name list</param>
+	]]
+	UnBlockEvent = Reflector.UnBlockEvent
+
+	ThreadCall = function(self, method, ...)
+	    if type(method) == "string" then method = self[method] end
+	    if type(method) == "function" then return Threading.ThreadCall(method, self, ...) end
+	end
+
 	if _EventManager then
 		__Doc__[[
 			<desc>Register an event</desc>
@@ -694,13 +753,9 @@ interface "IFModule"
 
 			if _M._Logined then Object.Fire(self, "OnEnable") end
 
-			local mdls = self:GetModules()
-
-			if mdls then
-				for _, mdl in ipairs(mdls) do
-					if _Addon_DefaultState[mdl] ~= false then
-						Enable(mdl)
-					end
+			for _, mdl in self:GetModules() do
+				if _Addon_DefaultState[mdl] ~= false then
+					Enable(mdl)
 				end
 			end
 		end
@@ -713,15 +768,11 @@ interface "IFModule"
 
 			if _M._Logined then Object.Fire(self, "OnDisable") end
 
-			local mdls = self:GetModules()
+			for _, mdl in self:GetModules() do
+				_Addon_DefaultState[mdl] = not _Addon_Disabled[mdl]
 
-			if mdls then
-				for _, mdl in ipairs(mdls) do
-					_Addon_DefaultState[mdl] = not _Addon_Disabled[mdl]
-
-					if not _Addon_Disabled[mdl] then
-						Disable(mdl)
-					end
+				if not _Addon_Disabled[mdl] then
+					Disable(mdl)
 				end
 			end
 		else
@@ -774,7 +825,7 @@ interface "IFModule"
 		local mdl = self
 
 		for sub in name:gmatch("[_%w]+") do
-			mdl = Addon.Module(mdl, sub)
+			mdl = Addon.Module(sub, mdl)
 		end
 
 		if mdl then
@@ -865,8 +916,8 @@ class "Addon"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-		function Module(self, parent, name)
-			Super(self, parent, name)
+		function Module(self, name, parent)
+			Super(self, name, parent)
 
 			_Addon_DefaultState[self] = true
 			_Addon_Disabled[self] = _Addon_Disabled[parent]
@@ -985,7 +1036,7 @@ class "Addon"
 	-- Constructor
 	------------------------------------------------------
 	function Addon(self, name)
-		Super(self, nil, name)
+		Super(self, name)
 
 		_Addon[name] = self
 	end
@@ -1047,7 +1098,7 @@ do
 				mdl = Addon(sub)
 				addon = mdl
 			else
-				mdl = Addon.Module(mdl, sub)
+				mdl = Addon.Module(sub, mdl)
 			end
 		end
 

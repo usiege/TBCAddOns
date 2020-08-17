@@ -16,7 +16,9 @@ local STRING_TYPE = "string"
 local BOSS_LINK_FORMAT = "%s:%s:%s"
 local LEVEL_RANGE_FORMAT = "  (|cffff0000%d|r: |cffff8040%d|r - |cff40bf40%d|r)"--"  <|cffff0000%d|r |cffff8040%d|r |cffffff00%d|r |cff40bf40%d|r>"
 local LEVEL_RANGE_FORMAT2 = "  (|cffff8040%d|r - |cff40bf40%d|r)"
-local CONTENT_PHASE_FORMAT = "|cff00FF96".."<P: %d>".."|r"
+local CONTENT_PHASE_FORMAT = "|cff00FF96".."<P: %g>".."|r"
+
+local IsMapsModuleAviable = AtlasLoot.Loader.IsMapsModuleAviable
 
 -- Saves all the items ;)
 ItemDB.Storage = {}
@@ -42,22 +44,7 @@ ItemDB.mt = {
 		contentList[t.__atlaslootdata.addonName][t.__atlaslootdata.contentCount] = k
 		contentList[t.__atlaslootdata.addonName][k] = t.__atlaslootdata.contentCount
 		v.__atlaslootdata = t.__atlaslootdata
-		--[=[
-		if v and v.items and #v.items > 0 then
-			local t = v.items
-			local npcID
-			for i = 1, #t do
-				npcID = t[i].npcId
-				if type(npcID) == "table" then
-					for j = 1, #npcID do
-						ItemDB.NpcList[npcID[j]] = v.__atlaslootdata.addonName..":"..k..":"..i
-					end
-				elseif npcID then
-					ItemDB.NpcList[npcID] = v.__atlaslootdata.addonName..":"..k..":"..i
-				end
-			end
-		end
-		]=]--
+		AtlasLoot.Data.AutoSelect:AddInstanceTable(t.__atlaslootdata.addonName, k, v)
 		rawset(t, k, v)
 	end
 }
@@ -83,7 +70,7 @@ function ItemDB:Add(addonName, tierID)
 end
 
 function ItemDB:Get(addonName)
-	assert(ItemDB.Storage[addonName], addonName.." not found!")
+	--assert(ItemDB.Storage[addonName], addonName.." not found!")
 	return ItemDB.Storage[addonName]
 end
 
@@ -257,9 +244,15 @@ function ItemDB:GetModuleList(addonName)
 	return contentList[addonName]
 end
 
+-- iniName, bossName
 function ItemDB:GetNameData_UNSAFE(addonName, contentName, boss)
-	if not ItemDB.Storage[addonName] then return end
+	if not ItemDB.Storage[addonName] or not ItemDB.Storage[addonName][contentName] then return end
 	return ItemDB.Storage[addonName][contentName]:GetName(true), ItemDB.Storage[addonName][contentName]:GetNameForItemTable(boss, true)
+end
+
+function ItemDB:GetNpcID_UNSAFE(addonName, contentName, boss)
+	if not ItemDB.Storage[addonName] or not ItemDB.Storage[addonName][contentName] or not ItemDB.Storage[addonName][contentName].items[boss] then return end
+	return ItemDB.Storage[addonName][contentName].items[boss].npcID
 end
 
 -- ##################################################
@@ -411,6 +404,15 @@ end
 -- ##################################################
 --	ContentProto
 -- ##################################################
+local ATLAS_TEXTURE, PATH_TEXTURE = "|A:%s:0:0|a ","|T%s:0|t "
+local SpecialMobList = {
+	rare = format(ATLAS_TEXTURE, "nameplates-icon-elite-silver"),
+	elite = format(ATLAS_TEXTURE, "nameplates-icon-elite-gold"),
+	quest = format(ATLAS_TEXTURE, "QuestNormal"),
+	questTurnIn = format(ATLAS_TEXTURE, "QuestTurnin"),
+	boss = format(PATH_TEXTURE, "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"),
+}
+
 --- Get the content Type
 -- @return ContentName, ContentIndex
 function ItemDB.ContentProto:GetContentType()
@@ -426,25 +428,25 @@ function ItemDB.ContentProto:GetName(raw)
 	if self.AreaID and not self.MapID then
 		self.MapID = self.AreaID
 	end
-	local add = ""
+	local addEnd = ""
 	if not raw then
 		if AtlasLoot.db.showLvlRange and self.LevelRange then
 			if AtlasLoot.db.showMinEnterLvl then
-				add = format(LEVEL_RANGE_FORMAT, self.LevelRange[1] or 0, self.LevelRange[2] or 0, self.LevelRange[3] or 0 )
+				addEnd = format(LEVEL_RANGE_FORMAT, self.LevelRange[1] or 0, self.LevelRange[2] or 0, self.LevelRange[3] or 0 )
 			else
-				add = format(LEVEL_RANGE_FORMAT2, self.LevelRange[2] or 0, self.LevelRange[3] or 0 )
+				addEnd = format(LEVEL_RANGE_FORMAT2, self.LevelRange[2] or 0, self.LevelRange[3] or 0 )
 			end
 		end
 		if AtlasLoot.db.ContentPhase.enableOnLootTable and self.ContentPhase and not ContentPhase:IsActive(self.ContentPhase) then
-			add = add.."  "..format(CONTENT_PHASE_FORMAT, self.ContentPhase)
+			addEnd = addEnd.."  "..format(CONTENT_PHASE_FORMAT, self.ContentPhase)
 		end
 	end
 	if self.name then
-		return self.name..add
+		return self.name..addEnd
 	elseif self.MapID then
-		return C_Map.GetAreaInfo(self.MapID)..add or "MapID:"..self.MapID
+		return C_Map.GetAreaInfo(self.MapID)..addEnd or "MapID:"..self.MapID
 	elseif self.FactionID then
-		return AtlasLoot:Faction_GetFactionName(self.FactionID)..add
+		return AtlasLoot:Faction_GetFactionName(self.FactionID)..addEnd
 	else
 		return UNKNOWN
 	end
@@ -463,16 +465,31 @@ function ItemDB.ContentProto:GetNameForItemTable(index, raw)
 	if raw and not self.items[index] then return end
 	assert(index and self.items[index], "index not found.")
 	index = self.items[index]
-	local add = ""
+	local addStart, addEnd = "", ""
 	if not raw then
 		if AtlasLoot.db.ContentPhase.enableOnLootTable and index.ContentPhase and not ContentPhase:IsActive(index.ContentPhase) then
-			add = add.." "..format(CONTENT_PHASE_FORMAT, index.ContentPhase)
+			addEnd = addEnd.." "..format(CONTENT_PHASE_FORMAT, index.ContentPhase)
+		end
+		if IsMapsModuleAviable() and index.AtlasMapBossID then
+			addStart = addStart.."|cffffffff"..index.AtlasMapBossID..")|r "
+		end
+		if AtlasLoot.db.enableBossLevel and index.Level then
+			if type(index.Level) == "table" then
+				addStart = addStart.."|cff808080<"..index.Level[1].." - "..index.Level[2]..">|r "
+			elseif index.Level == 999 then
+				addStart = addStart..SpecialMobList.boss
+			else
+				addStart = addStart.."|cff808080<"..(index.Level == 999 and SpecialMobList.boss or index.Level)..">|r "
+			end
+		end
+		if index.specialType and SpecialMobList[index.specialType] then
+			addStart = addStart..SpecialMobList[index.specialType]
 		end
 	end
 	if index.name then
-		return index.name..add
+		return addStart..index.name..addEnd
 	elseif index.FactionID then
-		return GetFactionInfoByID(index.FactionID)..add --or "Faction "..self.items[index].FactionID
+		return addStart..GetFactionInfoByID(index.FactionID)..addEnd --or "Faction "..self.items[index].FactionID
 	else
 		return UNKNOWN
 	end

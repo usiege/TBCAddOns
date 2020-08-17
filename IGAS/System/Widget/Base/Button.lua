@@ -11,6 +11,7 @@ if not IGAS:NewAddon("IGAS.Widget.Button", version) then
 end
 
 __Doc__[[Button is the primary means for users to control the game and their characters.]]
+__AutoProperty__()
 class "Button"
 	inherit "Frame"
 
@@ -22,27 +23,27 @@ class "Button"
 		<param name="button">string, name of the mouse button responsible for the click action:Button4, Button5, LeftButton, MiddleButton, RightButton</param>
 		<param name="down">boolean, true for a mouse button down action; false for button up or other actions</param>
 	]]
-	event "OnClick"
+	__WidgetEvent__() event "OnClick"
 
 	__Doc__[[
 		<desc>Run when the button is double-clicked</desc>
 		<param name="button">string, name of the mouse button responsible for the click action:Button4, Button5, LeftButton, MiddleButton, RightButton</param>
 	]]
-	event "OnDoubleClick"
+	__WidgetEvent__() event "OnDoubleClick"
 
 	__Doc__[[
 		<desc>Run immediately following the button's `OnClick` handler with the same arguments</desc>
 		<param name="button">string, name of the mouse button responsible for the click action:Button4, Button5, LeftButton, MiddleButton, RightButton</param>
 		<param name="down">boolean, true for a mouse button down action; false for button up or other actions</param>
 	]]
-	event "PostClick"
+	__WidgetEvent__() event "PostClick"
 
 	__Doc__[[
 		<desc>Run immediately before the button's `OnClick` handler with the same arguments</desc>
 		<param name="button">string, name of the mouse button responsible for the click action:Button4, Button5, LeftButton, MiddleButton, RightButton</param>
 		<param name="down">boolean, true for a mouse button down action; false for button up or other actions</param>
 	]]
-	event "PreClick"
+	__WidgetEvent__() event "PreClick"
 
 	------------------------------------------------------
 	-- Method
@@ -307,7 +308,7 @@ class "Button"
 			return self:GetDisabledTexture() and self:GetDisabledTexture().TexturePath
 		end,
 		Set = "SetDisabledTexture",
-		Type = String,
+		Type = String + Number,
 	}
 
 	__Doc__[[the texture object used when the button is highlighted]]
@@ -319,7 +320,7 @@ class "Button"
 			return self:GetHighlightTexture() and self:GetHighlightTexture().TexturePath
 		end,
 		Set = "SetHighlightTexture",
-		Type = String,
+		Type = String + Number,
 	}
 
 	__Doc__[[the texture object used for the button's normal state]]
@@ -331,7 +332,7 @@ class "Button"
 			return self:GetNormalTexture() and self:GetNormalTexture().TexturePath
 		end,
 		Set = "SetNormalTexture",
-		Type = String,
+		Type = String + Number,
 	}
 
 	__Doc__[[the texture object used when the button is pushed]]
@@ -343,7 +344,7 @@ class "Button"
 			return self:GetPushedTexture() and self:GetPushedTexture().TexturePath
 		end,
 		Set = "SetPushedTexture",
-		Type = String,
+		Type = String + Number,
 	}
 
 	__Doc__[[the FontString object used for the button's label text]]
@@ -378,5 +379,4 @@ class "Button"
 		end
 	end )
 	property "HighlightLocked" { Field = true, Type = Boolean }
-
 endclass "Button"

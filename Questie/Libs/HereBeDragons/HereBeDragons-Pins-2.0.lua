@@ -1,14 +1,9 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
--- HereBeDragons-Pins-2.0 is not supported on WoW 7.x
-if select(4, GetBuildInfo()) < 80000 and false then
-	return
-end
-
-local MAJOR, MINOR = "HereBeDragonsQuestie-Pins-2.0", 5
+local MAJOR, MINOR = "HereBeDragonsQuestie-Pins-2.0", 6
 assert(LibStub, MAJOR .. " requires LibStub")
 
-local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
+local pins, _oldversion = LibStub:NewLibrary(MAJOR, MINOR)
 if not pins then return end
 
 local HBD = LibStub("HereBeDragonsQuestie-2.0")
@@ -156,7 +151,11 @@ local function drawMinimapPin(pin, data)
         diffY = diffY/dist
     end
 
-    if dist <= 1 or data.floatOnEdge then
+    -- Questie Modification.
+    -- data.floatOnEdge is replaced by (data.floatOnEdge and ((pin.texture and pin.texture.a and pin.texture.a ~= 0) or pin.texture == nil))
+    -- icons will now only float on edge if they have an opacity which is not 0 or if no texture exist.
+    data.distanceFromMinimapCenter = dist
+    if dist <= 1 or (data.floatOnEdge and ((pin.texture and pin.texture.a and pin.texture.a ~= 0) or pin.texture == nil)) then
         pin:Show()
         pin:ClearAllPoints()
         pin:SetPoint("CENTER", pins.Minimap, "CENTER", diffX * minimapWidth, -diffY * minimapHeight)
@@ -203,7 +202,7 @@ local function UpdateMinimapPins(force)
     -- check for all values to be available (starting with 7.1.0, instances don't report coordinates)
     if not x or not y or (rotateMinimap and not facing) then
         minimapPinCount = 0
-        for pin, data in pairs(activeMinimapPins) do
+        for pin in pairs(activeMinimapPins) do
             pin:Hide()
             activeMinimapPins[pin] = nil
         end
@@ -234,7 +233,7 @@ local function UpdateMinimapPins(force)
         end
 
         for pin, data in pairs(minimapPins) do
-            if data.instanceID == instanceID and (not data.uiMapID or data.uiMapID == mapID or (data.showInParentZone and IsParentMap(data.uiMapID, mapID))) then
+            if instanceID == data.instanceID and math.abs(x-data.x) + math.abs(y-data.y) < 500 then--if data.instanceID == instanceID and (not data.uiMapID or data.uiMapID == mapID or (data.showInParentZone and IsParentMap(data.uiMapID, mapID))) then
                 activeMinimapPins[pin] = data
                 data.keep = true
                 -- draw the pin (this may reset data.keep if outside of the map)
@@ -340,15 +339,15 @@ worldmapPinsPool.resetterFunc = function(pinPool, pin)
 end
 
 -- register pin pool with the world map
-WorldMapFrame.pinPools["HereBeDragonsQuestiePinsTemplate"] = worldmapPinsPool
+WorldMapFrame.pinPools["HereBeDragonsPinsTemplateQuestie"] = worldmapPinsPool
 
 -- provider base API
 function worldmapProvider:RemoveAllData()
-    self:GetMap():RemoveAllPinsByTemplate("HereBeDragonsQuestiePinsTemplate")
+    self:GetMap():RemoveAllPinsByTemplate("HereBeDragonsPinsTemplateQuestie")
 end
 
 function worldmapProvider:RemovePinByIcon(icon)
-    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsQuestiePinsTemplate") do
+    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsPinsTemplateQuestie") do
         if pin.icon == icon then
             self:GetMap():RemovePin(pin)
         end
@@ -356,28 +355,46 @@ function worldmapProvider:RemovePinByIcon(icon)
 end
 
 function worldmapProvider:RemovePinsByRef(ref)
-    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsQuestiePinsTemplate") do
+    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsPinsTemplateQuestie") do
         if pin.icon and worldmapPinRegistry[ref][pin.icon] then
             self:GetMap():RemovePin(pin)
         end
     end
 end
 
-function worldmapProvider:RefreshAllData(fromOnShow)
-    self:RemoveAllData()
 
-    for icon, data in pairs(worldmapPins) do
-        self:HandlePin(icon, data)
+local lastUiMapId = -1;
+worldmapProvider.forceUpdate = false; --Put into worldmapProvider to allow addons to force update from outside of HBD.
+function worldmapProvider:RefreshAllData(fromOnShow)
+    local mapId = self:GetMap():GetMapID()
+    if(lastUiMapId ~= mapId or worldmapProvider.forceUpdate) then
+        self:RemoveAllData()
+        for icon, data in pairs(worldmapPins) do
+            self:HandlePin(icon, data)
+        end
+        --DEFAULT_CHAT_FRAME:AddMessage(mapId .. " - " .. lastUiMapId .. " : " .. tostring(worldmapProvider.forceUpdate));
+        lastUiMapId = mapId;
+        worldmapProvider.forceUpdate = false;
     end
 end
 
 function worldmapProvider:HandlePin(icon, data)
     local uiMapID = self:GetMap():GetMapID()
+
     -- check for a valid map
     if not uiMapID then return end
 
+    --Questie Modification
+    if(uiMapID ~= data.uiMapID and data.worldMapShowFlag == HBD_PINS_WORLDMAP_SHOW_CURRENT) then
+        icon:Hide();
+        return;
+    elseif(uiMapID == data.uiMapID and data.worldMapShowFlag == HBD_PINS_WORLDMAP_SHOW_CURRENT) then
+        icon:Show();
+    end
+
     local x, y
     if uiMapID == WORLD_MAP_ID then
+
         -- should this pin show on the world map?
         if uiMapID ~= data.uiMapID and data.worldMapShowFlag ~= HBD_PINS_WORLDMAP_SHOW_WORLD then return end
 
@@ -397,19 +414,22 @@ function worldmapProvider:HandlePin(icon, data)
                     return
                 end
             else
-                local show = false
+                local show = true -- assume true state
                 local parentMapID = HBD.mapData[data.uiMapID].parent
                 while parentMapID and HBD.mapData[parentMapID] do
                     if parentMapID == uiMapID then
-                        local mapType = HBD.mapData[parentMapID].mapType
+                        local parentMapType = HBD.mapData[parentMapID].mapType
                         -- show on any parent zones if they are normal zones
                         if data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_PARENT and
-                            (mapType == Enum.UIMapType.Zone or mapType == Enum.UIMapType.Dungeon or mapType == Enum.UIMapType.Micro) then
+                            (parentMapType == Enum.UIMapType.Zone or parentMapType == Enum.UIMapType.Dungeon or parentMapType == Enum.UIMapType.Micro) then
                             show = true
                         -- show on the continent
                         elseif data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_CONTINENT and
-                            mapType == Enum.UIMapType.Continent then
+                            parentMapType == Enum.UIMapType.Continent then
                             show = true
+                        elseif data.worldMapShowFlag == HBD_PINS_WORLDMAP_SHOW_CURRENT then
+                            -- Questie modifications!
+                            show = false
                         end
                         break
                         -- worldmap is handled above already
@@ -426,7 +446,8 @@ function worldmapProvider:HandlePin(icon, data)
         x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, uiMapID)
     end
     if x and y then
-        self:GetMap():AcquirePin("HereBeDragonsQuestiePinsTemplate", icon, x, y)
+        worldmapProvider.forceUpdate = true;
+        self:GetMap():AcquirePin("HereBeDragonsPinsTemplateQuestie", icon, x, y, data.frameLevelType)
     end
 end
 
@@ -436,7 +457,8 @@ function worldmapProviderPin:OnLoad()
     self:SetScalingLimits(1, 1.0, 1.2)
 end
 
-function worldmapProviderPin:OnAcquired(icon, x, y)
+function worldmapProviderPin:OnAcquired(icon, x, y, frameLevelType)
+    self:UseFrameLevelType(frameLevelType or "PIN_FRAME_LEVEL_AREA_POI")
     self:SetPosition(x, y)
 
     self.icon = icon
@@ -468,24 +490,32 @@ local function UpdateWorldMap()
     worldmapProvider:RefreshAllData()
 end
 
-local last_update = 0
-local function OnUpdateHandler(frame, elapsed)
-    last_update = last_update + elapsed
-    if last_update > 1 or queueFullUpdate then
-        UpdateMinimapPins(queueFullUpdate)
-        last_update = 0
-        queueFullUpdate = false
-    else
-        UpdateMinimapIconPosition()
-    end
+local function OnUpdateHandler()
+    UpdateMinimapIconPosition()
 end
-pins.updateFrame:SetScript("OnUpdate", OnUpdateHandler)
+local function OnUpdateHandler2()
+    UpdateMinimapPins(queueFullUpdate)
+    queueFullUpdate = false
+end
+
+
+local updateFrequency = 0.05
+pins.updateTimer = C_Timer.NewTicker(updateFrequency, OnUpdateHandler)
+pins.updateTimer2 = C_Timer.NewTicker(1, OnUpdateHandler2)
 
 local function OnEventHandler(frame, event, ...)
     if event == "CVAR_UPDATE" then
         local cvar, value = ...
         if cvar == "ROTATE_MINIMAP" then
             rotateMinimap = (value == "1")
+            if rotateMinimap then
+                updateFrequency = 0.0009 -- Make rotating minimap look smoother
+            else
+                updateFrequency = 0.05 -- Minimap rotation is disabled so no need to update extremly fast
+            end
+
+            pins.updateTimer:Cancel()
+            pins.updateTimer = C_Timer.NewTicker(updateFrequency, OnUpdateHandler)
             queueFullUpdate = true
         end
     elseif event == "MINIMAP_UPDATE_ZOOM" then
@@ -493,6 +523,11 @@ local function OnEventHandler(frame, event, ...)
     elseif event == "PLAYER_LOGIN" then
         -- recheck cvars after login
         rotateMinimap = GetCVar("rotateMinimap") == "1"
+        if rotateMinimap then
+            updateFrequency = 0.0009 -- Make rotating minimap look smoother
+            pins.updateTimer:Cancel()
+            pins.updateTimer = C_Timer.NewTicker(updateFrequency, OnUpdateHandler)
+        end
     elseif event == "PLAYER_ENTERING_WORLD" then
         UpdateMinimap()
         UpdateWorldMap()
@@ -545,7 +580,7 @@ function pins:AddMinimapIconWorld(ref, icon, instanceID, x, y, floatOnEdge)
     minimapPins[icon] = t
     queueFullUpdate = true
 
-    icon:SetParent(pins.Minimap)
+    icon:SetParent(pins.MinimapGroup or pins.Minimap)
 end
 
 --- Add a icon to the minimap (UiMapID zone coordinate version)
@@ -627,6 +662,8 @@ function pins:SetMinimapObject(minimapObject)
 end
 
 -- world map constants
+-- show worldmap pin only on zone map (Questie modification)
+HBD_PINS_WORLDMAP_SHOW_CURRENT   = -1
 -- show worldmap pin on its parent zone map (if any)
 HBD_PINS_WORLDMAP_SHOW_PARENT    = 1
 -- show worldmap pin on the continent map
@@ -642,7 +679,8 @@ HBD_PINS_WORLDMAP_SHOW_WORLD     = 3
 -- @param x X position in world coordinates
 -- @param y Y position in world coordinates
 -- @param showFlag Flag to control on which maps this pin will be shown
-function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag)
+-- @param frameLevel Optional Frame Level type registered with the WorldMapFrame, defaults to PIN_FRAME_LEVEL_AREA_POI
+function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag, frameLevel)
     if not ref then
         error(MAJOR..": AddWorldMapIconWorld: 'ref' must not be nil")
     end
@@ -665,6 +703,7 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag)
     t.y = y
     t.uiMapID = nil
     t.worldMapShowFlag = showFlag or 0
+    t.frameLevelType = frameLevel
 
     worldmapPins[icon] = t
 
@@ -678,9 +717,8 @@ end
 -- @param x X position in local/point coordinates (0-1), relative to the zone
 -- @param y Y position in local/point coordinates (0-1), relative to the zone
 -- @param showFlag Flag to control on which maps this pin will be shown
-function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag)
-	
-	--uiMapID = uiMapID + 1400
+-- @param frameLevel Optional Frame Level type registered with the WorldMapFrame, defaults to PIN_FRAME_LEVEL_AREA_POI
+function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag, frameLevel)
     if not ref then
         error(MAJOR..": AddWorldMapIconMap: 'ref' must not be nil")
     end
@@ -693,10 +731,7 @@ function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag)
 
     -- convert to world coordinates
     local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(x, y, uiMapID)
-    if not xCoord then 
-		DEFAULT_CHAT_FRAME:AddMessage("No world coordinates for zone " .. uiMapID);
-		return 
-	end
+    if not xCoord then return end
 
     if not worldmapPinRegistry[ref] then
         worldmapPinRegistry[ref] = {}
@@ -710,9 +745,10 @@ function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag)
     t.y = yCoord
     t.uiMapID = uiMapID
     t.worldMapShowFlag = showFlag or 0
+    t.frameLevelType = frameLevel
 
     worldmapPins[icon] = t
-    
+
     worldmapProvider:HandlePin(icon, t)
 end
 
@@ -727,6 +763,8 @@ function pins:RemoveWorldMapIcon(ref, icon)
         worldmapPins[icon] = nil
     end
     worldmapProvider:RemovePinByIcon(icon)
+
+    worldmapProvider.forceUpdate = true;
 end
 
 --- Remove all worldmap icons belonging to your addon (as tracked by "ref")
@@ -739,6 +777,8 @@ function pins:RemoveAllWorldMapIcons(ref)
     end
     worldmapProvider:RemovePinsByRef(ref)
     wipe(worldmapPinRegistry[ref])
+
+    worldmapProvider.forceUpdate = true;
 end
 
 --- Return the angle and distance from the player to the specified pin

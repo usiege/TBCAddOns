@@ -1,3 +1,5 @@
+local L = LibStub("AceLocale-3.0"):GetLocale("ClassicCodex")
+
 SLASH_CODEX1, SLASH_CODEX2 = "/codex", "/classiccodex"
 SlashCmdList["CODEX"] = function(input, editBox)
     local params = {}
@@ -5,17 +7,20 @@ SlashCmdList["CODEX"] = function(input, editBox)
 
     if (input == "" or input == nil) then
         print("Classic Codex (v" .. tostring(GetAddOnMetadata("ClassicCodex", "Version")) .. "):")
-        print("|cff33ffcc/codex|cffffffff show |cffcccccc - 显示数据库浏览器")
-        print("|cff33ffcc/codex|cffffffff unit <unit> |cffcccccc - 搜索单位")
-        print("|cff33ffcc/codex|cffffffff object <gameObject> |cffcccccc - 搜索物体、目标")
-        print("|cff33ffcc/codex|cffffffff item <item> |cffcccccc - 搜索物品")
-        print("|cff33ffcc/codex|cffffffff vendor <item> |cffcccccc - 搜索物品售卖者")
-        print("|cff33ffcc/codex|cffffffff quest <questName> |cffcccccc - 搜索任务给予者")
-        print("|cff33ffcc/codex|cffffffff quests |cffcccccc - 在地图上显示所有任务")
-        print("|cff33ffcc/codex|cffffffff meta <relation> [min, [max]] |cffcccccc - 在地图上显示相关目标、对象")
-        print("|cff33ffcc/codex|cffffffff clean |cffcccccc - 清理地图")
-        print("|cff33ffcc/codex|cffffffff reset |cffcccccc - 重置地图")
-        print("|cff33ffcc ->|cffffffff 可用关系:  |cff33ffccchests|r - 宝箱, |cff33ffccherbs|r - 草药, |cff33ffccmines|r - 矿物")
+        print(L["|cff33ffcc/codex|cffffffff show |cffcccccc - Show database interface"])
+        print(L["|cff33ffcc/codex|cffffffff unit <unit> |cffcccccc - Search units"])
+        print(L["|cff33ffcc/codex|cffffffff object <gameObject> |cffcccccc - Search objects"])
+        print(L["|cff33ffcc/codex|cffffffff item <item> |cffcccccc - Search items"])
+        print(L["|cff33ffcc/codex|cffffffff vendor <item> |cffcccccc - Search vendors for item"])
+        print(L["|cff33ffcc/codex|cffffffff quest <questName> |cffcccccc - Show specific quest giver"])
+        print(L["|cff33ffcc/codex|cffffffff quests |cffcccccc - Show all quests on the map"])
+        print(L["|cff33ffcc/codex|cffffffff meta <relation> [min, [max]] |cffcccccc - Show related objects on the map"])
+        print(L["|cff33ffcc    ->|cffffffff Available relations:  |cff33ffccchests|r, |cff33ffccherbs|r, |cff33ffccmines|r"])
+        print(L["|cff33ffcc/codex|cffffffff clean |cffcccccc - Clean map"])
+        print(L["|cff33ffcc/codex|cffffffff reset |cffcccccc - Reset map"])
+        print(L["|cff33ffcc/codexcfg|cffcccccc - Show options"])
+        print(L["|cff33ffcc/codexcfg|cffffffff <optionName>|cffcccccc - Toggle option"])
+        print(L["|cff33ffcc/codexcfg|cffffffff <optionName> <value>|cffcccccc - Set option"])
         return
     end
 

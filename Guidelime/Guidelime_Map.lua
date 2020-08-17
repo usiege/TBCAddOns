@@ -9,8 +9,8 @@ addon.SPECIAL_MAP_INDEX = {monster = 60, item = 61, object = 62, npc = 63, LOC =
 addon.mapIcons = {}
 
 
-local function createIconFrame(t, index, minimap)
-    local f = CreateFrame("Button", addonName .. t .. index .. minimap, nil)
+local function createIconFrame(t, index)
+    local f = CreateFrame("Button")
     f.texture = f:CreateTexture(nil, "TOOLTIP")
 	addon.setMapIconTexture(f, t)
 	if t ~= "GOTO" then
@@ -94,8 +94,8 @@ local function createMapIcon(t, i)
 		i = #addon.mapIcons[t] + 1
 	end
 	addon.mapIcons[t][i] = {}
-	addon.mapIcons[t][i].map = createIconFrame(t, i, 0)
-	addon.mapIcons[t][i].minimap = createIconFrame(t, i, 1)
+	addon.mapIcons[t][i].map = createIconFrame(t, i)
+	addon.mapIcons[t][i].minimap = createIconFrame(t, i)
 	addon.mapIcons[t][i].index = i
 	addon.mapIcons[t][i].inUse = false
 	return addon.mapIcons[t][i]
@@ -124,17 +124,21 @@ end
 local function getTooltip(element)
 	if not GuidelimeData.showTooltips then return end
 	local tooltip
-	if element.questId ~= nil then 
-		tooltip = addon.getQuestIcon(element.questId, element.questType, element.objective) .. 
-			addon.getQuestText(element.questId, element.questType, nil, element.step and element.step.active) 
-		if element.questType ~= "ACCEPT" then
+	if element.attached ~= nil and element.attached.questId ~= nil then 
+		tooltip = addon.getQuestIcon(element.attached.questId, element.attached.t, element.attached.objective) .. 
+			addon.getQuestText(element.attached.questId, element.attached.t, nil, element.step and element.step.active) 
+		if element.attached.t ~= "ACCEPT" then
 			local objectives
-			if element.questType == "TURNIN" or element.objective == nil then
+			if element.attached.t == "TURNIN" then
 				objectives = true
+			elseif element.attached.objective ~= nil then
+				objectives = {element.attached.objective}
+			elseif element.objectives ~= nil then
+				objectives = element.objectives
 			else
-				objectives = {element.objective}
+				objectives = true
 			end
-			local obj = addon.getQuestObjectiveText(element.questId, objectives, "    ")
+			local obj = addon.getQuestObjectiveText(element.attached.questId, objectives, "    ", element.npcId, element.objectId)
 			if obj ~= "" then tooltip = tooltip .. "\n" .. obj end
 		end
 	end
@@ -223,14 +227,12 @@ function addon.setArrowTexture()
 	if GuidelimeData.arrowStyle == 1 then
 		addon.arrowFrame.texture:SetTexture(addon.icons.MAP_LIME_ARROW)
 		addon.arrowFrame.texture:SetVertexColor(1,1,1)
-		addon.arrowFrame:SetHeight(64)
-		addon.arrowFrame:SetWidth(64)
 	elseif GuidelimeData.arrowStyle == 2 then
 		addon.arrowFrame.texture:SetTexture(addon.icons.MAP_ARROW)
 		addon.arrowFrame.texture:SetVertexColor(0.5,1,0.2)
-		addon.arrowFrame:SetHeight(42)
-		addon.arrowFrame:SetWidth(56)
 	end
+	addon.arrowFrame:SetWidth(GuidelimeDataChar.arrowSize)
+	addon.arrowFrame:SetHeight(GuidelimeDataChar.arrowSize)
 end
 
 function addon.getArrowIconText()
@@ -299,13 +301,13 @@ function addon.showArrow(element)
 	if GuidelimeDataChar.showArrow then
 		if addon.arrowFrame == nil then
 			addon.arrowFrame = CreateFrame("FRAME", nil, UIParent)
-			addon.arrowFrame:SetWidth(GuidelimeDataChar.arrowSize)
-			addon.arrowFrame:SetHeight(GuidelimeDataChar.arrowSize)
 			addon.arrowFrame:SetPoint(GuidelimeDataChar.arrowRelative, UIParent, GuidelimeDataChar.arrowRelative, GuidelimeDataChar.arrowX, GuidelimeDataChar.arrowY)
 		    addon.arrowFrame.texture = addon.arrowFrame:CreateTexture(nil, "OVERLAY")
 		    addon.setArrowTexture()
 		    addon.arrowFrame.texture:SetAllPoints()
 			addon.arrowFrame:SetAlpha(GuidelimeDataChar.arrowAlpha)
+			addon.arrowFrame:SetWidth(GuidelimeDataChar.arrowSize)
+			addon.arrowFrame:SetHeight(GuidelimeDataChar.arrowSize)
 			addon.arrowFrame:SetMovable(true)
 			addon.arrowFrame:EnableMouse(true)
 			addon.arrowFrame:SetScript("OnMouseDown", function(this) 

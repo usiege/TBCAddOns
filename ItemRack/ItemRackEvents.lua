@@ -2,7 +2,7 @@
 
 	Events can be one of four types:
 		Buff : Triggered by PLAYER_AURAS_CHANGED and delayed .3 sec
-		Zone : Triggered by ZONE_CHANGED_NEW_AREA and delayed .5 sec
+		Zone : Triggered by ZONE_CHANGED_NEW_AREA or ZONE_CHANGED_INDOORS and delayed .5 sec
 		Stance : Triggered by UPDATE_SHAPESHIFT_FORM and not delayed
 		Script : User-defined trigger
 
@@ -28,7 +28,7 @@
 ]]
 
 -- increment this value when default events are changed to deploy them to existing events
-ItemRack.EventsVersion = 15
+ItemRack.EventsVersion = 17
 
 -- default events, loaded when no events exist or ItemRack.EventsVersion is increased
 ItemRack.DefaultEvents = {
@@ -36,78 +36,86 @@ ItemRack.DefaultEvents = {
 		Type = "Zone",
 		Unequip = 1,  
 		Zones = {
-			["奥特兰克山谷"] = 1,
-			["阿拉希盆地"] = 1,
-			["战歌峡谷"] = 1,
-			["风暴之眼"] = 1,
-			["洛丹伦废墟"] = 1,
-			["刀锋竞技场"] = 1,
-			["纳格兰竞技场"] = 1,
+			["Alterac Valley"] = 1,
+			["Arathi Basin"] = 1,
+			["Warsong Gulch"] = 1,
+			["Eye of the Storm"] = 1,
+			["Ruins of Lordaeron"] = 1,
+			["Blade's Edge Arena"] = 1,
+			["Nagrand Arena"] = 1,
 		}
 	},
 	["City"] = {
 		Type = "Zone",
 		Unequip = 1,
 		Zones = {
-			["铁炉堡"] = 1,
-			["暴风城"] = 1,
-			["达纳苏斯"] = 1,
-			["埃索达"] = 1,
-			["奥格瑞玛"] = 1,
-			["雷霆崖"] = 1,
-			["銀月城"] = 1,
-			["幽暗城"] = 1,
-			["沙塔斯城"] = 1,
-			["达拉然"] = 1,
+			["Ironforge"] = 1,
+			["Stormwind City"] = 1,
+			["Darnassus"] = 1,
+			["The Exodar"] = 1,
+			["Orgrimmar"] = 1,
+			["Thunder Bluff"] = 1,
+			["Silvermoon City"] = 1,
+			["Undercity"] = 1,
+			["Shattrath City"] = 1,
+			["Dalaran"] = 1,
 		}
 	},
-	["骑术装"] = { Type = "Buff", Unequip = 1, Anymount = 1 },
-	["喝水中"] = { Type = "Buff", Unequip = 1, Buff = "喝水" },
-	["唤醒"] = { Type = "Buff", Unequip = 1, Buff = "唤醒" },
+	["Mounted"] = { Type = "Buff", Unequip = 1, Anymount = 1 },
+	["Drinking"] = { Type = "Buff", Unequip = 1, Buff = "Drink" },
 
-	["战斗姿态"] = { Type = "Stance", Stance = 1 },
-	["防御姿态"] = { Type = "Stance", Stance = 2 },
-	["狂暴姿态"] = { Type = "Stance", Stance = 3 },
+	["Evocation"] = { Class = "MAGE", Type = "Buff", Unequip = 1, Buff = "Evocation" },
 
-	["暗影形态"] = { Type = "Stance", Unequip = 1, Stance = 1 },
+	["Warrior Battle"] = { Class = "WARRIOR", Type = "Stance", Stance = 1 },
+	["Warrior Defensive"] = { Class = "WARRIOR", Type = "Stance", Stance = 2 },
+	["Warrior Berserker"] = { Class = "WARRIOR", Type = "Stance", Stance = 3 },
 
-	["德鲁伊人型"] = { Type = "Stance", Stance = 0 },
-	["德鲁伊熊"] = { Type = "Stance", Stance = 1 },
-	["德鲁伊水栖"] = { Type = "Stance", Stance = 2 },
-	["德鲁伊猎豹"] = { Type = "Stance", Stance = 3 },
-	["德鲁伊旅行"] = { Type = "Stance", Stance = 4 },
-	["德鲁伊枭兽"] = { Type = "Stance", Stance = "枭兽形态" },
-	["德鲁伊树"] = { Type = "Stance", Stance = "Tree of Life" },
-	["德鲁伊飞行"] = { Type = "Stance", Unequip = 1, Stance = "Flight Form" },
-	["德鲁伊迅捷飞行"] = { Type = "Stance", Unequip = 1, Stance = "Swift Flight Form" },
+	["Priest Shadowform"] = { Class = "PRIEST", Type = "Stance", Unequip = 1, Stance = 1 },
 
-	["潜行"] = { Type = "Stance", Unequip = 1, Stance = 1 },
+	["Druid Humanoid"] = { Class = "DRUID", Type = "Stance", Stance = 0 },
+	["Druid Bear"] = { Class = "DRUID", Type = "Stance", Stance = 1 },
+	["Druid Aquatic"] = { Class = "DRUID", Type = "Stance", Stance = 2 },
+	["Druid Cat"] = { Class = "DRUID", Type = "Stance", Stance = 3 },
+	["Druid Travel"] = { Class = "DRUID", Type = "Stance", Stance = 4 },
+	["Druid Moonkin"] = { Class = "DRUID", Type = "Stance", Stance = "Moonkin Form" },
 
-	["幽魂之狼"] = { Type = "Stance", Unequip = 1, Stance = 1 },
+	["Rogue Stealth"] = { Class = "ROGUE", Type = "Stance", Unequip = 1, Stance = 1 },
 
-	["游泳中"] = {
+	["Shaman Ghostwolf"] = { Class = "SHAMAN", Type = "Stance", Unequip = 1, Stance = 1 },
+
+	["Swimming"] = {
 		["Trigger"] = "MIRROR_TIMER_START",
 		["Type"] = "Script",
 		["Script"] = "local set = \"Name of set\"\nif IsSwimming() and not IsSetEquipped(set) then\n  EquipSet(set)\n  if not SwimmingEvent then\n    function SwimmingEvent()\n      if not IsSwimming() then\n        ItemRack.StopTimer(\"SwimmingEvent\")\n        UnequipSet(set)\n      end\n    end\n    ItemRack.CreateTimer(\"SwimmingEvent\",SwimmingEvent,.5,1)\n  end\n  ItemRack.StartTimer(\"SwimmingEvent\")\nend\n--[[Equips a set when swimming and breath gauge appears and unequips soon after you stop swimming.]]",
 	},
 
-	["获得Buffs"] = {
+	["Buffs Gained"] = {
 		Type = "Script",
 		Trigger = "UNIT_AURA",
-		Script = "if arg1==\"player\" then\n  IRScriptBuffs = IRScriptBuffs or {}\n  local buffs = IRScriptBuffs\n  for i in pairs(buffs) do\n    if not UnitAura(\"player\",i) then\n      buffs[i] = nil\n    end\n  end\n  local i,b = 1,1\n  while b do\n    b = UnitBuff(\"player\",i)\n    if b and not buffs[b] then\n      ItemRack.Print(\"Gained buff: \"..b)\n      buffs[b] = 1\n    end\n    i = i+1\n  end\nend\n--[[For script demonstration purposes. Doesn't equip anything just informs when a buff is gained.]]",
+		Script = "if arg1==\"player\" then\n  IRScriptBuffs = IRScriptBuffs or {}\n  local buffs = IRScriptBuffs\n  for i in pairs(buffs) do\n    if not AuraUtil.FindAuraByName(i,\"player\") then\n      buffs[i] = nil\n    end\n  end\n  local i,b = 1,1\n  while b do\n    b = AuraUtil.FindAuraByName(i,\"player\")\n    if b and not buffs[b] then\n      ItemRack.Print(\"Gained buff: \"..b)\n      buffs[b] = 1\n    end\n    i = i+1\n  end\nend\n--[[For script demonstration purposes. Doesn't equip anything just informs when a buff is gained.]]",
 	},
 
-	["施放之后"] = {
+	["After Cast"] = {
 		Type = "Script",
 		Trigger = "UNIT_SPELLCAST_SUCCEEDED",
 		Script = "local spell = \"Name of spell\"\nlocal set = \"Name of set\"\nif arg1==\"player\" and arg2==spell then\n  EquipSet(set)\nend\n\n--[[This event will equip \"Name of set\" when \"Name of spell\" has finished casting.  Change the names for your own use.]]",
+	},
+
+	["Nefarian's Lair"] = {
+		Type = "Zone",
+		Unequip = 1,
+		Zones = {
+			["Nefarian's Lair"] = 1,
+		}
 	},
 }
 
 -- resetDefault to reload/update default events, resetAll to wipe all events and recreate them
 function ItemRack.LoadEvents(resetDefault,resetAll)
 
+	local _, playerClass = UnitClass("player")
 	local version = tonumber(ItemRackSettings.EventsVersion) or 0
+
 	if ItemRack.EventsVersion > version then
 		resetDefault = 1 -- force a load of default events (leaving custom ones intact)
 		ItemRackSettings.EventsVersion = ItemRack.EventsVersion
@@ -126,7 +134,11 @@ function ItemRack.LoadEvents(resetDefault,resetAll)
 
 	if resetDefault or resetAll then
 		for i in pairs(ItemRack.DefaultEvents) do
-			ItemRack.CopyDefaultEvent(i)
+			local eventClass = ItemRack.DefaultEvents[i].Class
+
+			if not eventClass or eventClass == playerClass then
+				ItemRack.CopyDefaultEvent(i)
+			end
 		end
 	end
 
@@ -190,8 +202,8 @@ end
 function ItemRack.ResetEvents(resetDefault,resetAll)
 	if not resetDefault and not resetAll then
 		StaticPopupDialogs["ItemRackConfirmResetEvents"] = {
-			text = "Do you want to restore just Default events, or wipe All events and restore to default?",
-			button1 = "Default", button2 = "Cancel", button3 = "All", timeout = 0, hideOnEscape = 1, whileDead = 1,
+			text = "你想恢复默认事件，还是希望删除所有事件并恢复默认状态？",
+			button1 = "默认", button2 = "取消", button3 = "全部", timeout = 0, hideOnEscape = 1, whileDead = 1,
 			OnAccept = function() ItemRack.ResetEvents(1) end,
 			OnAlt = function() ItemRack.ResetEvents(1,1) end,
 		}
@@ -204,13 +216,14 @@ end
 function ItemRack.InitEvents()
 	ItemRack.LoadEvents()
 
-	ItemRack.CreateTimer("EventsBuffTimer",ItemRack.ProcessBuffEvent,.50)
-	ItemRack.CreateTimer("EventsZoneTimer",ItemRack.ProcessZoneEvent,.33)
+	ItemRack.CreateTimer("EventsBuffTimer",ItemRack.ProcessBuffEvent,.15)
+	ItemRack.CreateTimer("EventsZoneTimer",ItemRack.ProcessZoneEvent,.16)
+	ItemRack.CreateTimer("CheckForMountedEvents",ItemRack.CheckForMountedEvents,.5,1)
 
 	if ItemRackButton20Queue then
 		ItemRackButton20Queue:SetTexture("Interface\\AddOns\\ItemRack\\ItemRackGear")
 	else
-		print("ItemRackButton20Queue doesn't exist?")
+		print("ItemRackButton20队列不存在？")
 	end
 
 	ItemRack.RegisterEvents()
@@ -219,6 +232,7 @@ end
 function ItemRack.RegisterEvents()
 	local frame = ItemRackEventProcessingFrame
 	frame:UnregisterAllEvents()
+	ItemRack.StopTimer("CheckForMountedEvents")
 	ItemRack.ReflectEventsRunning()
 	if ItemRackUser.EnableEvents=="OFF" then
 		return
@@ -240,12 +254,17 @@ function ItemRack.RegisterEvents()
 			if not frame:IsEventRegistered("ZONE_CHANGED_NEW_AREA") then
 				frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 			end
+			if not frame:IsEventRegistered("ZONE_CHANGED_INDOORS") then
+				frame:RegisterEvent("ZONE_CHANGED_INDOORS")
+			end
 		elseif eventType=="Script" then
 			if not frame:IsEventRegistered(events[eventName].Trigger) then
 				frame:RegisterEvent(events[eventName].Trigger)
 			end
 		end
 	end
+	ItemRack.StartTimer("CheckForMountedEvents")
+
 	ItemRack.ProcessStanceEvent()
 	ItemRack.ProcessZoneEvent()
 	ItemRack.ProcessBuffEvent()
@@ -280,10 +299,11 @@ function ItemRack.ProcessingFrameOnEvent(self,event,...)
 			startBuff = 1
 		elseif event=="UPDATE_SHAPESHIFT_FORM" and eventType=="Stance" then
 			startStance = 1
-		elseif event=="ZONE_CHANGED_NEW_AREA" and eventType=="Zone" then
+		elseif (event=="ZONE_CHANGED_NEW_AREA" or event=="ZONE_CHANGED_INDOORS")  and eventType=="Zone" then
 			startZone = 1
 		elseif eventType=="Script" and events[eventName].Trigger==event then
-			RunScript(events[eventName].Script)
+			local method = loadstring(events[eventName].Script)
+			pcall(method, ...)
 		end
 	end
 	if startStance then
@@ -351,14 +371,15 @@ function ItemRack.ProcessZoneEvent()
 	local events = ItemRackEvents
 
 	local currentZone = GetRealZoneText()
+	local currentSubZone = GetSubZoneText()
 	local setToEquip, setToUnequip, setname
 
 	for eventName in pairs(enabled) do
 		if events[eventName].Type=="Zone" then
 			setname = ItemRackUser.Events.Set[eventName]
-			if events[eventName].Zones[currentZone] and not ItemRack.IsSetEquipped(setname) then
+			if (events[eventName].Zones[currentZone] or events[eventName].Zones[currentSubZone]) and not ItemRack.IsSetEquipped(setname) then
 				setToEquip = setname
-			elseif not events[eventName].Zones[currentZone] and events[eventName].Unequip and ItemRack.IsSetEquipped(setname) then
+			elseif not (events[eventName].Zones[currentZone] or events[eventName].Zones[currentSubZone]) and events[eventName].Unequip and ItemRack.IsSetEquipped(setname) then
 				setToUnequip = setname
 			end
 		end
@@ -368,6 +389,24 @@ function ItemRack.ProcessZoneEvent()
 	end
 	if setToEquip then
 		ItemRack.EquipSet(setToEquip)
+	end
+end
+
+--here we observe mounted status and raise an event should it change. UNIT_AURA event seems unreliable for this
+local _lastStateMounted = IsMounted() and not UnitOnTaxi("player")
+function ItemRack.CheckForMountedEvents()
+	if UnitIsDeadOrGhost("player") then
+		return
+	end
+
+	if ItemRackUser.EnableEvents=="OFF" then
+		return
+	end
+	
+	local isPlayerMounted = IsMounted() and not UnitOnTaxi("player")
+	if isPlayerMounted ~= _lastStateMounted then
+		_lastStateMounted = isPlayerMounted
+		ItemRack.ProcessBuffEvent()
 	end
 end
 
@@ -396,7 +435,7 @@ function ItemRack.ProcessBuffEvent()
 				isSetEquipped = ItemRack.IsSetEquipped(setname)
 				if buff and not isSetEquipped then
 					ItemRack.EquipSet(setname)
-				elseif not buff and isSetEquipped then
+				elseif not buff and isSetEquipped and events[eventName].Unequip then
 					ItemRack.UnequipSet(setname)
 				end
 			end

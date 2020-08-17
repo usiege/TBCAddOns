@@ -62,6 +62,7 @@ __Doc__[[
 			}
 	</usage>
 ]]
+__AutoProperty__()
 class "TreeView"
 	inherit "Frame"
 
@@ -97,6 +98,7 @@ class "TreeView"
 	end
 
 	__Doc__[[TreeNode is used to store data for tree nodes]]
+	__AutoProperty__()
 	class "TreeNode"
 		inherit "VirtualUIObject"
 
@@ -1394,7 +1396,7 @@ class "TreeView"
 	function SelectNone(self)
 		self.__SelectedItem = nil
 
-		for i = (self.__ChildNodeCount or 0), index+1, -1 do
+		for i = (self.__ChildNodeCount or 0), 1, -1 do
 			self:GetChild(_Index2Name(i)).HighlightLocked = false
 		end
 	end

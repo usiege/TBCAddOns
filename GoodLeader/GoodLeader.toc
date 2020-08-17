@@ -1,0 +1,8 @@
+## Interface: 11303
+## Title: GoodLeader
+## Title-zhCN: 好团长
+## Author: NetEase
+## Version: 0.0.13
+## SavedVariables: GOODLEADER_DB
+
+Load.xml

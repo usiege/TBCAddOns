@@ -117,8 +117,8 @@ function eCastingBar_ColorPicker_ColorChanged()
       eCastingBar_checkFlashBorderColors()
     elseif (ColorPickerFrame.objindex == "TimeColor" or ColorPickerFrame.objindex == "TargetBarTimeColor" or ColorPickerFrame.objindex == "MirrorTimeColor") then
     	eCastingBar_checkTimeColors()
-    elseif (ColorPickerFrame.objindex == "DelayColor" or ColorPickerFrame.objindex == "TargetBarDelayColor") then
-    	eCastingBar_setDelayColor()
+    elseif (ColorPickerFrame.objindex == "LagColor" or ColorPickerFrame.objindex == "TargetBarDelayColor") then
+    	eCastingBar_setLagColor()
     elseif (ColorPickerFrame.objindex == "SpellColor" 
     	or ColorPickerFrame.objindex == "ChannelColor" 
     	or ColorPickerFrame.objindex == "FeignDeathColor"
@@ -181,6 +181,9 @@ function eCastingBar_CheckButton_OnClick(self)
   elseif (string.find(self.index, "HideBorder")) then
     eCastingBar_checkBorders()
   end
+
+	testMode()
+    testModeMirror()      
 end
 
 function convertBooleanToInt(val)
@@ -227,10 +230,10 @@ function eCastingBar_setAnchor(self, subframe, xoffset, yoffset)
 end
 
 function eCastingBar_Menu_TimeOut(self, elapsed)
-	if (self.timer) then
-		self.timer = self.timer - elapsed
-		if (self.timer < 0) then
-			self.timer = nil
+	if (self.elapsed) then
+		self.elapsed = self.elapsed - elapsed
+		if (self.elapsed > 0) then
+			self.elapsed = 0.125
 			self:Hide()
 		end
 	end
@@ -305,4 +308,7 @@ function eCastingBar_Menu_OnClick(self)
 		eCastingBar_Saved.IconPosition = self.value
 		eCastingBar_setIcons();
 	end
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	testMode()
+	testModeMirror()
 end

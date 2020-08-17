@@ -25,17 +25,20 @@ ClickHandler:Add(
 	{
 		OpenSet = { "LeftButton", "None" },
 		DressUp = { "LeftButton", "Ctrl" },
+		WoWHeadLink = { "RightButton", "Shift" },
 		--ChatLink = { "LeftButton", "Shift" },
 		types = {
 			OpenSet = true,
 			DressUp = true,
 			--ChatLink = true,
+			WoWHeadLink = true,
 		},
 	},
 	{
 		{ "OpenSet", 	"OpenSet", 	"OpenSet desc" },
 		{ "DressUp", 	AL["Dress up"], 	AL["Shows the item in the Dressing room"] },
 		--{ "ChatLink", 	AL["Chat Link"], 	AL["Add item into chat"] },
+		{ "WoWHeadLink", 	AL["Show WowHead link"], 	AL["Shows a copyable link for WoWHead"] },
 	}
 )
 
@@ -43,10 +46,7 @@ function Set.OnSet(button, second)
 	if not SetClickHandler then
 		SetClickHandler = ClickHandler:GetHandler("Set")
 
-		for k,v in pairs(RAID_CLASS_COLORS) do
-			CLASS_NAMES_WITH_COLORS[k] = format(CLASS_COLOR_FORMAT,  v.colorStr, ALIL[k])
-		end
-		CLASS_COLOR_FORMAT = nil
+		CLASS_NAMES_WITH_COLORS = AtlasLoot:GetColoredClassNames()
 
 		Sets = AtlasLoot.Data.Sets
 	end
@@ -81,6 +81,8 @@ function Set.OnMouseAction(button, mouseButton)
 		--local itemInfo, itemLink = GetItemInfo(button.ItemString or button.ItemID)
 		--itemLink = itemLink or button.ItemString
 		--AtlasLoot.Button:AddChatLink(itemLink or "item:"..button.ItemID)
+	elseif mouseButton == "WoWHeadLink" then
+		AtlasLoot.Button:OpenWoWHeadLink(button, "item-set", button.SetID)
 	elseif mouseButton == "DressUp" then
 		for i = 1, #button.Items do
 			DressUpItemLink(type(button.Items[i]) == "string" and button.Items[i] or "item:"..button.Items[i])
@@ -142,8 +144,8 @@ function Set.Refresh(button)
 		end
 	end
 	if AtlasLoot.db.ContentPhase.enableOnSets then
-		local phaseT = Sets:GetPhaseTextureForSetID(button.SetID)
-		if phaseT then
+		local phaseT, active = Sets:GetPhaseTextureForSetID(button.SetID)
+		if phaseT and not active then
 			button.phaseIndicator:SetTexture(phaseT)
 			button.phaseIndicator:Show()
 		end

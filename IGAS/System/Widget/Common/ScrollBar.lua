@@ -11,6 +11,7 @@ if not IGAS:NewAddon("IGAS.Widget.ScrollBar", version) then
 end
 
 __Doc__[[ScrollBar is used as scroll controller for scrollForm and others]]
+__AutoProperty__()
 class "ScrollBar"
 	inherit "Frame"
 
@@ -43,14 +44,14 @@ class "ScrollBar"
         local slider = self:GetParent():GetChild("Slider")
 
 		slider:SetValue(slider:GetValue() - slider:GetValueStep())
-        PlaySound("UChatScrollButton")
+        PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
     end
 
     local function clickDownBtn(self)
         local slider = self:GetParent():GetChild("Slider")
 
         slider:SetValue(slider:GetValue() + slider:GetValueStep())
-        PlaySound("UChatScrollButton")
+        PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
     end
 
     local function OnMouseWheel(self, value)

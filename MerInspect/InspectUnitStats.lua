@@ -21,9 +21,8 @@ local function ShowSupportedItemStatsFrame(frame, unit)
             end)
         end
     end
-    local stats = LibItemStats:GetUnitItemStats(unit)
-    local ilevel = LibItemInfo:GetUnitItemLevel(unit)
-    stats.Itemlevel = ilevel
+    local stats = LibItemStats:GetUnitStats(unit)
+    stats.ilevel = LibItemInfo:GetUnitItemLevel(unit)
     frame.statsFrame:SetStats(stats):Show()
     LibEvent:trigger("TogglePlayerStatsFrame", frame.statsFrame, true, false)
 end
@@ -107,7 +106,7 @@ hooksecurefunc("ShowInspectItemListFrame", function(unit, parent, itemLevel, max
     end
     if (LibItemStats:IsSupported()) then
         ShowSupportedItemStatsFrame(frame, unit)
-    else
-        DefaultItemStatsFrame(frame, unit)
+    --else
+    --    DefaultItemStatsFrame(frame, unit)
     end
 end)

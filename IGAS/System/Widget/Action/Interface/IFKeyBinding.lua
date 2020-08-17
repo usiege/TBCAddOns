@@ -122,8 +122,8 @@ do
 		_IFKeyBinding_Loaded = true
 
 		self:RegisterEvent "PLAYER_REGEN_DISABLED"
-		self:RegisterEvent "PET_BATTLE_OPENING_START"
-		self:RegisterEvent "PET_BATTLE_CLOSE"
+		--self:RegisterEvent "PET_BATTLE_OPENING_START"
+		--self:RegisterEvent "PET_BATTLE_CLOSE"
 		self.OnLoad = nil
 	end
 
@@ -312,6 +312,7 @@ do
 end
 
 __Doc__[[IFKeyBinding is used to manage key bindings]]
+__AutoProperty__()
 interface "IFKeyBinding"
 
 	local function Clear4key(key)

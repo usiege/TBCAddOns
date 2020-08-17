@@ -14,6 +14,7 @@ local GetTradeskillLink = AtlasLoot.TooltipScan.GetTradeskillLink
 local ProfClickHandler = nil
 
 local PROF_COLOR = "|cffffff00"
+local WHITE_TEXT = "|cffffffff%s|r"
 local ITEM_COLORS = {}
 
 AtlasLoot.ClickHandler:Add(
@@ -22,16 +23,19 @@ AtlasLoot.ClickHandler:Add(
 		ChatLink = { "LeftButton", "Shift" },
 		ShowExtraItems = { "LeftButton", "None" },
 		DressUp = { "LeftButton", "Ctrl" },
+		WoWHeadLink = { "RightButton", "Shift" },
 		types = {
 			ChatLink = true,
 			ShowExtraItems = true,
 			DressUp = true,
+			WoWHeadLink = true,
 		},
 	},
 	{
 		{ "ChatLink", 		AL["Chat Link"], 			AL["Add profession link into chat"] },
 		{ "DressUp", 		AL["Dress up"], 			AL["Shows the item in the Dressing room"] },
 		{ "ShowExtraItems", AL["Show extra items"], 	AL["Shows extra items (tokens,mats)"] },
+		{ "WoWHeadLink", 	AL["Show WowHead link"], 	AL["Shows a copyable link for WoWHead"] },
 	}
 )
 
@@ -79,7 +83,7 @@ function Prof.OnEnter(button)
 	tooltip:SetOwner(button, "ANCHOR_RIGHT", -(button:GetWidth() * 0.5), 5)
 	tooltip:SetSpellByID(button.SpellID)
 	if AtlasLoot.db.showIDsInTT then
-		tooltip:AddDoubleLine("SpellID:", button.SpellID)
+		tooltip:AddDoubleLine("SpellID:", format(WHITE_TEXT, button.SpellID))
 	end
 	tooltip:Show()
 end
@@ -88,6 +92,7 @@ function Prof.OnLeave(button)
 	GetAlTooltip():Hide()
 end
 
+local PROF_STRING = "|cffffffff|Henchant:%d|h[%s]|h|r"
 function Prof.OnMouseAction(button, mouseButton)
 	if not mouseButton then return end
 	mouseButton = ProfClickHandler:Get(mouseButton)
@@ -95,7 +100,12 @@ function Prof.OnMouseAction(button, mouseButton)
 		if button.ItemID then
 			local itemInfo, itemLink = GetItemInfo(button.ItemID)
 			AtlasLoot.Button:AddChatLink(itemLink)
+		elseif button.SpellID then
+			local spellName = GetSpellInfo(button.SpellID)
+			AtlasLoot.Button:AddChatLink(string.format(PROF_STRING, button.SpellID, spellName))
 		end
+	elseif mouseButton == "WoWHeadLink" then
+		AtlasLoot.Button:OpenWoWHeadLink(button, "spell", button.SpellID)
 	elseif mouseButton == "DressUp" then
 		if button.ItemID then
 			local itemInfo, itemLink = GetItemInfo(button.ItemID)
@@ -150,8 +160,8 @@ function Prof.Refresh(button)
 			button.count:Show()
 		end
 		if AtlasLoot.db.ContentPhase.enableOnCrafting then
-			local phaseT = Profession.GetPhaseTextureForSpellID(button.SpellID)
-			if phaseT then
+			local phaseT, active = Profession.GetPhaseTextureForSpellID(button.SpellID)
+			if phaseT and not active then
 				button.phaseIndicator:SetTexture(phaseT)
 				button.phaseIndicator:Show()
 			end

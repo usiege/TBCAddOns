@@ -13,11 +13,13 @@ if not IGAS:NewAddon("IGAS.Widget.Form", version) then
 end
 
 __Doc__[[Form is used to create base frames to contain other ui elements. It can move, resize, has a caption, a close button, and a message bar.]]
+__AutoProperty__()
 class "Form"
 	inherit "Frame"
 	extend "IFContainer"
 
 	__Doc__[[DockHeader is used to attach the form to the screen border]]
+	__AutoProperty__()
 	class "DockHeader"
 		inherit "VirtualUIObject"
 
@@ -76,15 +78,15 @@ class "Form"
 			end
 		end
 
-		local function GetScreenFrameRect(frame)
-		    local es = frame:GetEffectiveScale();
+		local function GetScreenFrameRect(frame, noscale)
+		    local es = noscale and 1 or frame:GetEffectiveScale();
 		    local l, b, w, h = frame:GetRect();
 		    if (not (l and b)) then return 0, 0, 0, 0; end
 		    return l * es, (l + w) * es, b * es, (b + h) * es;
 		end
 
 		local function CheckPosition(self, instant)
-			local left, right, bottom, top = GetScreenFrameRect(self.Form)
+			local left, right, bottom, top = GetScreenFrameRect(self.Form, true)
 
 			if left < 10 then
 				self.NeedHideForm = 2
@@ -566,5 +568,6 @@ class "Form"
 		self.Resizable = true
 		self.Movable = true
 		self.Toplevel = true
+		self.ClampedToScreen = true
 	end
 endclass "Form"

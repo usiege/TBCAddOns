@@ -1,0 +1,105 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+  <Script file="Config.lua"/>
+  <Frame name="EZQuestConfigFrame" mixin="EZQuestConfigMixin">
+    <Layers>
+      <Layer level="ARTWORK">
+        <FontString name="$parentTitle" text="Settings" inherits="GameFontNormalLarge" justifyH="LEFT" justifyV="TOP">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="16" y="-16"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Frames>
+      <CheckButton name="$parentIsEnabled" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentTitle" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="-2" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnShow>
+            ToggleIsEnabledButton_OnShow(self);
+          </OnShow>
+          <OnLoad>
+            self.type = CONTROLTYPE_CHECKBOX;
+          </OnLoad>
+          <OnClick>
+            ToggleIsEnabledButton_OnClick(self);
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentAutoTurnInQuests" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentIsEnabled" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="5" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnShow>
+            ToggleAutoTurnInQuestsButton_OnShow(self);
+          </OnShow>
+          <OnLoad>
+            self.type = CONTROLTYPE_CHECKBOX;
+          </OnLoad>
+          <OnClick>
+            ToggleAutoTurnInQuestsButton_OnClick(self);
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentAutoAcceptQuests" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentAutoTurnInQuests" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnShow>
+            ToggleAutoAcceptQuestsButton_OnShow(self);
+          </OnShow>
+          <OnLoad>
+            self.type = CONTROLTYPE_CHECKBOX;
+          </OnLoad>
+          <OnClick>
+            ToggleAutoAcceptQuestsButton_OnClick(self);
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentAutoTrackQuests" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentAutoAcceptQuests" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnShow>
+            ToggleAutoTrackQuestsButton_OnShow(self);
+          </OnShow>
+          <OnLoad>
+            self.type = CONTROLTYPE_CHECKBOX;
+          </OnLoad>
+          <OnClick>
+            ToggleAutoTrackQuestsButton_OnClick(self);
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+    </Frames>
+    <Scripts>
+      <OnLoad method="OnLoad" />
+      <OnEvent method="OnEvent" />
+    </Scripts>
+  </Frame>
+</Ui>

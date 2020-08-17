@@ -1,4 +1,4 @@
-## Interface: 11302
+## Interface: 11305
 
 ## Title: Leatrix Plus
 ## Title-zhCN: Leatrix Plus [|cffeda55f功能百宝箱|r]
@@ -8,11 +8,10 @@
 ## Notes-zhCN: 哆啦A梦的百宝袋
 ## Notes-zhTW: 哆啦A夢的百寶袋
 
-## Version: 1.13.30
+## Version: 1.13.76
 ## Author: Leatrix
 ## SavedVariables: LeaPlusDB
 
 Leatrix_Plus_Library.lua
 Leatrix_Plus_Locale.lua
-Leatrix_Plus_Sounds.lua
 Leatrix_Plus.lua

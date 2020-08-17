@@ -1,14 +1,21 @@
 --[[
     This file is part of Decursive.
 
-    Decursive (v 2.7.6.3-7-gf1c71cc) add-on for World of Warcraft UI
-    Copyright (C) 2006-2018 John Wellesz (Decursive AT 2072productions.com) ( http://www.2072productions.com/to/decursive.php )
+    Decursive (v 2.7.7) add-on for World of Warcraft UI
+    Copyright (C) 2006-2019 John Wellesz (Decursive AT 2072productions.com) ( http://www.2072productions.com/to/decursive.php )
 
-    Starting from 2009-10-31 and until said otherwise by its author, Decursive
-    is no longer free software, all rights are reserved to its author (John Wellesz).
+    Decursive is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-    The only official and allowed distribution means are www.2072productions.com, www.wowace.com and curse.com.
-    To distribute Decursive through other means a special authorization is required.
+    Decursive is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Decursive.  If not, see <https://www.gnu.org/licenses/>.
 
 
     Decursive is inspired from the original "Decursive v1.9.4" by Patrick Bohnet (Quu).
@@ -17,7 +24,7 @@
     Decursive is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY.
 
-    This file was last updated on 2019-09-02T04:11:14Z
+    This file was last updated on 2020-03-08T20:44:24Z
 --]]
 -------------------------------------------------------------------------------
 
@@ -110,7 +117,7 @@ function D:ColorText (text, color)
 end
 
 function D:ColorTextNA (text, color)
-    return "|cFF".. color .. text .. "|r";
+    return (#color == 6 and "|cFF" or "|c") .. color .. text .. "|r";
 end
 
 function D:RemoveColor (text)
@@ -137,7 +144,7 @@ function D:PetUnitName (Unit, Check) -- {{{
     if not Check or self:UnitIsPet(Unit) then
         Name = ("%s-%s"):format(DC.PET, Name);
     end
-    
+
     return Name;
 
 end -- }}}
@@ -148,7 +155,7 @@ function D:UnitName(Unit)
             return name.."-"..server;
         else
             return name;
-        end 
+        end
 end
 
 local function isFormattedString(string)
@@ -204,13 +211,13 @@ function D:ColorPrint (r,g,b, ... )
     if not self.db then
         self:Print(ColorHeader, unpack(datas));
     end
-    
+
 end
 
 function D:errln( ... ) --{{{
     if not D.db or D.profile.Print_Error then
         self:ColorPrint(1,0,0,...);
-        
+
     end
 end --}}}
 
@@ -278,11 +285,11 @@ end -- }}}
 
 -- tcopy: recursively copy contents of one table to another
 function D:tcopy(to, from)   -- "to" must be a table (possibly empty)
-    if (type(from) ~= "table") then 
+    if (type(from) ~= "table") then
         return error(("D:tcopy: bad argument #2 'from' must be a table, got '%s' instead"):format(type(from)),2);
     end
 
-    if (type(to) ~= "table") then 
+    if (type(to) ~= "table") then
         return error(("D:tcopy: bad argument #1 'to' must be a table, got '%s' instead"):format(type(to)),2);
     end
     for k,v in pairs(from) do
@@ -298,14 +305,14 @@ end
 
 -- tcopycallback: recursively copy contents of one table to another calling a callback before storing the new values
 function D:tcopycallback(to, from, CallBack) -- "to" must be a table (possibly empty)
-    if (type(from) ~= "table") then 
+    if (type(from) ~= "table") then
         return error(("D:tcopycallback: bad argument #2 'from' must be a table, got '%s' instead"):format(type(from)),2);
     end
 
-    if (type(to) ~= "table") then 
+    if (type(to) ~= "table") then
         return error(("D:tcopycallback: bad argument #1 'to' must be a table, got '%s' instead"):format(type(to)),2);
     end
-    if (type(CallBack) ~= "function") then 
+    if (type(CallBack) ~= "function") then
         return error(("D:tcopycallback: bad argument #3 'CallBack' must be a function ref, got '%s' instead"):format(type(CallBack)),2);
     end
     for k,v in pairs(from) do
@@ -464,16 +471,32 @@ function D:NumToHexColor(ColorTable)
         return str_format("%02x%02x%02x%02x", ColorTable[4] * 255, ColorTable[1] * 255, ColorTable[2] * 255, ColorTable[3] * 255)
 end
 
+function D:HexColorToNum(hexColor)
+    t_color = {};
+    for hex in (hexColor):gmatch("[0-9a-fA-F][0-9a-fA-F]") do
+        t_color[#t_color + 1] = tonumber(hex, 16) / 255;
+    end
+
+    -- put the alpha in fourth position
+    if #t_color == 4 then
+        t_color[4] = table.remove(t_color, 1);
+    else -- add it if missing
+        t_color[4] = 1.0;
+    end
+
+    return t_color;
+end
+
 -- function taken from http://www.wowwiki.com/SetTexCoord_Transformations
 function D:SetCoords(t, A, B, C, D, E, F)
         local det = A*E - B*D;
         local ULx, ULy, LLx, LLy, URx, URy, LRx, LRy;
-        
+
         ULx, ULy = ( B*F - C*E ) / det, ( -(A*F) + C*D ) / det;
         LLx, LLy = ( -B + B*F - C*E ) / det, ( A - A*F + C*D ) / det;
         URx, URy = ( E + B*F - C*E ) / det, ( -D - A*F + C*D ) / det;
         LRx, LRy = ( E - B + B*F - C*E ) / det, ( -D + A -(A*F) + C*D ) / det;
-        
+
         t:SetTexCoord(ULx, ULy, LLx, LLy, URx, URy, LRx, LRy);
 end
 
@@ -487,7 +510,7 @@ do
         ["DEMONHUNTER"]    = true,
         ["DEATHKNIGHT"]    = true,
         ["MONK"]           = true
-    
+
     };
 
     function D:GetClassColor (EnglishClass, noCache)
@@ -537,7 +560,7 @@ do
 
     if CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS.RegisterCallback then
         CUSTOM_CLASS_COLORS:RegisterCallback(function() D:ScheduleDelayedCall('update_Class_Colors', D.CreateClassColorTables, .3, D) end);
-    end 
+    end
 
 end
 
@@ -915,4 +938,4 @@ do
 end
 
 
-T._LoadedFiles["Dcr_utils.lua"] = "2.7.6.3-7-gf1c71cc";
+T._LoadedFiles["Dcr_utils.lua"] = "2.7.7";

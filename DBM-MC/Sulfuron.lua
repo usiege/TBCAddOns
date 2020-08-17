@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Sulfuron", "DBM-MC", 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20190904200802")
+mod:SetRevision("20200716131113")
 mod:SetCreatureID(12098)--, 11662
 mod:SetEncounterID(669)
 mod:SetModelID(13030)
@@ -13,15 +13,15 @@ mod:RegisterEventsInCombat(
 )
 
 --TODO, nameplate aura if classic API supports it enough
-local warnInspire		= mod:NewTargetAnnounce(19779, 2, nil, "Tank|Healer")
+local warnInspire		= mod:NewTargetNoFilterAnnounce(19779, 2, nil, "Tank|Healer")
 local warnHandRagnaros	= mod:NewTargetAnnounce(19780, 2, nil, false, 2)
 local warnShadowPain	= mod:NewTargetAnnounce(19776, 2, nil, false, 2)
 local warnImmolate		= mod:NewTargetAnnounce(20294, 2, nil, false, 2)
 
 local specWarnHeal		= mod:NewSpecialWarningInterrupt(19775, "HasInterrupt", nil, nil, 1, 2)
 
-local timerInspire		= mod:NewTargetTimer(10, 19779, nil, "Tank|Healer", nil, 5, nil, DBM_CORE_TANK_ICON..DBM_CORE_HEALER_ICON)
-local timerHeal			= mod:NewCastTimer(2, 19775, nil, nil, 2, 4, nil, DBM_CORE_INTERRUPT_ICON)
+local timerInspire		= mod:NewTargetTimer(10, 19779, nil, "Tank|Healer", nil, 5, nil, DBM_CORE_L.TANK_ICON..DBM_CORE_L.HEALER_ICON)
+local timerHeal			= mod:NewCastTimer(2, 19775, nil, nil, 2, 4, nil, DBM_CORE_L.INTERRUPT_ICON)
 
 --function mod:OnCombatStart(delay)
 
@@ -56,10 +56,10 @@ do
 end
 
 do
-	local Heal = DBM:GetSpellInfo(19775)
+	local DarkMending = DBM:GetSpellInfo(19775)
 	function mod:SPELL_CAST_START(args)
 		--if args.spellId == 19775 then
-		if args.spellName == Heal and args:IsSrcTypeHostile() then
+		if args.spellName == DarkMending and args:IsSrcTypeHostile() then
 			if self:CheckInterruptFilter(args.sourceGUID, false, true) then--Only show warning/timer for your own target.
 				timerHeal:Start()
 				specWarnHeal:Show(args.sourceName)

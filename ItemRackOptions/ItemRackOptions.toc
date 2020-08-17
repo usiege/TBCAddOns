@@ -1,7 +1,9 @@
-## Interface: 11303
+## Interface: 11305
 ## Title: ItemRackOptions
+## Version: 3.46
 ## Notes: Load-On-Demand modules for ItemRack
 ## Dependencies: ItemRack, Blizzard_MacroUI
 ## LoadOnDemand: 1
+## X-Curse-Project-ID: 340903
 ItemRackOptions.lua
 ItemRackOptions.xml

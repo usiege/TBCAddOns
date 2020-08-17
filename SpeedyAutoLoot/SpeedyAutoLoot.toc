@@ -1,9 +1,8 @@
-## Interface: 11302
+## Interface: 11305
 ## Title: |cffEEE4AESpeedy AutoLoot|r
-## Title-zhCN: |cffEEE4AESpeedy AutoLoot|r 自动拾取增强
-## Notes: |cff58C6FALoot at ludicrous speed!|r
+## Notes: |cff58C6FALoot at ludicrous speed!|r|n|n|cff8D8D8DSlash command: /sal, /speedyautoloot|r
 ## Author: Yuyuli
-## Version: 2.0.9
+## Version: 2.0.29
 ## SavedVariables: SpeedyAutoLootDB
 
 SpeedyAutoLoot.lua

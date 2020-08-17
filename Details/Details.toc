@@ -1,6 +1,7 @@
-## Interface: 80000
+
+## Interface: 11305
+
 ## Title: Details! Damage Meter
-## Title-zhCN: Details-伤害统计
 ## Notes: Essential tool to impress that chick in your raid.
 ## SavedVariables: _detalhes_global
 ## SavedVariablesPerCharacter: _detalhes_database

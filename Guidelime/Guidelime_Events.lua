@@ -53,9 +53,10 @@ function addon.updateFromQuestLog()
 	local checkCompleted = false
 	local questChanged = false
 	local questFound = false
-	local newQuest = false
 	for id, q in pairs(addon.quests) do
 		if questLog[id] ~= nil and not questLog[id].failed then
+			local numObjectives = GetNumQuestLeaderBoards(questLog[id].index)
+			if numObjectives == 0 then questLog[id].finished = true end
 			if q.logIndex ~= nil then
 				questFound = true
 				if q.logIndex ~= questLog[id].index or q.finished ~= questLog[id].finished then
@@ -67,38 +68,27 @@ function addon.updateFromQuestLog()
 			else
 				questFound = true
 				questChanged = true
-				newQuest = true
 				q.logIndex = questLog[id].index
 				q.finished = questLog[id].finished
 				q.name = questLog[id].name
 				q.sort = questLog[id].sort
 				--if addon.debugging then print("LIME: new log entry ".. id .. " finished", q.finished) end
 			end
-			if q.objectives == nil or #q.objectives ~= GetNumQuestLeaderBoards(q.logIndex) then q.objectives = {} end
-			for k = 1, GetNumQuestLeaderBoards(q.logIndex) do
+			if q.objectives == nil or #q.objectives ~= numObjectives then q.objectives = {} end
+			for k = 1, numObjectives do
 				local desc, type, done = GetQuestLogLeaderBoard(k, addon.quests[id].logIndex)
 				if q.objectives[k] == nil or desc ~= q.objectives[k] or done ~= q.objectives[k].done then
 					questChanged = true
 					q.objectives[k] = {desc = desc, done = done, type = type}
 				end					
 			end
-		else
+		elseif not q.completed then
+			checkCompleted = true
 			if q.logIndex ~= nil and q.logIndex ~= -1 and not isCollapsed[q.sort] then
-				checkCompleted = true
 				q.logIndex = nil
-				newQuest = true
 				--if addon.debugging then print("LIME: removed log entry ".. id) end
 			end
 		end
-	end
-	if GuidelimeData.showQuestIds and newQuest then
-		local msg = "LIME: current quests: "
-		for id, q in pairs(addon.quests) do
-			if q.logIndex ~= nil then 
-				msg = msg .. q.name .. "(#" .. id .. "), "
-			end
-		end
-		print(msg:sub(1, #msg - 2))
 	end
 	return checkCompleted, questChanged, questFound
 end
@@ -159,7 +149,7 @@ end
 
 addon.frame:RegisterEvent('GOSSIP_SHOW')
 function addon.frame:GOSSIP_SHOW()
-	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() then 
+	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.currentGuide ~= nil and addon.currentGuide.activeQuests ~= nil then 
 		if addon.debugging then print ("LIME: GOSSIP_SHOW", GetGossipActiveQuests()) end
 		if addon.debugging then print ("LIME: GOSSIP_SHOW", GetGossipAvailableQuests()) end
 		local q = { GetGossipActiveQuests() }
@@ -167,7 +157,7 @@ function addon.frame:GOSSIP_SHOW()
 		local selectAvailable = nil
 		addon.openNpcAgain = false
 		for i = 1, GetNumGossipActiveQuests() do
-			local name = q[(i-1) * 7 + 1]
+			local name = q[(i-1) * 6 + 1]
 			if addon.contains(addon.currentGuide.activeQuests, function(id) return name == addon.getQuestNameById(id) end) then
 				if selectActive == nil then
 					selectActive = i
@@ -221,7 +211,7 @@ end
 
 addon.frame:RegisterEvent('QUEST_GREETING')
 function addon.frame:QUEST_GREETING()
-	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() then 
+	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.currentGuide ~= nil and addon.currentGuide.activeQuests ~= nil then 
 		if addon.debugging then print ("LIME: QUEST_GREETING", GetNumActiveQuests()) end
 		if addon.debugging then print ("LIME: QUEST_GREETING", GetNumAvailableQuests()) end
 		local selectActive = nil
@@ -266,13 +256,17 @@ addon.frame:RegisterEvent('QUEST_DETAIL')
 function addon.frame:QUEST_DETAIL()
 	local id = GetQuestID()
 	if addon.debugging then print ("LIME: QUEST_DETAIL", id) end
-	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.currentGuide.activeQuests ~= nil and addon.contains(addon.currentGuide.activeQuests, id) then 
-		C_Timer.After(addon.AUTO_COMPLETE_DELAY, function() 
-			AcceptQuest()
-			if addon.openNpcAgain then 
-				--todo
-			end
-		end)
+	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() then
+		if addon.currentGuide ~= nil and addon.currentGuide.activeQuests ~= nil and addon.contains(addon.currentGuide.activeQuests, id) then 
+			C_Timer.After(addon.AUTO_COMPLETE_DELAY, function()
+				AcceptQuest()
+				if addon.openNpcAgain then 
+					--todo
+				end
+			end)
+		else
+			addon.lastQuestOpened = id
+		end
 	end
 end
 
@@ -280,7 +274,7 @@ addon.frame:RegisterEvent('QUEST_PROGRESS')
 function addon.frame:QUEST_PROGRESS()
 	local id = GetQuestID()
 	if addon.debugging then print ("LIME: QUEST_PROGRESS", id) end
-	if IsQuestCompletable() and GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.contains(addon.currentGuide.activeQuests, id) then 
+	if IsQuestCompletable() and GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.currentGuide ~= nil and addon.currentGuide.activeQuests ~= nil and addon.contains(addon.currentGuide.activeQuests, id) then 
 		C_Timer.After(addon.AUTO_COMPLETE_DELAY, function() 
 			CompleteQuest()
 			if addon.openNpcAgain then 
@@ -293,7 +287,7 @@ end
 addon.frame:RegisterEvent('QUEST_COMPLETE')
 function addon.frame:QUEST_COMPLETE()
 	local id = GetQuestID()
-	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.contains(addon.currentGuide.activeQuests, id) then 
+	if GuidelimeData.autoCompleteQuest and not IsShiftKeyDown() and addon.currentGuide ~= nil and addon.currentGuide.activeQuests ~= nil and addon.contains(addon.currentGuide.activeQuests, id) then 
 		if addon.debugging then print ("LIME: QUEST_COMPLETE", id) end
 		if (GetNumQuestChoices() <= 1) then
 			C_Timer.After(addon.AUTO_COMPLETE_DELAY, function() 
@@ -321,14 +315,14 @@ function addon.frame:TAXIMAP_OPENED()
 				if not element.completed then
 					if element.flightmaster ~= nil then
 						local master = addon.flightmasterDB[element.flightmaster]
-						for i = 1, NumTaxiNodes() do
-							if (master.place or master.zone) == TaxiNodeName(i):sub(1, #(master.place or master.zone)) then
-								if element.t == "FLY" and TaxiNodeGetType(i) == "REACHABLE" then
+						for j = 1, NumTaxiNodes() do
+							if (master.place or master.zone) == TaxiNodeName(j):sub(1, #(master.place or master.zone)) then
+								if element.t == "FLY" and TaxiNodeGetType(j) == "REACHABLE" then
 									if IsMounted() then Dismount() end -- dismount before using the flightpoint
 									if addon.debugging then print ("LIME: Flying to " .. (master.place or master.zone)) end
-									TakeTaxiNode(i)
+									TakeTaxiNode(j)
 									addon.completeSemiAutomatic(element)
-								elseif element.t == "GET_FLIGHT_POINT" and TaxiNodeGetType(i) == "CURRENT" then
+								elseif element.t == "GET_FLIGHT_POINT" and TaxiNodeGetType(j) == "CURRENT" then
 									addon.completeSemiAutomatic(element)
 								end
 								return

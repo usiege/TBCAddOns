@@ -1,3 +1,234 @@
+2017/10/24
+    Fix the IList's Any, All, First and FirstOrDefault API, you can use them like :
+          print(List(100):Any("x=>x==30")) -- true
+          print(List(100):First("x=>x==30")) -- 30
+          print(List(100):Range(2, -1, 2):All("x=>x%2==0")) -- true
+
+2017/09/30
+   The linked and final APIs in List no longer cause memory increasement.
+
+2017/09/30
+    Fix the List:Remove(obj) API.
+
+2017/09/28
+   New Final API - Any, All, First, FirstOrDefault for System.Collection.IList.
+
+2017/03/29
+    Re-design the struct's validation, increase the performace about 10%-30%. `System.__Base__ attribtue` can be used on all struct types. See wiki for more details.
+
+2017/03/27
+    Re-design the meta-table's generation for class objects based on brach pediction. Improve the speed to access object features.
+
+    As a special example, if one class has only methods defined, it's `__index` meta-method will be a cache table for those methods and the `__newindex` would be nil, so it won't suffer any performance loss.
+
+    To achieve it, several features are re-deisgned :
+
+        * The `__index` defined in the class can be table now, if the class has no other featuers, the table will be used as the object's `__index` meta-method directly.
+
+                class "A" (function(_ENV)
+                    __index = { Info = print }
+                end)
+
+                A():Info()
+
+            If you access the __index through the class(like A.__index), you'll only get a copy, so take an attention.
+
+        * The Dispose method is no longer can be used for all objects, only class has Dispose defined(include its super class and extended interfaces) can access it. Otherwise, most objects no need to be Disposed since lua can collect them.
+
+
+2017/03/20
+    A new meta-method '__new' added for class, used to generate the table used as the object based on the arguments.
+
+        import "System"
+
+        class "A" (function(_ENV)
+            property "Name" { Type = String }
+
+            function A(self, name, t)
+                self.Name = name
+            end
+
+            __Arguments__{ String, Table }
+            function __new(name, t)
+                return t  -- So the t will be used as the object
+            end
+        end)
+
+        o = {}
+        obj = A("ann", o)
+
+        -- true
+        print(o == obj)
+
+2017/03/19
+    Property handler will recieve the defaut value as new value if set to nil.
+
+2017/03/01
+    Re-design the cache system for struct, interface and class, attribute __StructType__ & __StructOrder__ are removed.
+
+    struct System.NEString is added to validate for not empty string.
+
+2017/02/19
+    Fix the error message for System.Reflector.Validate :
+
+        struct "Point"
+            x = Number
+            y = Number
+            z = Point
+        endstruct "Point"
+
+        function Test(v)
+            -- Type, value[, name[, prefix[, stacklevel]]]
+            v = Reflector.Validate(Point, v, "v", "Test(v) - ", 2)
+        end
+
+        -- Test(v) - v.z.x must be a number, got boolean.
+        Test({x = 1, y = 2, z = { x= false, y = 2}})
+
+
+2017/02/18
+    The System.Module has a new method - ClearGlobalMethods, used to clear the global defined functions, the when a new version is existed, the object method attribtues can't be applied if those functions existed.
+
+2017/01/23
+    The List and Dictionary add support for iterators, works like :
+
+        import "System"
+        import "System.Collections"
+
+        a = {
+            Ann = 1,
+            Ben = 2,
+            King = 3,
+        }
+
+        dict = Dictionary(pairs(a))
+
+        dict.Keys:Each(print)
+
+        lst = List(Reflector.GetMethods(List))
+
+        -- Print the methods's name
+        lst:Each(print)
+
+
+2017/01/18
+    Re-design the System.Collections.Dictionary. It's a simple class now, and method Keys & Values is defined as property. You can use it like :
+
+        o = Dictionary (List(10, "x=>string.char(x+64)"), List(10, "x=>x^2"))
+
+        o:Map("x,y=>y/2").Values:Each(print)
+
+
+2017/01/11
+    The System.Module is marked with `__ObjMethodAttr__{ Inheritable = true }`.
+
+2016/12/24
+    System.Collections.ObjectArray is finished, used to handle a group of same type objects, can be used to bind event handlers to all objects. The System.Collections.ObjectArray is object method attribute enabled, so it's useful to bind attribute for event handlers :
+
+        import "System"
+        import "System.Threading"
+        import "System.Collections"
+
+        class "Person" { Name = { Type = String, Event = "OnNameChanged" } }
+
+        oArr = ObjectArray(Person, Person{ Name = "Ann" })
+
+        -- Bind event handler to the array's object
+        __Thread__()
+        function oArr:OnNameChanged(new, old)
+            print(old , "->", new)
+        end
+
+        oArr:Insert(Person{ Name = "AAA"} )
+
+        -- Set all object's name to None
+        oArr:Each("Name", "None")
+
+
+2016/12/20
+    System.Object is removed from Core, there is no need to provide a root class in PLoop system. The framework should do it by themselves.
+
+2016/12/15
+    Change the `System.__Arguments__`'s Priorty to lower and SubLevel to -9999, since it'd change the returned function, the lowest is used for attributes that won't change the contents(like register).
+
+    Fix the multi-attribute for methods not work.
+
+2016/12/14
+    Fix System.Recycle to be a pure table manager.
+
+2016/12/09
+    `System.__NoAutoSet__` attribute is added, used to block the assignment to the object directly.
+
+2016/12/04
+    Rename `__ObjectMethodAttributeEnabled__` to `__ObjMethodAttr__` for simple using.
+
+2016/12/01
+    The attribute has *Priority* and *SubLevel* property now, they are used to decided the order of the attribute's applied process.
+
+    Many methods removed from the *System.Reflector*, since they can be replaced by attribute's methods.
+
+2016/11/24
+    Re-design the property system, disable the PLOOP_SAVE_MEMORY(default disabled) mode will speed up the property's access by 10%-30%.
+
+2016/11/21
+    System.RawBoolean is added, only accept true/false, used for `__Arguments__`.
+
+2016/11/10
+    The attribute system support new type - System.AttributeTargets.ObjectMethod, it's used to bind info or modify the object's method(the object method is assigned to the object directly), works like :
+
+        __ObjectMethodAttributeEnabled__{ Inheritable = true }
+        class "A" {
+            Name = { Type = System.String, Default = "Anonymous", Event = "OnNameChanged" }
+        }
+
+        o = A()
+
+        __Delegate__(System.Threading.ThreadCall)
+        function o:DoThreadTask(...)
+        end
+
+        __Delegate__(System.Threading.ThreadCall)
+        o.OnNameChanged = o.OnNameChanged + function(self, new) end
+
+    Only object whose class is marked with `__ObjectMethodAttributeEnabled__` attribute can use this feature.
+
+2016/11/09
+    The struct system is re-designed, the validator can be only used to validate the value, not to change it, if the struct would modify the value, it should be done in `__init` method like :
+
+        struct "Boolean" {
+            -- No check for boolean
+            Boolean = function (value) end;
+
+            -- Change the value
+            __init = function (value) return value and true or false end;
+        }
+
+    The old system would cause heavy clone cost and some problem for `__Arguments__` overload system, and split the validation and modification would be more useful.
+
+2016/10/19
+    System.Reflector.GetBaseStruct is added to get the base struct of custom struct.
+
+    The class and custom struct must be mark with System.Serialization.__Serializable__ attribute as serializable data types, the array and member struct would be checked by the system automatically, the enum is always seriablizable.
+
+2016/10/17
+    Since the users can define methods for System.Object, some methods are removed.
+
+2016/10/15
+    The System.Module's constructor's parameter is re-designed like __Arguments__{ String, Argument(Module, true) }.
+
+    The System.Module.GetModules method would return an iterator.
+
+    The System.Module would try to use the object's class to create it's parent modules since the class can be inherited.
+
+2016/09/26
+    System.__Base__ attribute can only be appled to custom struct type.
+
+2016/09/15
+    System.__Base__ attribute added for structs, used to set it's base struct, so the value would be checked by its base struct first. Usage : __Base__(Number) struct "PosNumber" { function(val) assert(val>0, "%s must be positive.") end }
+
+2016/07/29
+    No auto property-method binding, must be declared with __AutoProperty__.
+
 2016/04/20
     No auto default value from type for properties if the default factory existed.
 

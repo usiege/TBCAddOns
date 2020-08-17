@@ -1757,6 +1757,7 @@ do
 end
 
 __Doc__[[MultiLineTextBox is used as a multi-line text editor.]]
+__AutoProperty__()
 class "MultiLineTextBox"
 	inherit "ScrollForm"
 
@@ -2851,7 +2852,7 @@ class "MultiLineTextBox"
 			self:HighlightText(cursorPos, cursorPos)
 
 			return self:Fire("OnPasting", startp, endp)
-		elseif self.__DBLCLKSELTEXT then
+		--[[elseif self.__DBLCLKSELTEXT then
 			local str = self.__Text.Text
 			local startp, endp = GetWord(str, cursorPos)
 
@@ -2859,7 +2860,7 @@ class "MultiLineTextBox"
 				self:HighlightText(startp - 1, endp)
 			end
 
-			self.__DBLCLKSELTEXT = nil
+			self.__DBLCLKSELTEXT = nil--]]
 		elseif self.__MouseDownShift == false then
 			-- First CursorChanged after mouse down if not press shift
 			self:HighlightText(cursorPos, cursorPos)
@@ -2937,6 +2938,16 @@ class "MultiLineTextBox"
 				-- mean double click
 				self.__DBLCLKSELTEXT = true
 				self.__OldCursorPosition = nil
+
+				local str = self.__Text.Text
+				local startp, endp = GetWord(str, self.CursorPosition)
+
+				if startp and endp then
+					Task.NextCall(HighlightText, self, startp-1, endp)
+					--self:HighlightText(startp - 1, endp)
+				end
+
+				self.__DBLCLKSELTEXT = nil
 			else
 				self.__MouseDownTime = GetTime()
 			end
@@ -3264,6 +3275,11 @@ class "MultiLineTextBox"
 		return self:Fire("OnCharComposition", ...)
 	end
 
+	local function OnShow(self)
+		self.Text = self.Text or ""
+		Task.NextCall(Ajust4Font, self)
+	end
+
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
@@ -3348,6 +3364,8 @@ class "MultiLineTextBox"
 		editbox.OnChar = editbox.OnChar + OnChar
 		editbox.OnMouseDown = editbox.OnMouseDown + OnMouseDown
 		editbox.OnMouseUp = editbox.OnMouseUp + OnMouseUp
+
+		self.OnShow 	= self.OnShow + OnShow
 
 		container:UpdateSize()
 	end

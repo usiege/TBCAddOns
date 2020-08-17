@@ -18,20 +18,18 @@ _MacroMapTemplate = "_MacroMap[%d]=%q\n"
 --_StanceOnTexturePath = [[Interface\Icons\Spell_Nature_WispSplode]]
 
 _StanceMap = {}
-_Profession = {}
 _MacroMap = {}
 
 --_FakeStanceMap = {
 --	[77769] = true,	-- Trap Launcher
 --}
 
+local _CheckSpellUsableTime = GetTime()
+
 -- Event handler
 function OnEnable(self)
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
 	self:RegisterEvent("SPELLS_CHANGED")
-	self:RegisterEvent("SKILL_LINES_CHANGED")
-	self:RegisterEvent("PLAYER_GUILD_UPDATE")
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:RegisterEvent("SPELL_UPDATE_USABLE")
@@ -45,32 +43,26 @@ function OnEnable(self)
 	UpdateStanceMap()
 	UpdateMacroMap()
 	--UpdateFakeStanceMap()
+
+	Task.ThreadCall(function()
+		-- Refresh Usable
+		while true do
+			Task.Delay(0.1)
+
+			if GetTime() - _CheckSpellUsableTime >= 0.1 then
+				handler:Refresh(RefreshUsable)
+			end
+		end
+	end)
 end
 
 function LEARNED_SPELL_IN_TAB(self)
 	RefreshTooltip()
-
-	return UpdateProfession()
 end
 
 function SPELLS_CHANGED(self)
 	UpdateMacroMap()
-	UpdateProfession()
 	UpdateStanceMap()
-end
-
-function SKILL_LINES_CHANGED(self)
-	return UpdateProfession()
-end
-
-function PLAYER_GUILD_UPDATE(self)
-	return UpdateProfession()
-end
-
-function PLAYER_SPECIALIZATION_CHANGED(self, unit)
-	if unit == "player" then
-		UpdateProfession()
-	end
 end
 
 function UPDATE_SHAPESHIFT_FORM(self)
@@ -88,6 +80,7 @@ function SPELL_UPDATE_COOLDOWN(self)
 end
 
 function SPELL_UPDATE_USABLE(self)
+	_CheckSpellUsableTime = GetTime()
 	return handler:Refresh(RefreshUsable)
 end
 
@@ -110,13 +103,17 @@ function UNIT_AURA(self, unit)
 	end
 end
 
+function SPELL_FLYOUT_UPDATE(self)
+	return handler:Refresh()
+end
+
 function UpdateStanceMap()
 	local str = "" --"for i in pairs(_StanceMap) do _StanceMap[i] = nil end\n"
 
 	--wipe(_StanceMap)
 
 	for i = 1, GetNumShapeshiftForms() do
-		local id = select(5, GetShapeshiftFormInfo(i))
+		local id = select(4, GetShapeshiftFormInfo(i))
 	    if id then
 			str = str.._StanceMapTemplate:format(id, i)
 	    	_StanceMap[id] = i
@@ -144,13 +141,11 @@ function UpdateMacroMap()
 	local _, id = GetSpellBookItemInfo(index, "spell")
 
 	while id do
-		if not _MacroMap[id] then
-			local name = GetSpellInfo(id)
-			if name then
-				_MacroMap[id] = name
-				cnt = cnt + 1
-				str[cnt] = _MacroMapTemplate:format(id, name)
-			end
+		local name = GetSpellInfo(id)
+		if name and _MacroMap[id] ~= name then
+			_MacroMap[id] = name
+			cnt = cnt + 1
+			str[cnt] = _MacroMapTemplate:format(id, name)
 		end
 
 		index = index + 1
@@ -195,30 +190,6 @@ end
 	end
 end--]]
 
-function UpdateProfession()
-	local lst = {GetProfessions()}
-	local offset, spell, name
-
-	for i = 1, 6 do
-	    if lst[i] then
-	        offset = 1 + select(6, GetProfessionInfo(lst[i]))
-	        spell = select(2, GetSpellBookItemInfo(offset, "spell"))
-	        name = GetSpellBookItemName(offset, "spell")
-
-	        if _Profession[name] ~= spell then
-	        	_Profession[name] = spell
-	        	Task.NoCombatCall(function ()
-	        		for _, btn in handler() do
-	        			if GetSpellInfo(btn.ActionTarget) == name then
-	        				btn:SetAction("spell", spell)
-	        			end
-	        		end
-	        	end)
-	        end
-	    end
-	end
-end
-
 -- Spell action type handler
 handler = ActionTypeHandler {
 	Name = "spell",
@@ -258,6 +229,26 @@ handler = ActionTypeHandler {
 }
 
 -- Overwrite methods
+function handler:RefreshButton()
+	local target = self.ActionTarget
+
+	if not target then return end
+
+	if not _StanceMap[target] and not _MacroMap[target] then
+		local name = GetSpellInfo(target)
+		if name then
+			_MacroMap[target] = name
+
+			Task.NoCombatCall(function ()
+				handler:RunSnippet( _MacroMapTemplate:format(target, name) )
+
+				self:SetAttribute("*type*", "macro")
+				self:SetAttribute("*macrotext*", "/cast ".. name)
+			end)
+		end
+	end
+end
+
 function handler:PickupAction(target)
 	return PickupSpell(target)
 end
@@ -313,7 +304,7 @@ end
 function handler:IsActivedAction()
 	local target = self.ActionTarget
 	if _StanceMap[target] then
-		return select(3, GetShapeshiftFormInfo(_StanceMap[target]))
+		return select(2, GetShapeshiftFormInfo(_StanceMap[target]))
 	elseif _MacroMap[target] then
 		return IsCurrentSpell(_MacroMap[target])
 	end
@@ -330,7 +321,7 @@ function handler:IsUsableAction()
 	local target = self.ActionTarget
 
 	if _StanceMap[target] then
-		return select(4, GetShapeshiftFormInfo(_StanceMap[target]))
+		return select(3, GetShapeshiftFormInfo(_StanceMap[target]))
 	elseif _MacroMap[target] then
 		return IsUsableSpell(_MacroMap[target])
 	end
@@ -371,10 +362,6 @@ interface "IFActionHandler"
 			else
 				target = GetSpellLink(target)
 		   		target = tonumber(target and target:match("spell:(%d+)"))
-			end
-
-			if target and _Profession[GetSpellInfo(target)] then
-				target = _Profession[GetSpellInfo(target)]
 			end
 		end
 

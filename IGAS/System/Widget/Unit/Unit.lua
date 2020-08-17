@@ -22,25 +22,24 @@ namespace "System.Widget.Unit"
 -- Constants
 ------------------------------------------------------
 ClassPowerMap = {
-	[0] = "MANA",
-	[1] = "RAGE",
-	[2] = "FOCUS",
-	[3] = "ENERGY",
-	[4] = "COMBO_POINTS",
-	[5] = "RUNES",
-	[6] = "RUNIC_POWER",
-	[7] = "SOUL_SHARDS",
-	[8] = "LUNAR_POWER",
-	[9] = "HOLY_POWER",
-	[10] = "ALTERNATE_POWER",
-	[11] = "MAELSTROM",
-	[12] = "CHI",
-	[13] = "INSANITY",
-	[14] = "OBSOLETE",
-	[15] = "OBSOLETE2",
-	[16] = "ARCANE_CHARGES",
-	[17] = "FURY",
-	[18] = "PAIN",
+	[_G.Enum.PowerType.Mana] = "MANA",
+	[_G.Enum.PowerType.Rage] = "RAGE",
+	[_G.Enum.PowerType.Focus] = "FOCUS",
+	[_G.Enum.PowerType.Energy] = "ENERGY",
+	[_G.Enum.PowerType.Happiness] = "HAPPINESS",
+	[_G.Enum.PowerType.Runes] = "RUNES",
+	[_G.Enum.PowerType.RunicPower] = "RUNIC_POWER",
+	[_G.Enum.PowerType.SoulShards] = "SOUL_SHARDS",
+	[_G.Enum.PowerType.LunarPower] = "LUNAR_POWER",
+	[_G.Enum.PowerType.HolyPower] = "HOLY_POWER",
+	[_G.Enum.PowerType.Alternate] = "ALTERNATE",
+	[_G.Enum.PowerType.Maelstrom] = "MAELSTROM",
+	[_G.Enum.PowerType.Chi] = "CHI",
+	[_G.Enum.PowerType.ArcaneCharges] = "ARCANE_CHARGES",
+	[_G.Enum.PowerType.Fury] = "FURY",
+	[_G.Enum.PowerType.Pain] = "PAIN",
+	[_G.Enum.PowerType.Insanity] = "INSANITY",
+	[_G.Enum.PowerType.ComboPoints] = "COMBO_POINTS",
 }
 
 for i, v in ipairs(ClassPowerMap) do
@@ -91,44 +90,47 @@ SHAMAN_TOTEM_PRIORITIES = {
     AIR_TOTEM_SLOT,
 }
 
-PowerBarColor = {}
-PowerBarColor["MANA"] = { r = 0.00, g = 0.00, b = 1.00 }
-PowerBarColor["RAGE"] = { r = 1.00, g = 0.00, b = 0.00, fullPowerAnim=true }
-PowerBarColor["FOCUS"] = { r = 1.00, g = 0.50, b = 0.25, fullPowerAnim=true }
-PowerBarColor["ENERGY"] = { r = 1.00, g = 1.00, b = 0.00, fullPowerAnim=true }
-PowerBarColor["COMBO_POINTS"] = { r = 1.00, g = 0.96, b = 0.41 }
-PowerBarColor["RUNES"] = { r = 0.50, g = 0.50, b = 0.50 }
-PowerBarColor["RUNIC_POWER"] = { r = 0.00, g = 0.82, b = 1.00 }
-PowerBarColor["SOUL_SHARDS"] = { r = 0.50, g = 0.32, b = 0.55 }
-PowerBarColor["LUNAR_POWER"] = { r = 0.30, g = 0.52, b = 0.90, atlas="_Druid-LunarBar" }
-PowerBarColor["HOLY_POWER"] = { r = 0.95, g = 0.90, b = 0.60 }
-PowerBarColor["MAELSTROM"] = { r = 0.00, g = 0.50, b = 1.00, atlas = "_Shaman-MaelstromBar", fullPowerAnim=true }
-PowerBarColor["INSANITY"] = { r = 0.40, g = 0, b = 0.80, atlas = "_Priest-InsanityBar"}
-PowerBarColor["CHI"] = { r = 0.71, g = 1.0, b = 0.92 }
-PowerBarColor["ARCANE_CHARGES"] = { r = 0.1, g = 0.1, b = 0.98 }
-PowerBarColor["FURY"] = { r = 0.788, g = 0.259, b = 0.992, atlas = "_DemonHunter-DemonicFuryBar", fullPowerAnim=true }
-PowerBarColor["PAIN"] = { r = 255/255, g = 156/255, b = 0, atlas = "_DemonHunter-DemonicPainBar", fullPowerAnim=true }
+PowerBarColor = {};
+PowerBarColor["MANA"] = { r = 0.00, g = 0.00, b = 1.00 };
+PowerBarColor["RAGE"] = { r = 1.00, g = 0.00, b = 0.00, fullPowerAnim=true };
+PowerBarColor["FOCUS"] = { r = 1.00, g = 0.50, b = 0.25, fullPowerAnim=true };
+PowerBarColor["ENERGY"] = { r = 1.00, g = 1.00, b = 0.00, fullPowerAnim=true };
+PowerBarColor["HAPPINESS"] = { r = 1.00, g = 0.41, b = 0.96 };
+PowerBarColor["RUNES"] = { r = 0.50, g = 0.50, b = 0.50 };
+PowerBarColor["RUNIC_POWER"] = { r = 0.00, g = 0.82, b = 1.00 };
+PowerBarColor["SOUL_SHARDS"] = { r = 0.50, g = 0.32, b = 0.55 };
+PowerBarColor["LUNAR_POWER"] = { r = 0.30, g = 0.52, b = 0.90, atlas="_Druid-LunarBar" };
+PowerBarColor["HOLY_POWER"] = { r = 0.95, g = 0.90, b = 0.60 };
+PowerBarColor["MAELSTROM"] = { r = 0.00, g = 0.50, b = 1.00, atlas = "_Shaman-MaelstromBar", fullPowerAnim=true };
+PowerBarColor["INSANITY"] = { r = 0.40, g = 0, b = 0.80, atlas = "_Priest-InsanityBar"};
+PowerBarColor["COMBO_POINTS"] = { r = 1.00, g = 0.96, b = 0.41 };
+PowerBarColor["CHI"] = { r = 0.71, g = 1.0, b = 0.92 };
+PowerBarColor["ARCANE_CHARGES"] = { r = 0.1, g = 0.1, b = 0.98 };
+PowerBarColor["FURY"] = { r = 0.788, g = 0.259, b = 0.992, atlas = "_DemonHunter-DemonicFuryBar", fullPowerAnim=true };
+PowerBarColor["PAIN"] = { r = 255/255, g = 156/255, b = 0, atlas = "_DemonHunter-DemonicPainBar", fullPowerAnim=true };
 -- vehicle colors
-PowerBarColor["AMMOSLOT"] = { r = 0.80, g = 0.60, b = 0.00 }
-PowerBarColor["FUEL"] = { r = 0.0, g = 0.55, b = 0.5 }
-PowerBarColor["STAGGER"] = { {r = 0.52, g = 1.0, b = 0.52}, {r = 1.0, g = 0.98, b = 0.72}, {r = 1.0, g = 0.42, b = 0.42},}
+PowerBarColor["AMMOSLOT"] = { r = 0.80, g = 0.60, b = 0.00 };
+PowerBarColor["FUEL"] = { r = 0.0, g = 0.55, b = 0.5 };
+PowerBarColor["STAGGER"] = { {r = 0.52, g = 1.0, b = 0.52}, {r = 1.0, g = 0.98, b = 0.72}, {r = 1.0, g = 0.42, b = 0.42},};
 
--- these are mostly needed for a fallback case (in case the code tries to index a power token that is missing from the table,
--- it will try to index by power type instead)
-PowerBarColor[0] = PowerBarColor["MANA"]
-PowerBarColor[1] = PowerBarColor["RAGE"]
-PowerBarColor[2] = PowerBarColor["FOCUS"]
-PowerBarColor[3] = PowerBarColor["ENERGY"]
-PowerBarColor[4] = PowerBarColor["CHI"]
-PowerBarColor[5] = PowerBarColor["RUNES"]
-PowerBarColor[6] = PowerBarColor["RUNIC_POWER"]
-PowerBarColor[7] = PowerBarColor["SOUL_SHARDS"]
-PowerBarColor[8] = PowerBarColor["LUNAR_POWER"]
-PowerBarColor[9] = PowerBarColor["HOLY_POWER"]
-PowerBarColor[11] = PowerBarColor["MAELSTROM"]
-PowerBarColor[13] = PowerBarColor["INSANITY"]
-PowerBarColor[17] = PowerBarColor["FURY"]
-PowerBarColor[18] = PowerBarColor["PAIN"]
+PowerBarColor[_G.Enum.PowerType.Mana] = PowerBarColor["MANA"]
+PowerBarColor[_G.Enum.PowerType.Rage] = PowerBarColor["RAGE"]
+PowerBarColor[_G.Enum.PowerType.Focus] = PowerBarColor["FOCUS"]
+PowerBarColor[_G.Enum.PowerType.Energy] = PowerBarColor["ENERGY"]
+PowerBarColor[_G.Enum.PowerType.Happiness] = PowerBarColor["HAPPINESS"]
+PowerBarColor[_G.Enum.PowerType.Runes] = PowerBarColor["RUNES"]
+PowerBarColor[_G.Enum.PowerType.RunicPower] = PowerBarColor["RUNIC_POWER"]
+PowerBarColor[_G.Enum.PowerType.SoulShards] = PowerBarColor["SOUL_SHARDS"]
+PowerBarColor[_G.Enum.PowerType.LunarPower] = PowerBarColor["LUNAR_POWER"]
+PowerBarColor[_G.Enum.PowerType.HolyPower] = PowerBarColor["HOLY_POWER"]
+PowerBarColor[_G.Enum.PowerType.Alternate] = PowerBarColor["ALTERNATE"]
+PowerBarColor[_G.Enum.PowerType.Maelstrom] = PowerBarColor["MAELSTROM"]
+PowerBarColor[_G.Enum.PowerType.Chi] = PowerBarColor["CHI"]
+PowerBarColor[_G.Enum.PowerType.ArcaneCharges] = PowerBarColor["ARCANE_CHARGES"]
+PowerBarColor[_G.Enum.PowerType.Fury] = PowerBarColor["FURY"]
+PowerBarColor[_G.Enum.PowerType.Pain] = PowerBarColor["PAIN"]
+PowerBarColor[_G.Enum.PowerType.Insanity] = PowerBarColor["INSANITY"]
+PowerBarColor[_G.Enum.PowerType.ComboPoints] = PowerBarColor["COMBO_POINTS"]
 
 DebuffTypeColor = {}
 DebuffTypeColor["none"] = { r = 0.80, g = 0, b = 0 }
@@ -407,6 +409,7 @@ class "SmoothValue"
 			self.NowDelay = delay
 
 			self.Value = (self.RealValue - self.OldValue) * (1 - delay / self.SmoothDelay) + self.OldValue
+			OnValueChanged(self, self.Value)
 		end
 
 		self.Processing = false
@@ -419,47 +422,52 @@ class "SmoothValue"
 	event "OnValueChanged"
 
 	------------------------------------------------------
-	-- Property
+	-- Method
 	------------------------------------------------------
-	__Doc__[[The real value of object]]
-	__Handler__( function(self, new, old)
+	function SetValue(self, value, max)
+		self.RealValue = value
+
 		if not self.Processing then
 			self.NowDelay = self.SmoothDelay
-			self.OldValue = self.Value
-			self.TargetValue = new
-
-			return ThreadCall(process, self)
+			self.OldValue = self.Value or 0
+			if self.OldValue > max then self.OldValue = max end
+			self.TargetValue = value
+			if value == self.OldValue then
+				self.Value = value
+				return OnValueChanged(self, value)
+			else
+				return ThreadCall(process, self)
+			end
 		else
 			if self.TargetValue > self.OldValue then
-				if new > self.TargetValue then
+				if value > self.TargetValue then
 					self.NowDelay = self.SmoothDelay
 					self.OldValue = self.Value
-					self.TargetValue = new
+					self.TargetValue = value
 				end
 			else
-				if new < self.TargetValue then
+				if value < self.TargetValue then
 					self.NowDelay = self.SmoothDelay
 					self.OldValue = self.Value
-					self.TargetValue = new
+					self.TargetValue = value
 				end
 			end
 		end
-	end)
-	property "RealValue" { Type = NumberNil }
+	end
 
-	__Doc__[[The smoothed value]]
-	__Event__ "OnValueChanged"
-	property "Value" { Type = Number }
-
+	------------------------------------------------------
+	-- Property
+	------------------------------------------------------
 	__Doc__[[The delay time for smoothing value changes]]
 	property "SmoothDelay" { Type = PositiveNumber, Default = 1 }
 
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-	__Arguments__{ }
 	function SmoothValue(self)
 		self.Processing = false
 		self.Disposed = false
+		self.OldValue = 0
+		self.Value = 0
 	end
 endclass "SmoothValue"

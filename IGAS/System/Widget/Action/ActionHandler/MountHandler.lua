@@ -33,9 +33,16 @@ function OnEnable(self)
 	OnEnable = nil
 end
 
+local firstUpdate = true
+
 function COMPANION_UPDATE(self, companionType)
 	if not companionType or companionType == "MOUNT" then
-		return handler:Refresh(RefreshUsable)
+		if firstUpdate then
+			firstUpdate = true
+			return handler:Refresh()
+		else
+			return handler:Refresh(RefreshUsable)
+		end
 	end
 end
 
@@ -49,13 +56,15 @@ function UNIT_AURA(self, unit)
 	end
 end
 
+local _ForceUpdated = false
+function ForceUpdate()
+	_ForceUpdated = false
+	return handler:Refresh(RefreshIcon)
+end
+
 -- Companion action type handler
 handler = ActionTypeHandler {
 	Name = "mount",
-
-	InitSnippet = [[
-		_MountCastTemplate = "/run if not InCombatLockdown() then if select(4, C_MountJournal.GetMountInfoByID(%d)) then C_MountJournal.Dismiss() else C_MountJournal.SummonByID(%d) end end"
-	]],
 
 	PickupSnippet = "Custom",
 
@@ -64,7 +73,7 @@ handler = ActionTypeHandler {
 
 		if target then
 			self:SetAttribute("*type*", "macro")
-			self:SetAttribute("*macrotext*", _MountCastTemplate:format(target, target))
+			self:SetAttribute("*macrotext*", "/CANCELFORM")
 		else
 			self:SetAttribute("*type*", nil)
 			self:SetAttribute("*macrotext*", nil)
@@ -75,7 +84,23 @@ handler = ActionTypeHandler {
 		self:SetAttribute("*type*", nil)
 		self:SetAttribute("*macrotext*", nil)
 	]],
+
+	PreClickSnippet = [=[
+		self:GetFrameRef("IFActionHandler_Manager"):RunFor(self, [[ Manager:CallMethod("SummonMount", self:GetName()) ]])
+	]=],
 }
+
+IGAS:GetUI(handler.Manager).SummonMount = function (self, btnName)
+	local mountID = IGAS:GetWrapper(_G[btnName]).Mount
+
+	if mountID then
+		if select(4, C_MountJournal.GetMountInfoByID(mountID)) then
+			C_MountJournal.Dismiss()
+		else
+			Task.NextCall(C_MountJournal.SummonByID, mountID)
+		end
+	end
+end
 
 -- Overwrite methods
 function handler:PickupAction(target)
@@ -94,18 +119,20 @@ function handler:PickupAction(target)
 end
 
 function handler:GetActionTexture()
-	local target = self.ActionTarget
+	local target, icon = self.ActionTarget
 	if target == SUMMON_RANDOM_ID then
-		return GetSpellTexture(SUMMON_RANDOM_FAVORITE_MOUNT_SPELL)
+		icon = GetSpellTexture(SUMMON_RANDOM_FAVORITE_MOUNT_SPELL)
 	else
-		return (select(3, GetMountInfoByID(target)))
+		icon = (select(3, GetMountInfoByID(target)))
 	end
+	if not icon and not _ForceUpdated then _ForceUpdated = true Task.DelayCall(1, ForceUpdate) end
+	return icon
 end
 
 function handler:IsActivedAction()
 	local target = self.ActionTarget
 	if target == SUMMON_RANDOM_ID then
-		return IsCurrentSpell(SUMMON_RANDOM_FAVORITE_MOUNT_SPELL)
+		return IsMounted()
 	else
 		return (select(4, GetMountInfoByID(target)))
 	end
@@ -126,7 +153,8 @@ function handler:SetTooltip(GameTooltip)
 	if target == SUMMON_RANDOM_ID then
 		return GameTooltip:SetSpellByID(SUMMON_RANDOM_FAVORITE_MOUNT_SPELL)
 	else
-		return GameTooltip:SetMountBySpellID(target)
+		local _, spell = C_MountJournal.GetMountInfoByID(target)
+		return GameTooltip:SetMountBySpellID(spell)
 	end
 end
 

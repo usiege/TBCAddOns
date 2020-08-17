@@ -1,5 +1,4 @@
 local _, ADDONSELF = ...
-local OOGAME = false
 
 ADDONSELF.gui = {
 }
@@ -15,10 +14,6 @@ local GenExport = ADDONSELF.genexport
 local GenReport = ADDONSELF.genreport
 local SendToChatSlowly = ADDONSELF.sendchat
 local GetMoneyStringL = ADDONSELF.GetMoneyStringL
-
--- global
-OO.db = Database
-local CURRENT_RAID = OO
 
 local function GetRosterNumber()
     local all = {}
@@ -103,13 +98,6 @@ function GUI:UpdateLootTableFromDatabase()
         end
     end
 
-    -- for k,v in pairs(data) do
-    --     print(k, v.cols)
-    --     for k,v in pairs(v.cols) do
-    --         print(k,v.value)
-    --     end
-    -- end
-
     self.lootLogFrame:SetData(data)
     self:UpdateSummary()
 end
@@ -124,17 +112,17 @@ local function GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, col
     local idx = rowdata["cols"][1].value
 
     local ledger = Database:GetCurrentLedger()
-    local entry = ledger["items"][idx] 
+    local entry = ledger["items"][idx]
     return entry, idx
 end
 
 local function CreateCellUpdate(cb)
-    return function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, ttable, ...)
+    return function(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
         if not fShow then
             return
         end
 
-        local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, ttable)
+        local entry, idx = GetEntryFromUI(rowFrame, cellFrame, data, cols, row, realrow, column, table)
 
         if entry then
             cb(cellFrame, entry, idx, rowFrame)
@@ -180,10 +168,6 @@ local function CreateBidFrame()
 
 end
 
-
-
-
-
 function GUI:Init()
 
 
@@ -219,16 +203,10 @@ function GUI:Init()
     end
 
     -- title
-    local title = L["Raid Ledger"]
     do
         local t = f:CreateTexture(nil, "ARTWORK")
         t:SetTexture("Interface/DialogFrame/UI-DialogBox-Header")
-        local title_width = 256
-        if OOGAME then
-            title_width = title_width+110
-            title = L["LONG_TITLE"]
-        end
-        t:SetWidth(title_width)
+        t:SetWidth(256)
         t:SetHeight(64)
         t:SetPoint("TOP", f, 0, 12)
         f.texture = t
@@ -236,7 +214,7 @@ function GUI:Init()
 
     do
         local t = f:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-        t:SetText(title)
+        t:SetText(L["Raid Ledger"])
         t:SetPoint("TOP", f.texture, 0, -14)
     end
     -- title
@@ -1491,9 +1469,8 @@ function GUI:Init()
         local entryUpdate = CreateCellUpdate(function(cellFrame, entry)
 
             if not (cellFrame.textBox) then
-                -- 支出或收入明细说明
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 0, 0)
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
                 cellFrame.textBox:SetWidth(120)
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
@@ -1566,7 +1543,7 @@ function GUI:Init()
         local beneficiaryUpdate = CreateCellUpdate(function(cellFrame, entry)
             if not cellFrame.textBox then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate,AutoCompleteEditBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 0, 0)
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
                 cellFrame.textBox:SetWidth(120)
                 cellFrame.textBox:SetHeight(30)
                 cellFrame.textBox:SetAutoFocus(false)
@@ -1616,6 +1593,7 @@ function GUI:Init()
                 cellFrame.bidButton:Show()
             end
         end)
+
 
         local valueTypeMenuCtx = {}
         local setCostType = function(t)
@@ -1671,7 +1649,7 @@ function GUI:Init()
             local tooltip = self.commtooltip
             if not (cellFrame.textBox) then
                 cellFrame.textBox = CreateFrame("EditBox", nil, cellFrame, "InputBoxTemplate")
-                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER", 20, 0)
+                cellFrame.textBox:SetPoint("CENTER", cellFrame, "CENTER")
                 cellFrame.textBox:SetWidth(70)
                 cellFrame.textBox:SetHeight(30)
                 -- cellFrame.textBox:SetNumeric(true)
@@ -1746,36 +1724,6 @@ function GUI:Init()
 
         end)
 
-        -- 添加是否支付UI
-        local paymentUpdate = CreateCellUpdate(function(cellFrame, entry)
-            -- body
-            if not cellFrame.paymentUpdate then
-
-                local b = CreateFrame("CheckButton", nil, cellFrame, "UICheckButtonTemplate")
-                b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                b.text:SetPoint("LEFT", b, "RIGHT", 0, 1)
-                b:SetPoint("LEFT", cellFrame, -30, 0)
-                --b:SetPoint("CENTER", cellFrame, "CENTER", -20, 0)
-                local paid = entry["payment"] or false -- (cost_number > 0
-                b.text:SetText(paid and L["Paid"] or L["UnPaid"])
-                b:SetChecked(paid) -- should from db
-                -- 
-
-                b:SetScript("OnClick", function()
-                    local paid = b:GetChecked()
-                    b.text:SetText(paid and L["Paid"] or L["UnPaid"])
-
-                    entry["payment"] = paid
-                    GUI:UpdateLootTableFromDatabase()
-                end)
-
-                cellFrame.paymentUpdate = b
-            end
-
-            cellFrame.paymentUpdate:Show()
-        end)
-
-
         self.lootLogFrame = ScrollingTable:CreateST({
             {
                 ["name"] = "",
@@ -1788,17 +1736,12 @@ function GUI:Init()
             },
             {
                 ["name"] = L["Entry"],
-                ["width"] = 200,
+                ["width"] = 250,
                 ["DoCellUpdate"] = entryUpdate,
             },
             {
-                ["name"] = L["Payment"],
-                ["width"] = 80,
-                ["DoCellUpdate"] = paymentUpdate,
-            },
-            {
                 ["name"] = L["Beneficiary"],
-                ["width"] = 120,
+                ["width"] = 150,
                 ["DoCellUpdate"] = beneficiaryUpdate,
             },
             {
@@ -1806,7 +1749,7 @@ function GUI:Init()
                 ["width"] = 100,
                 ["align"] = "RIGHT",
                 ["DoCellUpdate"] = valueUpdate,
-            },
+            }
         }, 12, 30, nil, f)
 
         self.lootLogFrame.head:SetHeight(15)
@@ -1864,7 +1807,8 @@ function GUI:Init()
         })
     end
 
-    -- report btn 最下面的团队
+
+    -- report btn
     do
         local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
         b:SetWidth(120)
@@ -2144,85 +2088,7 @@ function GUI:Init()
         end)        
     end
 
-    -- oo game frame
-    do
-        local b = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
-        local text_oo = L["OO Game Data Synchro"]
-        local width_oo = 145
-        if OOGAME then
-            width_oo = width_oo - 25
-            -- text_oo = string.sub(text_oo, #text_oo-3, 4)
-            text_oo = L["Data Synchro"]
-        end
-        b:SetWidth(width_oo)
-        b:SetHeight(25)
-        b:SetPoint("BOTTOMLEFT", 40, 40)
-        b:SetText(text_oo)
-        b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        -- 喇叭 小图标
-        -- do
-        --     local icon = b:CreateTexture(nil, 'ARTWORK')
-        --     icon:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat")
-        --     icon:SetPoint('TOPLEFT', 10, -5)
-        --     icon:SetSize(16, 16)
-        -- end
-
-        local ba = CreateFrame("Button", nil, f, "GameMenuButtonTemplate")
-        ba:SetWidth(25)
-        ba:SetHeight(25)
-        ba:SetPoint("LEFT", b, "RIGHT", 0, 0)
-        ba:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        do
-            local icon = ba:CreateTexture(nil, 'ARTWORK')
-            icon:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
-            icon:SetPoint('CENTER', 1, 0)
-            icon:SetSize(16, 16)
-        end
-
-        local channelTypeMenu = {
-            {
-                isTitle = true,
-                text = L["Data synchro"],
-                notCheckable = true,
-            },
-            {
-                text = L["OO Game Arrow item 1"],
-                notCheckable = true,
-                func = function ()
-                    -- body
-                    OOEventDataSyncButton01()
-                end
-            },
-            {
-                text = L["OO Game Arrow item 2"],
-                notCheckable = true,
-                func = function ()
-                    -- body
-                    OOEventDataSyncButton02()
-                end
-            },
-            {
-                text = L["OO Game Arrow item 3"],
-                notCheckable = true,
-                func = function ()
-                    -- body
-                    OOEventDataSyncButton03()
-                end
-            },
-        }
-        ba:SetScript("OnClick", function(self, button)
-            EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
-        end)
-        ba:Hide()
-
-        b:SetScript("OnClick", function(self, button)
-            EasyMenu(channelTypeMenu, menuFrame, "cursor", 0 , 0, "MENU");
-        end)
-        
-
-    end
-
-    -- export btn 导出战报
+    -- export btn
     do
         local lootLogFrame = self.lootLogFrame
         local exportEditbox = self.exportEditbox
@@ -2250,7 +2116,6 @@ function GUI:Init()
                 b:SetText(L["Close text export"])
             end
 
-            -- 导出战报
             exportEditbox:SetText(GenExport(Database:GetCurrentLedger()["items"], GUI:GetSplitNumber(), opt))
         end
 
@@ -2308,277 +2173,20 @@ function GUI:Init()
 
 end
 
-
--- oolib GUI
-function InputBox(title, text, accept, data)
-    StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX'] = StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX'] or {}
-    local dlg = StaticPopupDialogs['NETEASE_WARGAME_MSG_BOX']
-    wipe(dlg)
-    dlg.text = title
-    dlg.button1 = L['确定']
-    dlg.OnAccept = accept
-    dlg.hideOnEscape = 1
-    dlg.timeout = 0
-    dlg.exclusive = 1
-    dlg.whileDead = 1
-    dlg.hasEditBox = true
-    dlg.editBoxWidth = 260
-    dlg.EditBoxOnTextChanged = function(editBox, t)
-        if t ~= text then
-            editBox:SetMaxBytes(nil)
-            editBox:SetMaxLetters(nil)
-            editBox:SetText(text)
-            editBox:HighlightText()
-            editBox:SetCursorPosition(0)
-            editBox:SetFocus()
-        end
-    end
-
-    StaticPopup_Show('NETEASE_WARGAME_MSG_BOX', nil, nil, data)
-end
-
-
--- local oolib event 
-function OOEventDataSyncButton01( ... )
-    -- body
-    InputBox(L['OO Game Web record'], L["OO Game Web url"])
-end
-
-function OOEventDataSyncButton02( ... )
-    -- body
-    local text = CURRENT_RAID:GetRecord()
-    InputBox(L['OO Game Web record'], text)
-
-    -- store to Database
-    OO.db.record = text
-end
-
-
-function OOEventDataSyncButton03( ... )
-    -- body
-    for i,v in ipairs(current_group_user_names()) do
-        repeat
-            local member = CURRENT_RAID:GetMember(v)
-            if member == nil then break end
-            SendChatMessage(L["OO Game secret code record"] .. member.random_key, 
-                "whisper", nil, v)
-        until true
-    end
-end
-
--- deprecated 5.0.4
--- RegEvent("RAID_ROSTER_UPDATE", function ()
---     -- body
---     print("raid事件")
--- end)
-
-local last_member_count = 0 -- 上次团队成员人数
---local last_member_names = {}
-
--- 返回username的索引
--- 这里的索引是游戏中分配给每个玩家在团队中的编号，可用于获取用户信息；
--- 注意： 团长总在索引1 这在团长进行小队调整时也适用；
-local function get_userinraid_index(username)
-    -- body
-    local index = nil
-    local num = GetNumGroupMembers()
-    for i=1,num do
-        local name = GetRaidRosterInfo(i)
-        if name == username then
-            index = i
-            break
-        end
-    end
-    return index
-end
-
-
-function current_group_user_names( ... )
-
-    local member_count = GetNumGroupMembers()
-    local names = {}
-    for i=1,member_count do
-        local name = GetRaidRosterInfo(i)
-        table.insert(names, name)
-    end
-
-    return names
-end
-
--- 返回两数组中不同的一个数据
-local function find_diff_name( b_names, s_names )
-    -- body
-    local the_one = ""
-    -- local last_names = CURRENT_RAID.username_list
-    -- print(#b_names, #s_names)
-    if #b_names < #s_names then
-        b_names, s_names = s_names, b_names
-    end
-
-    for i,v in ipairs(b_names) do
-        if not OOIsInTable(v, s_names) then
-            the_one = v
-            break
-        end
-    end
-
-    return the_one
-end
-
-local function group_initialize( ... )
-    -- body
-    local member_count = CURRENT_RAID:MemberCount()
-    print(string.format("当前成员数量是 --- > %d", member_count))
-    last_member_count = member_count
-    if member_count == 1 then 
-        -- 已经组建成功
-
-        return 
-    end
-    local name = GetRaidRosterInfo(1)
-    CURRENT_RAID:AddMember(name, 1)
-    local member = CURRENT_RAID:GetMember(name)
-    member.is_commander = true
-end
-
-local function group_deprecated( ... )
-    -- body
-    CURRENT_RAID:ClearAll()
-    last_member_count = 0
-end
-
-
-local function group_bulided( member_count )
-    -- body
-    -- 更新旧队员信息
-    local last_member_count = CURRENT_RAID:MemberCount()
-    if last_member_count == member_count then
-        -- 团队成员数量没有发生变化 需要更新状态
-        if DEBUG then
-            print("队伍成员无变化！")
-            local m_list = CURRENT_RAID.member_list
-            print(m_list or "member list is nil")
-            for k,v in pairs(m_list) do
-                print(k,v)
-            end
-        end
-        for i=1,member_count do
-            repeat
-                local name = GetRaidRosterInfo(i)
-                local member = CURRENT_RAID:GetMember(name)
-                if member == nil then break end
-
-                CURRENT_RAID:UpdateMember(member, i)
-                local key = member.random_key
-
-                if DEBUG then
-                    print("index: " .. i .. " ---> " .. "name: " .. 
-                        name .. " ---> " .. "random key: " .. key)
-                end
-            until true
-        end
-
-    elseif last_member_count > member_count then
-        -- 有队员离队
-        -- 当前所有队员名称
-        local names = current_group_user_names()
-        for i,v in ipairs(names) do
-            print(v)
-        end
-        for i,v in ipairs(CURRENT_RAID.username_list) do
-            print(i,v)
-        end
-        -- 找到刚刚离队的人
-        local leave_username = find_diff_name(CURRENT_RAID.username_list, names)
-
-
-        -- 移除掉离队的人
-        CURRENT_RAID:RemoveMember(leave_username)
-        if DEBUG then
-            print("移除掉了： " .. leave_username)
-        end
-    else
-        -- 有新队员添加进来
-        local names = current_group_user_names()
-
-        local new_username = find_diff_name(names, CURRENT_RAID.username_list)
-        local index = get_userinraid_index(new_username)   -- 新成员在团队中的索引，该索引在调整队伍时会发生变化
-        CURRENT_RAID:AddMember(new_username, index) -- 去重复,注意索引
-        if DEBUG then
-            print("添加新成员： " .. new_username)
-        end
-    end
-end
-
-
-RegEvent("GROUP_ROSTER_UPDATE", function (...)
-    -- body
-    if DEBUG then
-        -- print("raid事件")
-        -- for i,v in ipairs(...) do
-        --     print(i,v)
-        -- end
-    end
-
-
-    local num_group_member = GetNumGroupMembers() or 0
-    print(string.format("当前团队共 %d 人", num_group_member))
-    if num_group_member == 0 then
-        group_deprecated()
-    elseif num_group_member == 1 then
-        group_initialize()
-    else 
-        group_bulided(num_group_member)
-    end
-
-end)
-
-
 RegEvent("VARIABLES_LOADED", function()
     GUI:UpdateLootTableFromDatabase()
 end)
 
-
 RegEvent("ADDON_LOADED", function()
-
-    -- gui Init
     GUI:Init()
     Database:RegisterChangeCallback(function()
         GUI:UpdateLootTableFromDatabase()
     end)
 
     GUI:UpdateLootTableFromDatabase()
-    
-
-    -- ooraid Init
-    -- raid 
-    CURRENT_RAID:AssignRaidID()
-    print("oolib")
-    print(CURRENT_RAID.raid_id)
-    -- member 
-    local num_group_member = GetNumGroupMembers()
-    for i=1,num_group_member do
-        local new_username = GetRaidRosterInfo(i)
-        CURRENT_RAID:AddMember(new_username, i)
-    end
-
-
-    if DEBUG then
-        --print("addon loaded")
-        local raid = CURRENT_RAID
-        print(" ---- addon -----")
-        print(raid.member_list or "addon loaded member_list is nil")
-        for k,v in pairs(raid.member_list) do
-            print(k, v)
-        end
-        print("------")
-        for i,v in ipairs(raid.username_list) do
-            print(i,v)
-        end
-        print("----- addon  end -----")
-    end
 
     -- raid frame handler
+
     do
         local hooked = false
 
@@ -2660,9 +2268,6 @@ RegEvent("ADDON_LOADED", function()
     end
 end)
 
-
-
-
 StaticPopupDialogs["RAIDLEDGER_CLEARMSG"] = {
     text = L["Remove all records?"],
     button1 = ACCEPT,
@@ -2673,7 +2278,6 @@ StaticPopupDialogs["RAIDLEDGER_CLEARMSG"] = {
     multiple = 0,
     OnAccept = function()
         Database:NewLedger()
-        group_deprecated()
     end,
 }
 

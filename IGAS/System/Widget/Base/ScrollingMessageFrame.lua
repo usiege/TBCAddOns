@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.ScrollingMessageFrame", version) then
 end
 
 __Doc__[[ScrollingMessageFrame expands on MessageFrame with the ability to store a much longer series of messages.]]
+__AutoProperty__()
 class "ScrollingMessageFrame"
 	inherit "Frame"
 	extend "IFFont"
@@ -23,24 +24,24 @@ class "ScrollingMessageFrame"
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 		<param name="button">string, name of the mouse button responsible for the click action</param>
 	]]
-	event "OnHyperlinkClick"
+	__WidgetEvent__() event "OnHyperlinkClick"
 
 	__Doc__[[
 		<desc>Run when the mouse moves over a hyperlink in the ScrollingMessageFrame</desc>
 		<param name="linkData">string, essential data (linktype:linkdata portion) of the hyperlink (e.g. "quest:982:17")</param>
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 	]]
-	event "OnHyperlinkEnter"
+	__WidgetEvent__() event "OnHyperlinkEnter"
 
 	__Doc__[[
 		<desc>Run when the mouse moves away from a hyperlink in the ScrollingMessageFrame</desc>
 		<param name="linkData">string, essential data (linktype:linkdata portion) of the hyperlink (e.g. "quest:982:17")</param>
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 	]]
-	event "OnHyperlinkLeave"
+	__WidgetEvent__() event "OnHyperlinkLeave"
 
 	__Doc__[[Run when the scrolling message frame's scroll position changes]]
-	event "OnMessageScrollChanged"
+	__WidgetEvent__() event "OnMessageScrollChanged"
 
 	------------------------------------------------------
 	-- Method

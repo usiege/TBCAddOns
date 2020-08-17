@@ -42,8 +42,8 @@
 	<Script file="Base\PlayerModel.lua"/>
 	<Script file="Base\DressUpModel.lua"/>
 	<Script file="Base\TabardModel.lua"/>
-	<Script file="Base\ArchaeologyDigSiteFrame.lua"/>
-	<Script file="Base\QuestPOIFrame.lua"/>
+	<!--Script file="Base\ArchaeologyDigSiteFrame.lua" -->
+	<!--Script file="Base\QuestPOIFrame.lua"/ -->
 	<Script file="Base\MovieFrame.lua"/>
 	<Script file="Base\CinematicModel.lua"/>
 
@@ -73,6 +73,7 @@
 	<Script file="Secure\IFSecureHandler.lua"/>
 	<Script file="Secure\SecureFrame.lua"/>
 	<Script file="Secure\SecureButton.lua"/>
+	<Script file="Secure\SecureCheckButton.lua"/>
 
 	<!-- Custom Widget -->
 	<Script file="Common\NormalButton.lua"/>

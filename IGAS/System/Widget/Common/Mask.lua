@@ -14,6 +14,8 @@ do
 	------------------------------------------------------
 	-- Move & Resize
 	------------------------------------------------------
+	_GameTooltip = IGAS.GameTooltip
+
 	Sleep = Threading.Sleep
 
 	_Mask_Showing = _Mask_Showing or {}
@@ -23,7 +25,7 @@ do
 	_ISMoving = false
 
 	_FixPosing = false
-	_PointsPool = {}
+	-- _PointsPool = {}
 
 	_FixPos = {
 		TOP = Frame("IGAS_Mask_FixPos_TOP"),
@@ -212,12 +214,24 @@ do
 					posFrm.Visible = false
 				end
 			end
+
+			if _ISMoving then
+				_GameTooltip:SetOwner(mark, "ANCHOR_BOTTOMRIGHT")
+				_GameTooltip:SetText(("%.1f : %.1f"):format(mark:GetLeft(), mark:GetBottom()))
+				_GameTooltip:Show()
+			else
+				_GameTooltip:SetOwner(mark, "ANCHOR_BOTTOMRIGHT")
+				_GameTooltip:SetText(("%.1f - %.1f"):format(mark.Width, mark.Height))
+				_GameTooltip:Show()
+			end
 		end
 
 		-- End Operation
 		mark:StopMovingOrSizing()
 
-		frm = mark.Owner or mark.Parent
+		_GameTooltip:Hide()
+
+		frm = mark.Parent
 
 		if frm then
 			-- Get Pos
@@ -250,10 +264,14 @@ do
 				posFrm:ClearAllPoints()
 			end
 
-			frm:ClearAllPoints()
-
 			frm.Width = mark.Width
 			frm.Height = mark.Height
+
+			frm:UpdateWithAnchorSetting(mark._OrgLocation)
+
+			mark._OrgLocation = nil
+
+			--[[frm:ClearAllPoints()
 
 			for point, detail in pairs(_PointsPool) do
 				local x, y = GetPos(mark, point, top, bottom, left, right)
@@ -262,7 +280,7 @@ do
 				frm:SetPoint(point, detail.relativeTo, detail.relativePoint, x - rx, y - ry)
 			end
 
-			wipe(_PointsPool)
+			wipe(_PointsPool)--]]
 
 			Sleep(0.1) -- Sleep to keep safe
 			-- Fire Script
@@ -275,6 +293,7 @@ do
 				mark:Fire("OnMoveFinished")
 			else
 				mark:Fire("OnResizeFinished")
+				mark:SetSize(frm:GetSize())
 			end
 		end
 	end
@@ -284,7 +303,7 @@ do
 
 		local ret = ""
 
-		local frm = self.Owner or self.Parent
+		local frm = self.Parent
 
 		if not frm or _FixPosing then
 			return
@@ -298,7 +317,9 @@ do
 			return
 		end
 
-		wipe(_PointsPool)
+		self._OrgLocation = frm.Location
+
+		--[[wipe(_PointsPool)
 
 		for i = 1, frm:GetNumPoints() do
 			local point, relativeTo, relativePoint, xOffset, yOffset = frm:GetPoint(i)
@@ -307,7 +328,7 @@ do
 									relativePoint = relativePoint,
 									xOffset = xOffset,
 									yOffset = yOffset,}
-		end
+		end--]]
 
 		--frm:BlockEvent("OnPositionChanged", "OnSizeChanged")
 
@@ -445,6 +466,7 @@ do
 end
 
 __Doc__[[Mask is used to moving, resizing or key binding for other frames.]]
+__AutoProperty__()
 class "Mask"
 	inherit "Button"
 

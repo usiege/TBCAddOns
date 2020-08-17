@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.ScrollFrame", version) then
 end
 
 __Doc__[[ScrollFrame is used to show a large body of content through a small window. The ScrollFrame is the size of the "window" through which you want to see the larger content, and it has another frame set as a "ScrollChild" containing the full content.]]
+__AutoProperty__()
 class "ScrollFrame"
 	inherit "Frame"
 
@@ -20,20 +21,20 @@ class "ScrollFrame"
 		<desc>Run when the scroll frame's horizontal scroll position changes</desc>
 		<param name="offset">number, new horizontal scroll position (in pixels, measured from the leftmost scroll position)</param>
 	]]
-	event "OnHorizontalScroll"
+	__WidgetEvent__() event "OnHorizontalScroll"
 
 	__Doc__[[
 		<desc>Run when the scroll frame's scroll position is changed</desc>
 		<param name="xOffset">number, new horizontal scroll range (in pixels, measured from the leftmost scroll position)</param>
 		<param name="yOffset">number, new vertical scroll range (in pixels, measured from the topmost scroll position)</param>
 	]]
-	event "OnScrollRangeChanged"
+	__WidgetEvent__() event "OnScrollRangeChanged"
 
 	__Doc__[[
 		<desc>Run when the scroll frame's vertical scroll position changes</desc>
 		<param name="offset">number, new vertical scroll position (in pixels, measured from the topmost scroll position)</param>
 	]]
-	event "OnVerticalScroll"
+	__WidgetEvent__() event "OnVerticalScroll"
 
 	------------------------------------------------------
 	-- Method

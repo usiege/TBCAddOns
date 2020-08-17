@@ -1,9 +1,8 @@
 ItemRack = {}
 
-local disable_delayed_swaps = nil -- temporary. change nil to 1 to stop attempting to delay set swaps while casting
 local _
 
-ItemRack.Version = "3.24"
+ItemRack.Version = GetAddOnMetadata("ItemRack", "Version")
 
 ItemRackUser = {
 	Sets = {}, -- user's sets
@@ -14,6 +13,7 @@ ItemRackUser = {
 	Locked = "OFF", -- buttons locked
 	EnableEvents = "ON", -- whether all events enabled
 	EnableQueues = "ON", -- whether all auto queues enabled
+	EnablePerSetQueues = "OFF",
 	ButtonSpacing = 4, -- padding between docked buttons
 	Alpha = 1, -- alpha of buttons
 	MainScale = 1, -- scale of the dockable buttons
@@ -69,26 +69,26 @@ ItemRack.BankSlots = { -1,5,6,7,8,9,10 }
 ItemRack.KnownItems = {} -- cache of known item locations for fast lookup
 
 ItemRack.SlotInfo = {
-	[0] = { name="AmmoSlot", real="Ammo", INVTYPE_AMMO=1 },
-	[1] = { name="HeadSlot", real="Head", INVTYPE_HEAD=1 },
-	[2] = { name="NeckSlot", real="Neck", INVTYPE_NECK=1 },
-	[3] = { name="ShoulderSlot", real="Shoulder", INVTYPE_SHOULDER=1 },
-	[4] = { name="ShirtSlot", real="Shirt", INVTYPE_BODY=1 },
-	[5] = { name="ChestSlot", real="Chest", INVTYPE_CHEST=1, INVTYPE_ROBE=1 },
-	[6] = { name="WaistSlot", real="Waist", INVTYPE_WAIST=1 },
-	[7] = { name="LegsSlot", real="Legs", INVTYPE_LEGS=1 },
-	[8] = { name="FeetSlot", real="Feet", INVTYPE_FEET=1 },
-	[9] = { name="WristSlot", real="Wrist", INVTYPE_WRIST=1 },
-	[10] = { name="HandsSlot", real="Hands", INVTYPE_HAND=1 },
-	[11] = { name="Finger0Slot", real="Top Finger", INVTYPE_FINGER=1, other=12 },
-	[12] = { name="Finger1Slot", real="Bottom Finger", INVTYPE_FINGER=1, other=11 },
-	[13] = { name="Trinket0Slot", real="Top Trinket", INVTYPE_TRINKET=1, other=14 },
-	[14] = { name="Trinket1Slot", real="Bottom Trinket", INVTYPE_TRINKET=1, other=13 },
-	[15] = { name="BackSlot", real="Cloak", INVTYPE_CLOAK=1 },
-	[16] = { name="MainHandSlot", real="Main hand", INVTYPE_WEAPONMAINHAND=1, INVTYPE_2HWEAPON=1, INVTYPE_WEAPON=1, other=17},
-	[17] = { name="SecondaryHandSlot", real="Off hand", INVTYPE_WEAPON=1, INVTYPE_WEAPONOFFHAND=1, INVTYPE_SHIELD=1, INVTYPE_HOLDABLE=1, other=16},
-	[18] = { name="RangedSlot", real="Ranged", INVTYPE_RANGED=1, INVTYPE_RANGEDRIGHT=1, INVTYPE_THROWN=1, INVTYPE_RELIC=1},
-	[19] = { name="TabardSlot", real="Tabard", INVTYPE_TABARD=1 },
+	[0] = { name="AmmoSlot", real="弹药", INVTYPE_AMMO=1 },
+	[1] = { name="HeadSlot", real="头部", INVTYPE_HEAD=1 },
+	[2] = { name="NeckSlot", real="颈部", INVTYPE_NECK=1 },
+	[3] = { name="ShoulderSlot", real="肩部", INVTYPE_SHOULDER=1 },
+	[4] = { name="ShirtSlot", real="衬衣", INVTYPE_BODY=1 },
+	[5] = { name="ChestSlot", real="胸部", INVTYPE_CHEST=1, INVTYPE_ROBE=1 },
+	[6] = { name="WaistSlot", real="腰部", INVTYPE_WAIST=1 },
+	[7] = { name="LegsSlot", real="腿部", INVTYPE_LEGS=1 },
+	[8] = { name="FeetSlot", real="脚", INVTYPE_FEET=1 },
+	[9] = { name="WristSlot", real="手腕", INVTYPE_WRIST=1 },
+	[10] = { name="HandsSlot", real="手", INVTYPE_HAND=1 },
+	[11] = { name="Finger0Slot", real="手指(上)", INVTYPE_FINGER=1, other=12 },
+	[12] = { name="Finger1Slot", real="手指(下)", INVTYPE_FINGER=1, other=11 },
+	[13] = { name="Trinket0Slot", real="饰品(上)", INVTYPE_TRINKET=1, other=14 },
+	[14] = { name="Trinket1Slot", real="饰品(下)", INVTYPE_TRINKET=1, other=13 },
+	[15] = { name="BackSlot", real="背部", INVTYPE_CLOAK=1 },
+	[16] = { name="MainHandSlot", real="主手", INVTYPE_WEAPONMAINHAND=1, INVTYPE_2HWEAPON=1, INVTYPE_WEAPON=1, other=17},
+	[17] = { name="SecondaryHandSlot", real="副手", INVTYPE_WEAPON=1, INVTYPE_WEAPONOFFHAND=1, INVTYPE_SHIELD=1, INVTYPE_HOLDABLE=1, other=16},
+	[18] = { name="RangedSlot", real="远程", INVTYPE_RANGED=1, INVTYPE_RANGEDRIGHT=1, INVTYPE_THROWN=1, INVTYPE_RELIC=1},
+	[19] = { name="TabardSlot", real="徽章", INVTYPE_TABARD=1 },
 }
 
 ItemRack.DockInfo = {  -- docking-dependent values
@@ -114,29 +114,29 @@ ItemRack.RunAfterCombat = {} -- functions to run when player drops out of combat
 
 -- miscellaneous tooltips ElementName, Line1, Line2
 ItemRack.TooltipInfo = {
-	{"ItemRackButtonMenuLock","锁定按钮","切换锁定状态以防止按钮/菜单移动和隐藏边框和控制按钮。\n\n在打开菜单时按住ALT键可在锁定时访问这些控制按钮."},
-	{"ItemRackButtonMenuQueue","自动队列","为此插槽设置自动队列.\n\n按住Alt并单击从中打开的插槽，以打开/关闭其自动队列."},
-	{"ItemRackButtonMenuOptions","选项","打开设置窗口,配置装备和自动队列"},
-	{"ItemRackButtonMenuClose","移除","删除此菜单从中打开的插槽"},
-	{"ItemRackOptSetsHideCheckButton","隐藏装备集","选中此项可使装备集隐藏在菜单中."},
-	{"ItemRackOptItemStatsPriority","优先级","使该装备在冷却后自动装备"},
-	{"ItemRackOptItemStatsKeepEquipped","暂停队列","选中此项可暂停此插槽的自动队列，直到物品未被配置为止。"},
-	{"ItemRackOptQueueEnable","自动队列此槽","选中此项可允许此插槽自动排队，当一个物品进入冷却状态时，它将替换列表中处于冷却状态的更高的物品"},
-	{"ItemRackOptSetsHideCheckButton","隐藏","在菜单中隐藏此装备集. (相当于按Alt+键单击菜单中的装备集)"},
-	{"ItemRackOptSetsSaveButton","保存装备集","保存此装备集"},
-	{"ItemRackOptSetsDeleteButton","删除装备集","删除此装备集，如果以后可能还需要它，请选中左侧的“隐藏”."},
-	{"ItemRackOptSetsBindButton","绑键装备集","允许你为此装备集绑定一个按键."},
-	{"ItemRackOptEventNew","新事件","创建一个新事件."},
-	{"ItemRackOptEventEdit","编辑事件","编辑此事件."},
-	{"ItemRackOptEventDelete","删除事件","如果此事件已启用或者有装备集在使用此事件,那么它将删除标签并将其放到列表中。如果这是一个未标记的事件，它将完全删除它."},
-	{"ItemRackOptEventEditSave","保存事件","保存对此事件的更改."},
-	{"ItemRackOptEventEditCancel","取消更改","取消对此事件所做的任何更改并返回事件列表."},
-	{"ItemRackOptEventEditBuffAnyMount","坐骑检查","选中此项将检查是否有任何坐骑激活，而不是特定的buff."},
-	{"ItemRackOptEventEditExpand","在编辑器中编辑","这会将上面的脚本编辑框分离为可调整大小的文本编辑器."},
-	{"ItemRackFloatingEditorUndo","撤消","将文本还原为上次保存的状态."},
-	{"ItemRackFloatingEditorTest","测试","将下面的文本作为脚本运行，以确保没有语法错误."},
-	{"ItemRackFloatingEditorSave","保存事件","保存对此事件的更改并返回到事件列表."},
-	{"ItemRackOptToggleInvAll","切换所有","切换所有插槽"}
+	{"ItemRackButtonMenuLock","锁定","锁定按键/菜单，同时隐藏控制菜单。\n\n按住Alt时将显示控制菜单。"},
+	{"ItemRackButtonMenuQueue","自动队列","设置这个装备栏的自动队列。\n\nAlt左键可以开启/停止这个装备栏的自动队列。"},
+	{"ItemRackButtonMenuOptions","选项","打开ItemRack设置界面。"},
+	{"ItemRackButtonMenuClose","移除","移除这个装备栏的按键。"},
+	{"ItemRackOptSetsHideCheckButton","隐藏","隐藏这个套装。"},
+	{"ItemRackOptItemStatsPriority","队列","队列该装备，使其在当前装备使用后自动装备上（需要完成冷却）。"},
+	{"ItemRackOptItemStatsKeepEquipped","暂停","暂停这个装备栏的自动队列。（例如，你设置了骑马自动装备胡萝卜，可以选择暂停。）"},
+	{"ItemRackOptQueueEnable","自动队列","选中启用自动队列，正在装备的物品使用后，会自动装备队列中优先级最高，且可以使用的装备。"},
+	{"ItemRackOptSetsHideCheckButton","隐藏","隐藏这个套装。 (与Alt点击套装效果相同)"},
+	{"ItemRackOptSetsSaveButton","保存","保存套装。有一些设定，例如绑定按键、头盔斗篷显示控制等，只能在已保存的套装上修改。"},
+	{"ItemRackOptSetsDeleteButton","删除","删除套装设定。如果仅仅不希望出现在菜单中，可以选择“隐藏”。"},
+	{"ItemRackOptSetsBindButton","绑定按键","允许为每一个套装绑定一个按键。"},
+	{"ItemRackOptEventNew","新建","新建事件。"},
+	{"ItemRackOptEventEdit","编辑","编辑事件。注意：如果仅仅编辑了名称，则再保存时会拷贝一个带有新名字的事件副本。"},
+	{"ItemRackOptEventDelete","删除","如果这个事件已经链接了套装，那么将删除链接，如果事件没有链接套装，将彻底删除事件。"},
+	{"ItemRackOptEventEditSave","保存","保存当前改动。注意：如果仅仅编辑了名称，则再保存时会拷贝一个带有新名字的事件副本。"},
+	{"ItemRackOptEventEditCancel","撤销","取消所有改动，并返回事件列表。"},
+	{"ItemRackOptEventEditBuffAnyMount","骑乘","选中此项，将检查所有坐骑，而不再检查特定名称buff。"},
+	{"ItemRackOptEventEditExpand","编辑器","打开脚本编辑器。"},
+	{"ItemRackFloatingEditorUndo","撤销","返回脚本最后保存状态。"},
+	{"ItemRackFloatingEditorTest","测试","运行脚本并进行除错。 (Interface选项中的Lua错误提示需要打开。)\n注意：测试不能完美模拟特定状态。"},
+	{"ItemRackFloatingEditorSave","保存","保存更改并返回事件列表。"},
+	{"ItemRackOptToggleInvAll","全选","选择/清除选择所有装备栏。"}
 }
 
 ItemRack.BankOpen = nil -- 1 if bank is open, nil if not
@@ -164,7 +164,7 @@ function ItemRack.RegisterExternalEventListener(self,event,handler)
 		handlers = {}
 		ItemRack.ExternalEventHandlers[event] = handlers
 	end
-
+	
 	table.insert(handlers, handler)
 end
 
@@ -193,6 +193,7 @@ function ItemRack.OnPlayerLogin()
 	handler.UNIT_SPELLCAST_STOP = ItemRack.OnCastingStop
 	handler.UNIT_SPELLCAST_SUCCEEDED = ItemRack.OnCastingStop
 	handler.UNIT_SPELLCAST_INTERRUPTED = ItemRack.OnCastingStop
+	handler.UNIT_SPELLCAST_FAILED = ItemRack.OnCastingStop
 	handler.CHARACTER_POINTS_CHANGED = ItemRack.UpdateClassSpecificStuff
 	handler.PLAYER_TALENT_UPDATE = ItemRack.UpdateClassSpecificStuff
 --	handler.ACTIVE_TALENT_GROUP_CHANGED = ItemRack.UpdateClassSpecificStuff
@@ -206,9 +207,8 @@ end
 
 function ItemRack.OnCastingStart(self,event,unit)
 	if unit=="player" then
-		local _,_,_,startTime,endTime = UnitCastingInfo("player")
-		if endTime-startTime>0 then
-			ItemRack.NowCasting = 1
+		if CastingInfo() or ChannelInfo() then
+			ItemRack.NowCasting = true
 		end
 	end
 end
@@ -219,9 +219,17 @@ function ItemRack.OnCastingStop(self,event,unit)
 			return
 		else
 			ItemRack.NowCasting = nil
+			-- This check is in the event that a successful spellcast puts you in combat
+			if event ~= "UNIT_SPELLCAST_SUCCEEDED" and not ItemRack.inCombat then
+				ItemRack.ProcessCombatQueue()
+			else
+				ItemRack.OnSpellSucceed()
+			end
+			--[[
 			if #(ItemRack.SetsWaiting)>0 and not ItemRack.AnythingLocked() then
 				ItemRack.ProcessSetsWaiting()
 			end
+			]]
 		end
 	end
 end
@@ -229,6 +237,17 @@ end
 function ItemRack.OnItemLockChanged()
 	ItemRack.StartTimer("LocksChanged")
 	ItemRack.LocksHaveChanged = 1
+end
+
+function ItemRack.OnSpellSucceed()
+	ItemRack.StartTimer("DelayedCombatQueue")
+end
+
+function ItemRack.DelayedCombatQueue()
+	if ItemRack.inCombat or ItemRack.NowCasting then
+		return
+	end
+	ItemRack.ProcessCombatQueue()
 end
 
 function ItemRack.OnUnitInventoryChanged(self,event,unit)
@@ -249,6 +268,14 @@ function ItemRack.OnUnitInventoryChanged(self,event,unit)
 end
 
 function ItemRack.OnLeavingCombatOrDeath()
+	ItemRack.inCombat = InCombatLockdown()
+	if ItemRack.NowCasting then
+		return
+	end
+	ItemRack.ProcessCombatQueue()
+end
+
+function ItemRack.ProcessCombatQueue()
 	if not ItemRack.IsPlayerReallyDead() and next(ItemRack.CombatQueue) then
 		local combat = ItemRackUser.Sets["~CombatQueue"].equip
 		local queue = ItemRack.CombatQueue
@@ -263,8 +290,9 @@ function ItemRack.OnLeavingCombatOrDeath()
 		ItemRack.UpdateCombatQueue()
 		ItemRack.EquipSet("~CombatQueue")
 	end
-	if event=="PLAYER_REGEN_ENABLED" then
-		ItemRack.inCombat = nil
+
+	local inLockdown = InCombatLockdown()
+	if not inLockdown then
 		if ItemRackOptFrame and ItemRackOptFrame:IsVisible() then
 			ItemRackOpt.ListScrollFrameUpdate()
 			ItemRackOptSetsBindButton:Enable()
@@ -281,6 +309,7 @@ function ItemRack.OnLeavingCombatOrDeath()
 			end
 		end
 	end
+
 end
 
 function ItemRack.OnEnteringCombat()
@@ -358,7 +387,7 @@ do
 			end
 		end
 		for name in pairs(data) do
-			tooltip:AddDoubleLine("ItemRack 套装: ", name, 0,.6,1, 0,.6,1)
+			tooltip:AddDoubleLine("ItemRack Set: ", name, 0,.6,1, 0,.6,1)
 			data[name] = nil
 		end
 		tooltip:Show()
@@ -376,14 +405,14 @@ function ItemRack.InitCore()
 
 	-- pattern splitter by Maldivia http://forums.worldofwarcraft.com/thread.html?topicId=6441208576
 	local function split(str, t)
-	    local start, stop, single, plural = str:find("\1244(.-):(.-);")
-	    if start then
-	        split(str:sub(1, start - 1) .. single .. str:sub(stop + 1), t)
-	        split(str:sub(1, start - 1) .. plural .. str:sub(stop + 1), t)
-	    else
-	        tinsert(t, (str:gsub("%%d","%%d+")))
-	    end
-	    return t
+		local start, stop, single, plural = str:find("\1244(.-):(.-);")
+		if start then
+			split(str:sub(1, start - 1) .. single .. str:sub(stop + 1), t)
+			split(str:sub(1, start - 1) .. plural .. str:sub(stop + 1), t)
+		else
+			tinsert(t, (str:gsub("%%d","%%d+")))
+		end
+		return t
 	end
 	ItemRack.CHARGES_PATTERNS = {}
 	split(ITEM_SPELL_CHARGES,ItemRack.CHARGES_PATTERNS)
@@ -396,6 +425,7 @@ function ItemRack.InitCore()
 	ItemRack.CreateTimer("MinimapDragging",ItemRack.MinimapDragging,0,1)
 	ItemRack.CreateTimer("LocksChanged",ItemRack.LocksChanged,.2)
 	ItemRack.CreateTimer("MinimapShine",ItemRack.MinimapShineUpdate,0,1)
+	ItemRack.CreateTimer("DelayedCombatQueue",ItemRack.DelayedCombatQueue,.1)
 
 	for i=-2,11 do
 		ItemRack.LockList[i] = {}
@@ -423,10 +453,11 @@ function ItemRack.InitCore()
 	--if not disable_delayed_swaps then
 		-- in the event delayed swaps while casting don't work well,
 		-- make disable_delayed_swaps=1 at top of this file to disable it
-		-- ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_START")
-		-- ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-		-- ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-		-- ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_START")
+	ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+	ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	ItemRackFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
 	--end
 	ItemRack.StartTimer("CooldownUpdate")
 	ItemRack.MoveMinimap()
@@ -990,7 +1021,6 @@ function ItemRack.BuildMenu(id,menuInclude)
 			button = ItemRack.CreateMenuButton(i,ItemRack.Menu[i]) or ItemRackButtonMenu
 			button:SetPoint("TOPLEFT",ItemRackMenuFrame,ItemRack.menuDock,xpos,ypos)
 			button:SetFrameLevel(ItemRackMenuFrame:GetFrameLevel()+1)
-			button:SetFrameStrata("TOOLTIP")
 			if ItemRack.menuOrient=="VERTICAL" then
 				xpos = xpos + ItemRack.DockInfo[ItemRack.currentDock].xdir*40
 				col = col + 1
@@ -1247,7 +1277,7 @@ end
 
 function ItemRack.EquipItemByID(id,slot)
 	if not id then return end
-	if not ItemRack.SlotInfo[slot].swappable and (UnitAffectingCombat("player") or ItemRack.IsPlayerReallyDead()) then
+	if ItemRack.NowCasting or (not ItemRack.SlotInfo[slot].swappable and (UnitAffectingCombat("player") or ItemRack.IsPlayerReallyDead()) ) then
 		ItemRack.AddToCombatQueue(slot,id)
 	elseif not GetCursorInfo() and not SpellIsTargeting() then
 		if id~=0 then -- not an empty slot
@@ -1334,16 +1364,8 @@ end
 
 function ItemRack.IsPlayerReallyDead()
 	local dead = UnitIsDeadOrGhost("player")
-	if select(2,UnitClass("player"))=="HUNTER" then
-		if GetLocale()=="enUS" and AuraUtil.FindAuraByName("Feign Death", "player") then
-			return nil
-		else
-			for i=1,40 do
-				if select(2,UnitBuff("player",i))==GetFileIDFromPath("Interface\\Icons\\Ability_Rogue_FeignDeath") then
-					return nil
-				end
-			end
-		end
+	if UnitIsFeignDeath("player") then
+		dead = false
 	end
 	return dead
 end
@@ -1365,7 +1387,7 @@ function ItemRack.UpdateCombatQueue()
 			queue:SetTexture(select(2,ItemRack.GetInfoByID(ItemRack.CombatQueue[i])))
 			queue:SetAlpha(1)
 			queue:Show()
-		elseif ItemRackUser.QueuesEnabled[i] then
+		elseif ItemRack.GetQueuesEnabled()[i] then
 			queue:SetTexture("Interface\\AddOns\\ItemRack\\ItemRackGear")
 			queue:SetAlpha(ItemRackUser.EnableQueues=="ON" and 1 or .5)
 			queue:Show()
@@ -1373,17 +1395,17 @@ function ItemRack.UpdateCombatQueue()
 			queue:Hide()
 		end
 	end
-	if PaperDollFrame:IsVisible() then
-		for i=1,19 do
-			queue = _G["Character"..ItemRack.SlotInfo[i].name.."Queue"]
-			if ItemRack.CombatQueue[i] then
-				queue:SetTexture(select(2,ItemRack.GetInfoByID(ItemRack.CombatQueue[i])))
-				queue:Show()
-			else
-				queue:Hide()
-			end
+
+	for i=1,19 do
+		queue = _G["Character"..ItemRack.SlotInfo[i].name.."Queue"]
+		if ItemRack.CombatQueue[i] then
+			queue:SetTexture(select(2,ItemRack.GetInfoByID(ItemRack.CombatQueue[i])))
+			queue:Show()
+		else
+			queue:Hide()
 		end
 	end
+
 end
 
 --[[ Tooltip ]]
@@ -1608,7 +1630,7 @@ function ItemRack.CooldownUpdate()
 				if ItemRackSettings.NotifyThirty=="ON" then
 					name = GetItemInfo(i)
 					if name then
-						ItemRack.Notify(name.." ready soon!")
+						ItemRack.Notify(name.."即将就绪")
 					end
 				end
 				ItemRackUser.ItemsUsed[i]=5 -- tag for just 0 notify now
@@ -1616,7 +1638,7 @@ function ItemRack.CooldownUpdate()
 				if ItemRackSettings.Notify=="ON" then
 					name = GetItemInfo(i)
 					if name then
-						ItemRack.Notify(name.." ready!")
+						ItemRack.Notify(name.."已经就绪")
 					end
 				end
 			end
@@ -1727,7 +1749,7 @@ end
 
 function ItemRack.MinimapOnEnter(self)
 	if ItemRackSettings.MinimapTooltip=="ON" then
-		ItemRack.OnTooltip(self,"ItemRack","左键: 选择一个装备集\n右键: 打开选项\nALT左键: 显示隐藏的装备集\nALT右键: 事件开关\nShift左键: 解除这套装备集")
+		ItemRack.OnTooltip(self,"ItemRack","左键：选择套装\n右键：开启设置窗口\nAlt+左键：显示隐藏套装\nAlt+右键：事件触发开关\nShift+左键：解除当前套装")
 	end
 end
 
@@ -1903,8 +1925,8 @@ function ItemRack.SlashHandler(arg1)
 	if arg1 and string.match(arg1,"equip") then
 		local set = string.match(arg1,"equip (.+)")
 		if not set then
-			ItemRack.Print("Usage: /itemrack equip set name")
-			ItemRack.Print("ie: /itemrack equip pvp gear")
+			ItemRack.Print("使用说明: /itemrack equip 套装名称")
+			ItemRack.Print("例: /itemrack equip Raid套装")
 		else
 			ItemRack.EquipSet(set)
 		end
@@ -1912,8 +1934,8 @@ function ItemRack.SlashHandler(arg1)
 	elseif arg1 and string.match(arg1,"toggle") then
 		local sets = string.match(arg1,"toggle (.+)")
 		if not sets then
-			ItemRack.Print("Usage: /itemrack toggle set name[, second set name]")
-			ItemRack.Print("ie: /itemrack toggle pvp gear, tanking set")
+			ItemRack.Print("使用说明: /itemrack toggle 套装1[, 套装2]")
+			ItemRack.Print("例: /itemrack toggle Raid套装, PVP套装")
 		else
 			local set1,set2 = string.match(sets,"(.+), ?(.+)")
 			if not set1 then
@@ -1944,12 +1966,12 @@ function ItemRack.SlashHandler(arg1)
 	elseif arg1=="opt" or arg1=="options" or arg1=="config" then
 		ItemRack.ToggleOptions()
 	else
-		ItemRack.Print("/itemrack opt : summons options window.")
-		ItemRack.Print("/itemrack equip set name : equip set 'set name'.")
-		ItemRack.Print("/itemrack toggle set name[, second set] : toggles set 'set name'.")
-		ItemRack.Print("/itemrack reset : resets buttons and their settings.")
-		ItemRack.Print("/itemrack reset everything : wipes ItemRack to default.")
-		ItemRack.Print("/itemrack lock/unlock : locks/unlocks the buttons.")
+		ItemRack.Print("/itemrack opt : 打开设置窗口")
+		ItemRack.Print("/itemrack equip 套装名称 : 装备套装")
+		ItemRack.Print("/itemrack toggle 套装1[, 套装2] : 切换套装1 [, 套装2]")
+		ItemRack.Print("/itemrack reset : 重置按键绑定")
+		ItemRack.Print("/itemrack reset everything : 将ItemRack恢复初始状态")
+		ItemRack.Print("/itemrack lock/unlock : 锁定/解锁ItemRack")
 	end
 
 end
@@ -1984,7 +2006,7 @@ function ItemRack.GetBankedSet(setname)
 				PickupContainerItem(bag,slot)
 				PickupContainerItem(freeBag,freeSlot)
 			else
-				ItemRack.Print("Not enough room in bags to pull all items from '"..setname.."'.")
+				ItemRack.Print("没有足够背包空间放下套装'"..setname.."'的全部装备")
 				return
 			end
 		end
@@ -2010,7 +2032,7 @@ function ItemRack.PutBankedSet(setname)
 					PickupContainerItem(freeBag,freeSlot)
 				end
 			else
-				ItemRack.Print("Not enough room in bank to store all items from '"..setname.."'.")
+				ItemRack.Print("没有足够银行空间放下套装'"..setname.."'的装备")
 				return
 			end
 		end
@@ -2019,8 +2041,8 @@ end
 
 function ItemRack.ResetEverything()
 	StaticPopupDialogs["ItemRackCONFIRMRESET"] = {
-		text = "This will restore ItemRack to its default state, wiping all sets, buttons, events and settings.\nThe UI will be reloaded. Continue?",
-		button1 = "Yes", button2 = "No", timeout = 0, hideOnEscape = 1, showAlert = 1,
+		text = "这将重置ItemRack所有设置到初始状态。\n并将重新载入UI，是否继续？",
+		button1 = "是", button2 = "否", timeout = 0, hideOnEscape = 1, showAlert = 1,
 		OnAccept = function() ItemRackUser=nil ItemRackSettings=nil ItemRackItems=nil ItemRackEvents=nil ReloadUI() end
 	}
 	StaticPopup_Show("ItemRackCONFIRMRESET")
@@ -2042,7 +2064,7 @@ function ItemRack.ProfileFuncs()
 			end
 		end
 		table.sort(t)
-		local info = "ItemRack profile "..date().." "..UnitName("player").."\n"
+		local info = "ItemRack配置文件："..date().." "..UnitName("player").."\n"
 		for i=1,#(t) do
 			info = info..t[i].."\n"
 		end
@@ -2050,3 +2072,36 @@ function ItemRack.ProfileFuncs()
 	end
 end
 
+-- returns Queues for the current set if EnablePerSetQueues is enabled, otherwise the global Queues
+function ItemRack.GetQueues()
+	if ItemRackUser.EnablePerSetQueues == "ON" then
+		if not (ItemRackUser.CurrentSet and ItemRackUser.Sets[ItemRackUser.CurrentSet]) then
+			return ItemRackUser.Queues
+		end
+		
+		local currentSet = ItemRackUser.Sets[ItemRackUser.CurrentSet]
+		if not currentSet.Queues then
+			currentSet.Queues = {}
+		end
+		return currentSet.Queues
+	else
+		return ItemRackUser.Queues
+	end
+end
+
+-- returns QueuesEnabled for the current set if EnablePerSetQueues is enabled, otherwise the global QueuesEnabled
+function ItemRack.GetQueuesEnabled()
+	if ItemRackUser.EnablePerSetQueues == "ON" then
+		if not (ItemRackUser.CurrentSet and ItemRackUser.Sets[ItemRackUser.CurrentSet]) then
+			return ItemRackUser.QueuesEnabled
+		end
+		
+		local currentSet = ItemRackUser.Sets[ItemRackUser.CurrentSet]
+		if not currentSet.QueuesEnabled then
+			currentSet.QueuesEnabled = {}
+		end
+		return currentSet.QueuesEnabled
+	else
+		return ItemRackUser.QueuesEnabled
+	end
+end

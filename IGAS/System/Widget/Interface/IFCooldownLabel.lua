@@ -9,6 +9,7 @@ if not IGAS:NewAddon("IGAS.Widget.IFCooldownLabel", version) then
 end
 
 __Doc__[[IFCooldownLabel is used to provide a label to display the cooldown]]
+__AutoProperty__()
 interface "IFCooldownLabel"
 	extend "IFCooldown"
 
@@ -109,13 +110,19 @@ interface "IFCooldownLabel"
 	end )
 	property "IFCooldownLabelAutoColor" { Type = Boolean }
 
+	__Doc__[[Whether change the font size based on the jeight]]
+	property "IFCooldownLabelAutoSize" { Type = Boolean, Default = true }
+
+	__Doc__[[The min duration to display the label]]
+	property "IFCooldownLabelMinDuration" { Type = Number, Default = 0 }
+
 	------------------------------------------------------
 	-- Event Handler
 	------------------------------------------------------
 	local function OnCooldownUpdate(self, start, duration)
 		local label = self:GetChild("CooldownLabel")
 
-		if start and start > 0 and duration and duration > 0 then
+		if start and start > 0 and duration and duration > self.IFCooldownLabelMinDuration then
 			-- Insert to update list
 			self.__IFCooldownLabel_End = start + duration
 			self.__IFCooldownLabel_UpdateTime = GetTime()
@@ -137,7 +144,7 @@ interface "IFCooldownLabel"
 	end
 
 	local function OnSizeChanged(self)
-		if self.Height > 0 then
+		if self.Height > 0 and self.IFCooldownLabelAutoSize then
 			self:GetChild("CooldownLabel"):SetFont(self:GetChild("CooldownLabel"):GetFont(), self.Height * 4 / 7, "OUTLINE")
 		end
 	end

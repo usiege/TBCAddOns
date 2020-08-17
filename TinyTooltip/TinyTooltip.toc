@@ -1,6 +1,5 @@
 ## Interface: 80200
 ## Title: TinyTooltip
-## Title-zhCN: 鼠标提示
 ## Notes: TinyTooltip
 ## Author: M
 ## Version: 8.2.1

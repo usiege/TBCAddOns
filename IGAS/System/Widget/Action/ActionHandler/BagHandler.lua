@@ -22,13 +22,10 @@ _Enabled = false
 
 _BagSlotMapTemplate = "_BagSlotMap[%d] = %d"
 
-_BagSlotMap = {
-	[0] = "BackSlot",
-	"Bag0Slot",
-	"Bag1Slot",
-	"Bag2Slot",
-	"Bag3Slot",
-}
+_, _EmptyTexture = GetInventorySlotInfo("Bag0Slot")
+NUM_BANKGENERIC_SLOTS = _G.NUM_BANKGENERIC_SLOTS
+
+_BagSlotMap = {}
 
 _ContainerMap = {}
 
@@ -39,11 +36,17 @@ function OnEnable(self)
 	self:RegisterEvent("BAG_UPDATE_DELAYED")
 	self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
 
+	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
+	self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
+
 	local cache = {}
-	for i, slot in pairs(_BagSlotMap) do
-		local id, texture = GetInventorySlotInfo(slot)
-		_BagSlotMap[i] = { id = id, texture = texture, slot = slot }
-		tinsert(cache, _BagSlotMapTemplate:format(i, id))
+
+	-- Container
+	_BagSlotMap[0] = GetInventorySlotInfo("BackSlot")
+
+	for i = 1, 10 do
+		_BagSlotMap[i] = ContainerIDToInventoryID(i)
+		tinsert(cache, _BagSlotMapTemplate:format(i, _BagSlotMap[i]))
 	end
 
 	if next(cache) then
@@ -59,12 +62,18 @@ function OnEnable(self)
 				elseif target and target <= 4 then
 					btn:SetAttribute("*type*", "macro")
 					btn:SetAttribute("*macrotext*", "/click CharacterBag".. tostring(target-1) .."Slot")
+				elseif target and target <= 10 then
+					btn:SetAttribute("*type*", "openbank")
+					btn:SetAttribute("_openbank", [=[ self:GetFrameRef("IFActionHandler_Manager"):RunFor(self, [[ Manager:CallMethod("OpenBankBag", self:GetName()) ]]) ]=])
 				else
 					btn:SetAttribute("*type*", nil)
 					btn:SetAttribute("*macrotext*", nil)
+					btn:SetAttribute("_openbank", nil)
 				end
-				local id = target ~= 0 and _BagSlotMap[target] and _BagSlotMap[target].id or target or false
-				IFPushItemAnim.AttachBag(btn, id)
+				if target <= 4 then
+					local id = target ~= 0 and _BagSlotMap[target] or target or false
+					IFPushItemAnim.AttachBag(btn, id)
+				end
 			end
 
 			handler:Refresh()
@@ -77,7 +86,7 @@ end
 function ITEM_LOCK_CHANGED(self, bag, slot)
 	if not slot then
 		for i, map in pairs(_BagSlotMap) do
-			if map.id == bag then
+			if map == bag then
 				local flag = IsInventoryItemLocked(bag)
 				for _, btn in handler() do
 					if btn.ActionTarget == i then btn.IconLocked = flag end
@@ -92,7 +101,9 @@ function CURSOR_UPDATE(self)
 	for _, btn in handler() do
 		local target = _BagSlotMap[btn.ActionTarget]
 		if target then
-			btn.HighlightLocked = CursorCanGoInSlot(target.id)
+			btn.HighlightLocked = CursorCanGoInSlot(target)
+		else
+			btn.HighlightLocked = false
 		end
 	end
 end
@@ -102,7 +113,33 @@ function BAG_UPDATE_DELAYED(self)
 		handler:Refresh(btn)
 		local target = _BagSlotMap[btn.ActionTarget]
 		if target then
-			btn.IconLocked = IsInventoryItemLocked(target.id)
+			btn.IconLocked = IsInventoryItemLocked(target)
+		else
+			btn.IconLocked = false
+		end
+	end
+end
+
+function PLAYERBANKBAGSLOTS_CHANGED(self)
+	for _, btn in handler() do
+		handler:Refresh(btn)
+		local target = _BagSlotMap[btn.ActionTarget]
+		if target then
+			btn.IconLocked = IsInventoryItemLocked(target)
+		else
+			btn.IconLocked = false
+		end
+	end
+end
+
+function PLAYERBANKSLOTS_CHANGED(self, slot)
+	if slot > NUM_BANKGENERIC_SLOTS then
+		slot = slot - NUM_BANKGENERIC_SLOTS + NUM_BAG_FRAMES
+
+		for _, btn in handler() do
+			if btn.ActionTarget == slot then
+				handler:Refresh(btn)
+			end
 		end
 	end
 end
@@ -119,7 +156,11 @@ handler = ActionTypeHandler {
 	ReceiveStyle = "Keep",
 	InitSnippet = [[ _BagSlotMap = newtable() ]],
 	PickupSnippet = [[
-		return "clear", "bag", _BagSlotMap[...]
+		local id = ...
+		if id ~= 0 then
+			Manager:CallMethod("CloseContainerForSafe", id)
+			return "clear", "bag", _BagSlotMap[id]
+		end
 	]],
 	ReceiveSnippet = "Custom",
 	UpdateSnippet = [[
@@ -132,9 +173,13 @@ handler = ActionTypeHandler {
 		elseif target and target <= 4 then
 			self:SetAttribute("*type*", "macro")
 			self:SetAttribute("*macrotext*", "/click CharacterBag".. tostring(target-1) .."Slot")
+		elseif target and target <= 10 then
+			self:SetAttribute("*type*", "openbank")
+			Manager:CallMethod("RegisterBankBag", self:GetName())
 		else
 			self:SetAttribute("*type*", nil)
 			self:SetAttribute("*macrotext*", nil)
+			Manager:CallMethod("UnregisterBankBag", self:GetName())
 		end
 
 		Manager:CallMethod("UpdateForPushItemAnim", self:GetName(), target)
@@ -142,7 +187,7 @@ handler = ActionTypeHandler {
 	ClearSnippet = [[
 		self:SetAttribute("*type*", nil)
 		self:SetAttribute("*macrotext*", nil)
-
+		Manager:CallMethod("UnregisterBankBag", self:GetName())
 		Manager:CallMethod("UpdateForPushItemAnim", self:GetName(), false)
 	]],
 	OnEnableChanged = function(self) _Enabled = self.Enabled end,
@@ -150,16 +195,63 @@ handler = ActionTypeHandler {
 
 -- Use Manager to control the IFPushItemAnim
 IGAS:GetUI(handler.Manager).UpdateForPushItemAnim = function (self, name, target)
-	local id = target ~= 0 and _BagSlotMap[target] and _BagSlotMap[target].id or target or false
+	local id = target ~= 0 and _BagSlotMap[target] or target or false
 	return IFPushItemAnim.AttachBag(IGAS:GetWrapper(_G[name]), id)
 end
 
+IGAS:GetUI(handler.Manager).RegisterBankBag = function (self, btnName)
+	Task.NoCombatCall(function()
+		_G[btnName]:SetAttribute("_openbank", [=[ self:GetFrameRef("IFActionHandler_Manager"):RunFor(self, [[ Manager:CallMethod("OpenBankBag", self:GetName()) ]]) ]=])
+	end)
+end
+
+IGAS:GetUI(handler.Manager).UnregisterBankBag = function (self, btnName)
+	Task.NoCombatCall(function()
+		_G[btnName]:SetAttribute("_openbank",  nil)
+	end)
+end
+
+IGAS:GetUI(handler.Manager).OpenBankBag = function (self, btnName)
+	local bankID = IGAS:GetWrapper(_G[btnName]).BagSlot
+
+	if bankID and not InCombatLockdown() then
+		local inventoryID = BankButtonIDToInvSlotID(bankID-4, 1)
+		local hadItem = PutItemInBag(inventoryID)
+		if ( not hadItem ) then
+			-- open bag
+			ToggleBag(bankID)
+		end
+	end
+end
+
+IGAS:GetUI(handler.Manager).CloseContainerForSafe = function (self, id)
+	if id and not InCombatLockdown() then
+		CloseBag(id)
+	end
+end
+
 -- Overwrite methods
+function handler:RefreshButton()
+	local bag = self.ActionTarget
+
+	if bag > 4 then
+		-- Check if buyed
+		if bag - 4 <= GetNumBankSlots() then
+			self.BagUsable = true
+		else
+			self.BagUsable = false
+		end
+	else
+		self.BagUsable = true
+	end
+end
+
+
 function handler:ReceiveAction(target, detail)
 	if target == 0 then
 		return PutItemInBackpack()
-	elseif target and target <= 4 then
-		return PutItemInBag(_BagSlotMap[target].id)
+	elseif target and target <= 10 then
+		return PutItemInBag(_BagSlotMap[target])
 	end
 end
 
@@ -170,7 +262,7 @@ end
 function handler:GetActionTexture()
 	if self.ActionTarget == 0 then return MainMenuBarBackpackButtonIconTexture:GetTexture() end
 	local target = _BagSlotMap[self.ActionTarget]
-	return target and GetInventoryItemTexture("player", target.id) or target.texture
+	return target and GetInventoryItemTexture("player", target) or _EmptyTexture
 end
 
 function handler:GetActionCharges()
@@ -185,24 +277,28 @@ function handler:GetActionCharges()
 			return total, total
 		end
 	elseif style == "AllEmpty" or style == "All" then
-		local sFree, sTotal, free, total, bagFamily = 0, 0
-		local _, tarFamily = GetContainerNumFreeSlots(self.ActionTarget)
-		if not tarFamily then return nil end
-		for i = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
-			free, bagFamily = GetContainerNumFreeSlots(i)
-			total = GetContainerNumSlots(i)
-			if bagFamily == tarFamily then
-				sFree = sFree + free
-				sTotal = sTotal + total
+		if self.ActionTarget <= 4 then
+			local sFree, sTotal, free, total, bagFamily = 0, 0
+			local _, tarFamily = GetContainerNumFreeSlots(self.ActionTarget)
+			if not tarFamily then return nil end
+			for i = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
+				free, bagFamily = GetContainerNumFreeSlots(i)
+				total = GetContainerNumSlots(i)
+				if bagFamily == tarFamily then
+					sFree = sFree + free
+					sTotal = sTotal + total
+				end
 			end
-		end
-		if self.ActionTarget == 0 then
-			self.__BagHandler_FreeSlots = sFree
-		end
-		if style == "AllEmpty" then
-			return sFree, sTotal
+			if self.ActionTarget == 0 then
+				self.__BagHandler_FreeSlots = sFree
+			end
+			if style == "AllEmpty" then
+				return sFree, sTotal
+			else
+				return sTotal, sTotal
+			end
 		else
-			return sTotal, sTotal
+			return nil
 		end
 	end
 end
@@ -224,7 +320,6 @@ end
 function handler:SetTooltip(GameTooltip)
 	local target = self.ActionTarget
 	if target == 0 then
-		GameTooltip:SetOwner(self, "ANCHOR_LEFT")
 		GameTooltip:SetText(BACKPACK_TOOLTIP, 1.0, 1.0, 1.0)
 		local keyBinding = GetBindingKey("TOGGLEBACKPACK")
 		if ( keyBinding ) then
@@ -233,11 +328,13 @@ function handler:SetTooltip(GameTooltip)
 		GameTooltip:AddLine(string.format(NUM_FREE_SLOTS, (self.__BagHandler_FreeSlots or 0)))
 		GameTooltip:Show()
 	elseif _BagSlotMap[target] then
-		local id = _BagSlotMap[target].id
+		local id = _BagSlotMap[target]
 		if ( GameTooltip:SetInventoryItem("player", id) ) then
-			local bindingKey = GetBindingKey("TOGGLEBAG"..(5 -  target))
-			if ( bindingKey ) then
-				GameTooltip:AppendText(" "..NORMAL_FONT_COLOR_CODE.."("..bindingKey..")"..FONT_COLOR_CODE_CLOSE)
+			if id <= 4 then
+				local bindingKey = GetBindingKey("TOGGLEBAG"..(5 -  target))
+				if ( bindingKey ) then
+					GameTooltip:AppendText(" "..NORMAL_FONT_COLOR_CODE.."("..bindingKey..")"..FONT_COLOR_CODE_CLOSE)
+				end
 			end
 			if (not IsInventoryItemProfessionBag("player", ContainerIDToInventoryID(target))) then
 				for i = LE_BAG_FILTER_FLAG_EQUIPMENT, NUM_LE_BAG_FILTER_FLAGS do
@@ -251,6 +348,8 @@ function handler:SetTooltip(GameTooltip)
 		else
 			GameTooltip:SetText(EQUIP_CONTAINER, 1.0, 1.0, 1.0)
 		end
+	else
+
 	end
 end
 
@@ -325,28 +424,14 @@ interface "IFActionHandler"
 		Type = struct { 0,
 			function (value)
 				assert(type(value) == "number", "%s must be number.")
-				assert(value >= 0 and value <= 4, "%s must between [0-4]")
+				assert(value >= 0 and value <= 10, "%s must between [0-10]")
 				return math.floor(value)
 			end
 		},
 	}
 
-	__Doc__[[Whether the search overlay will be shown]]
-	__Handler__(function (self, value)
-		-- Create it when needed
-		local overlay = self:GetChild("SearchOverlay")
-		if value then
-			if not overlay then
-				overlay = Texture("SearchOverlay", self, "OVERLAY", nil, 2)
-				overlay:SetAllPoints(self)
-				overlay:SetTexture(0, 0, 0, 0.8)
-			end
-			overlay.Visible = true
-		elseif overlay then
-			overlay.Visible = false
-		end
-	end)
-	property "ShowSearchOverlay" { Type = Boolean }
+	__Doc__[[Whether the bag is usable]]
+	property "BagUsable" { Type = Boolean, Default = true }
 
 	__Doc__[[What to be shown as the count]]
 	__Handler__(RefreshCount)

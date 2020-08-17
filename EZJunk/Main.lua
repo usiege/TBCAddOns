@@ -1,19 +1,24 @@
-local _, core = ...; -- Namespace
-local events = CreateFrame("Frame");
+local ADDON_NAME = ...;
 
-function core:Init(event, name)	
+EZJunkMixin = {};
+
+function EZJunkMixin:OnLoad()
+	self:RegisterEvent("ADDON_LOADED");
+end
+
+function EZJunkMixin:OnEvent(event, ...)
 	if (event == "ADDON_LOADED") then
-		if (name == "EZJunk") then
-			events:UnregisterEvent("ADDON_LOADED");
+		if (ADDON_NAME == ...) then
+			self:UnregisterEvent("ADDON_LOADED");
 
-			events:RegisterEvent("MERCHANT_SHOW");
+			self:RegisterEvent("MERCHANT_SHOW");
 		end
 	elseif (event == "MERCHANT_SHOW") then
-		core.OnMerchantShow();
+		self.OnMerchantShow();
 	end
 end
 
-function core:OnMerchantShow()
+function EZJunkMixin:OnMerchantShow(...)
 	if ( MerchantFrame:IsVisible() and MerchantFrame.selectedTab == 1 ) then
 		local link;
 		local itemInfo;
@@ -26,30 +31,10 @@ function core:OnMerchantShow()
 				link = GetContainerItemLink(bag, slot);
 
 				if (link) then
-					itemInfo = core:GetItemInfo(link);
-					containerItemInfo = core:GetContainerItemInfo(bag, slot);
-					--print(containerItemInfo.Quality);
+					itemInfo = EZJunkMixin:GetItemInfo(link);
+					containerItemInfo = EZJunkMixin:GetContainerItemInfo(bag, slot);
 
-					if core:IsJunk(itemInfo) then
-						-- DEBUG
-						--print(itemInfo.Name);
-						--print(itemInfo.Link);
-						--print(itemInfo.Rarity);
-						--print(itemInfo.Level);
-						--print(itemInfo.MinLevel);
-						--print(itemInfo.Type);
-						--print(itemInfo.SubType);
-						--print(itemInfo.StackCount);
-						--print(itemInfo.EquipLocation);
-						--print(itemInfo.Icon);
-						--print(itemInfo.SellPrice);
-						--print(itemInfo.ClassId);
-						--print(itemInfo.SubClassId);
-						--print(itemInfo.BindType);
-						--print(itemInfo.ExpacId);
-						--print(itemInfo.ItemSetId);
-						--print(itemInfo.IsCraftingReagent);
-
+					if (EZJunkMixin:IsJunk(itemInfo)) then
 						--sell item
 						UseContainerItem(bag, slot);
 
@@ -61,14 +46,38 @@ function core:OnMerchantShow()
 		end
 
 		if (profitInCopper > 0 and itemsSold > 0) then
-			local junkItemText = itemsSold > 1 and "items" or "item";
-
-			print(GetCoinTextureString(profitInCopper) .. " 已从销售中获得 " .. itemsSold .. " 垃圾: " .. junkItemText);
+			print("|cFF0DEA38EZ|r |cFF9D9D9DJunk|r: " .. GetCoinTextureString(profitInCopper));
 		end
 	end
 end
 
-function core:IsJunk(itemInfo)	
+function EZJunkMixin:InternalAttachItemValueTooltip(tooltip, checkStack)
+	local link = select(2, tooltip:GetItem());
+
+	if (link) then
+		local itemInfo = EZJunkMixin:GetItemInfo(link);
+
+		if (itemInfo.SellPrice and itemInfo.SellPrice > 0) then
+			local stackCount = 1;
+
+			if (checkStack) then
+				local frame = GetMouseFocus();
+				local objectType = frame:GetObjectType();
+
+				if (objectType == "Button") then
+					stackCount = frame.count or 1;
+				end
+			end
+
+			local totalValue = itemInfo.SellPrice * (type(stackCount) == "number" and stackCount or 1);
+			--local displayValue = GetCoinTextureString(totalValue);
+			
+			SetTooltipMoney(tooltip, totalValue, nil, format("%s:", SELL_PRICE));
+		end
+	end
+end
+
+function EZJunkMixin:IsJunk(itemInfo)	
 	if itemInfo.Rarity == 0 then
 		return true
 	end
@@ -76,7 +85,7 @@ function core:IsJunk(itemInfo)
 	return false
 end
 
-function core:GetItemInfo(link)
+function EZJunkMixin:GetItemInfo(link)
 	local name, link, rarity, level, minLevel, type, subType, stackCount, equipLoc, icon, sellPrice, classId, subClassId, bindType = GetItemInfo(link);
 
 	return {
@@ -100,7 +109,7 @@ function core:GetItemInfo(link)
 	};
 end
 
-function core:GetContainerItemInfo(bag, slot)
+function EZJunkMixin:GetContainerItemInfo(bag, slot)
 	local icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemId = GetContainerItemInfo(bag, slot);
 
 	return {
@@ -117,44 +126,15 @@ function core:GetContainerItemInfo(bag, slot)
 	};
 end
 
-function core:InternalAttachItemValueTooltip(tooltip, checkStack)
-	local link = select(2, tooltip:GetItem());
-
-	if (link) then
-		local itemInfo = core:GetItemInfo(link);
-
-		if (itemInfo.SellPrice and itemInfo.SellPrice > 0) then
-			local stackCount = 1;
-
-			if (checkStack) then
-				local frame = GetMouseFocus();
-				local objectType = frame:GetObjectType();
-
-				if (objectType == "Button") then
-					stackCount = frame.count or 1;
-				end
-			end
-
-			local totalValue = itemInfo.SellPrice * stackCount;
-			local displayValue = GetCoinTextureString(totalValue);
-			
-			SetTooltipMoney(tooltip, totalValue, nil, format("%s:", SELL_PRICE));
-		end
-	end
-end
-
 local function AttachItemValueTooltip(tooltip, ...)
 	if (not MerchantFrame:IsShown()) then
-		core:InternalAttachItemValueTooltip(tooltip, true);
+		EZJunkMixin:InternalAttachItemValueTooltip(tooltip, true);
 	end
 end
 
 local function AttachLinkedItemValueTooltip(tooltip, ...)
-	core:InternalAttachItemValueTooltip(tooltip, false);
+	EZJunkMixin:InternalAttachItemValueTooltip(tooltip, false);
 end
-
-events:RegisterEvent("ADDON_LOADED");
-events:SetScript("OnEvent", core.Init);
 
 GameTooltip:HookScript("OnTooltipSetItem", AttachItemValueTooltip);
 ItemRefTooltip:HookScript("OnTooltipSetItem", AttachLinkedItemValueTooltip);

@@ -4,6 +4,6 @@
     <Script file="LibEvent.lua"/>
     <Script file="LibSchedule.lua"/>
     <Script file="LibItemInfo.lua"/>
-    <Script file="LibItemStats.lua"/>
     <Script file="LibItemEnchant.lua"/>
+    <Include file="LibItemStats\LibItemStats.xml"/>
 </Ui>

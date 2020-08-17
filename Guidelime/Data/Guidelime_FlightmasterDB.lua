@@ -1,7 +1,7 @@
 local addonName, addon = ...
 
 addon.flightmasterDB = {
-	[352] = {zone = "Stormwind City", name = "Dungar Longdrink", faction = "Alliance", localesIndex = 2},
+	[352] = {zone = "Stormwind City", name = "Dungar Longdrink", place = "Stormwind", faction = "Alliance", localesIndex = 2},
 	[523] = {zone = "Westfall", name = "Thor", place = "Sentinel Hill", faction = "Alliance", localesIndex = 4},
 	[931] = {zone = "Redridge Mountains", name = "Ariena Stormfeather", place = "Lakeshire", faction = "Alliance", localesIndex = 5},
 	[1387] = {zone = "Stranglethorn Vale", name = "Thysta", place = "Grom'gol Base Camp", faction = "Horde", localesIndex = 20},
@@ -31,7 +31,7 @@ addon.flightmasterDB = {
 	[4317] = {zone = "Thousand Needles", name = "Nyse", place = "Freewind Post", faction = "Horde", localesIndex = 30},      
 	[4319] = {zone = "Feralas", name = "Thyssiana", place = "Thalanaar", faction = "Alliance", localesIndex = 31},               
 	[4321] = {zone = "Dustwallow Marsh", name = "Baldruc", place = "Theramore", faction = "Alliance", localesIndex = 32},      
-	[4407] = {zone = "Stonetalon Mountains", name = "Teloren", place = "Stonetalon Peak", faction = "Horde", localesIndex = 33},  
+	[4407] = {zone = "Stonetalon Mountains", name = "Teloren", place = "Stonetalon Peak", faction = "Alliance", localesIndex = 33},  
 	[4551] = {zone = "Undercity", name = "Michael Garrett", faction = "Horde", localesIndex = 11},                  
 	[6026] = {zone = "Swamp of Sorrows", name = "Breyk", place = "Stonard", faction = "Horde", localesIndex = 56},
 	[6706] = {zone = "Desolace", name = "Baritanas Skyriver", place = "Nijel's Point", faction = "Alliance", localesIndex = 37},

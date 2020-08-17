@@ -3,6 +3,6 @@
 		TinyPad:Toggle()
 	</Binding>
 	<Binding name="TINYPAD_SEARCH" category="ADDONS">
-		TinyPad:TogglePanel()
+		TinyPad:OpenSearch()
 	</Binding>
 </Bindings>

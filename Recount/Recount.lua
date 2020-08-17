@@ -1,4 +1,4 @@
-Recount = LibStub("AceAddon-3.0"):NewAddon("Recount", "AceConsole-3.0",--[["AceEvent-3.0",]] "AceComm-3.0", "AceTimer-3.0")
+Recount = LibStub("AceAddon-3.0"):NewAddon("Recount", "AceConsole-3.0", "AceComm-3.0", "AceTimer-3.0")
 local Recount = _G.Recount
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
@@ -11,7 +11,7 @@ local FilterSize	= 20
 local RampUp		= 5
 local RampDown		= 10
 
-Recount.Version = tonumber(string.sub("$Revision: 1532 $", 12, -3))
+Recount.Version = tonumber(string.sub("$Revision: 1544 $", 12, -3))
 
 local _G = _G
 local abs = abs
@@ -1050,7 +1050,8 @@ function Recount:FindGuardianFromTooltip(nameGUID)
 	RecountTempTooltip:SetHyperlink("unit:"..nameGUID)
 	if RecountTempTooltip:NumLines() > 0 then
 		local petName = _G["RecountTempTooltipTextLeft1"]:GetText()
-		return petName
+		local petOwnerString = _G["RecountTempTooltipTextLeft2"]:GetText()
+		return petName, petOwnerString
 	else
 		return nil
 	end

@@ -45,7 +45,7 @@ local function GetInspectItemListFrame(parent)
         }
         local height = 424
         frame:SetSize(160, height)
-        frame:SetFrameLevel(0)
+        --frame:SetFrameLevel(0)
         frame:SetPoint("TOPLEFT", parent, "TOPRIGHT", 0, 0)
         frame:SetBackdrop(frame.backdrop)
         frame:SetBackdropColor(0, 0, 0, 0.8)
@@ -221,6 +221,25 @@ LibEvent:attachTrigger("UNIT_INSPECT_READY, UNIT_REINSPECT_READY", function(self
     end
 end)
 
+--Backdrop
+LibEvent:attachTrigger("INSPECT_FRAME_BACKDROP", function(self, frame)
+    if (MerInspectDB and MerInspectDB.ShowInspectAngularBorder) then
+        frame.backdrop.edgeSize = 1
+        frame.backdrop.edgeFile = "Interface\\Buttons\\WHITE8X8"
+        frame.backdrop.insets.top = 1
+        frame.backdrop.insets.left = 1
+        frame.backdrop.insets.right = 1
+        frame.backdrop.insets.bottom = 1
+    else
+        frame.backdrop.edgeSize = 16
+        frame.backdrop.edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border"
+        frame.backdrop.insets.top = 4
+        frame.backdrop.insets.left = 4
+        frame.backdrop.insets.right = 4
+        frame.backdrop.insets.bottom = 4
+    end
+end)
+
 --設置邊框和位置
 LibEvent:attachTrigger("INSPECT_FRAME_SHOWN", function(self, frame, parent, ilevel)
     local x, y, f = 0, 0, parent:GetName()
@@ -276,7 +295,7 @@ LibEvent:attachTrigger("INSPECT_FRAME_COMPARE", function(self, frame)
         frame.statsFrame:SetParent(frame)
     end
     if (frame.statsFrame) then
-        frame.statsFrame:SetPoint("TOPLEFT", frame.statsFrame:GetParent(), "TOPRIGHT", 1, -1)
+        frame.statsFrame:SetPoint("TOPLEFT", frame.statsFrame:GetParent(), "TOPRIGHT", 1, 0)
     end
 end)
 
@@ -299,12 +318,11 @@ LibEvent:attachTrigger("TogglePlayerStatsFrame", function(self, frame, bool, for
     end
     if (forceShown or (MerInspectDB and MerInspectDB.ShowCharacterItemStats)) then
         if (LibItemStats:IsSupported()) then
-            local stats = LibItemStats:GetUnitItemStats("player")
-            local ilevel = LibItemInfo:GetUnitItemLevel("player")
-            stats.Itemlevel = ilevel
+            local stats = LibItemStats:GetUnitStats("player")
+            stats.ilevel = LibItemInfo:GetUnitItemLevel("player")
             PlayerStatsFrame:SetStats(stats):Show()
             if (frame.inspectFrame and frame.inspectFrame:IsShown()) then
-                PlayerStatsFrame:SetPoint("TOPLEFT", frame.inspectFrame, "TOPRIGHT", 1, -1)
+                PlayerStatsFrame:SetPoint("TOPLEFT", frame.inspectFrame, "TOPRIGHT", 1, 0)
             elseif (not frame:GetName()) then
                 PlayerStatsFrame:SetPoint("TOPLEFT", frame, "TOPRIGHT", 1, 0)
             else
@@ -327,11 +345,11 @@ PaperDollFrame:HookScript("OnHide", function(self)
 end)
 
 LibEvent:attachEvent("PLAYER_EQUIPMENT_CHANGED", function(self)
-    if (CharacterFrame:IsShown() and MerInspectDB and MerInspectDB.ShowCharacterItemSheet) then
+    if (CharacterFrame:IsShown() and PaperDollFrame:IsShown() and MerInspectDB and MerInspectDB.ShowCharacterItemSheet) then
         local ilevel, _, maxLevel = LibItemInfo:GetUnitItemLevel("player")
         ShowInspectItemListFrame("player", PaperDollFrame, ilevel, maxLevel)
     end
-    if (CharacterFrame:IsShown()) then
+    if (CharacterFrame:IsShown() and PaperDollFrame:IsShown()) then
         LibEvent:trigger("TogglePlayerStatsFrame", PaperDollFrame, false)
         LibEvent:trigger("TogglePlayerStatsFrame", PaperDollFrame, true)
     end

@@ -12,13 +12,6 @@ import "System.Widget.Action.ActionRefreshMode"
 
 MAX_SKILLLINE_TABS = _G.MAX_SKILLLINE_TABS
 
-enum "FlyoutDirection" {
-	"UP",
-	"DOWN",
-	"LEFT",
-	"RIGHT",
-}
-
 _FlyoutSlot = {}
 _FlyoutTexture = {}
 
@@ -28,7 +21,7 @@ function OnEnable(self)
 	self:RegisterEvent("SPELLS_CHANGED")
 	self:RegisterEvent("SKILL_LINES_CHANGED")
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	-- self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
 	OnEnable = nil
 end

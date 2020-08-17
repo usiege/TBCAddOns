@@ -1,6 +1,5 @@
 ## Interface: 11302
 ## Title: oGlow
-## Title-zhCN: oGlow-装备着色
 ## Author: Haste
 ## Version: 2.2.8
 ## SavedVariables: oGlowDB

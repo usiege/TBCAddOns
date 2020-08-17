@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.Slider", version) then
 end
 
 __Doc__[[Sliders are elements intended to display or allow the user to choose a value in a range.]]
+__AutoProperty__()
 class "Slider"
 	inherit "Frame"
 
@@ -21,13 +22,13 @@ class "Slider"
 		<param name="min">new minimun value of the slider bar</param>
 		<param name="max">new maximum value of the slider bar</param>
 	]]
-	event "OnMinMaxChanged"
+	__WidgetEvent__() event "OnMinMaxChanged"
 
 	__Doc__[[
 		<desc>Fired when the slider's value changes</desc>
 		<param name="value">new value of the slider bar</param>
 	]]
-	event "OnValueChanged"
+	__WidgetEvent__() event "OnValueChanged"
 
 	------------------------------------------------------
 	-- Method
@@ -174,5 +175,4 @@ class "Slider"
 		end,
 		Type = MinMax,
 	}
-
 endclass "Slider"

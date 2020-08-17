@@ -1,3 +1,5 @@
+local L = LibStub("AceLocale-3.0"):GetLocale("ClassicCodex")
+
 CodexMap = CreateFrame("Frame")
 CodexMap.HBDP = LibStub("HereBeDragons-Pins-2.0")
 CodexMap.HBD = LibStub("HereBeDragons-2.0")
@@ -82,21 +84,10 @@ function str2rgb(text)
 end
 
 function showTooltip()
-	local focus = GetMouseFocus()
-	
-	if focus and focus:GetName() ~= "TargetFrame" and not UnitExists("mouseover") then
-		GameTooltip:Hide()
-		return
-	end
-	
-	if focus and focus.title then 
-		return
-	end
+	if not CodexConfig.showUnitTooltip then return end
+	local name = UnitName("mouseover")
 
-	if focus and focus:GetName() and strsub((focus:GetName() or ""), 0, 10) == "QuestTimer" then return end
-
-	local name = getglobal("GameTooltipTextLeft1") and getglobal("GameTooltipTextLeft1"):GetText()
-	if name and CodexMap.tooltips[name] then
+	if name and not UnitIsPlayer("mouseover") and CodexMap.tooltips[name] then
 		for title, meta in pairs(CodexMap.tooltips[name]) do
 			CodexMap:ShowTooltip(meta, GameTooltip)
 			GameTooltip:Show()
@@ -165,7 +156,8 @@ function CodexMap:ShowMapId(map)
 		for worldMapId, mapId in pairs(CodexMap.zones) do
 			if worldMapId == map then
 				WorldMapFrame:SetMapID(mapId)
-				CodexMap:UpdateNodes()
+				-- The previous CodexMap:UpdateNodes() call has rendered all the required markers, so there is no need to redraw
+				--CodexMap:UpdateNodes()
 				return true
 			end
 		end
@@ -186,15 +178,16 @@ end
 function CodexMap:ShowTooltip(meta, tooltip)
 	local catch = nil
 	local tooltip = tooltip or GameTooltip
+	local quests = CodexDB.quests.loc
 
 	-- Add quest data
 	if meta["quest"] then
 		-- scan all quest entries for matches
-		for questId = 1, GetNumQuestLogEntries() do
-			local title, _, _, _, _, complete = GetQuestLogTitle(questId)
+		for questIndex = 1, GetNumQuestLogEntries() do
+			local _, _, _, header, _, complete, _, questId = GetQuestLogTitle(questIndex)
 
-			if meta["quest"] == title then
-				local objectives = GetNumQuestLeaderBoards(questId)
+			if not header and quests[questId] and meta["quest"] == quests[questId].T then
+				local objectives = GetNumQuestLeaderBoards(questIndex)
 				catch = true
 
 				local symbol = (complete or objectives == 0) and "|cff555555[|cffffcc00?|cff555555]|r " or "|cff555555[|cffffcc00!|cff555555]|r "
@@ -203,7 +196,7 @@ function CodexMap:ShowTooltip(meta, tooltip)
 				local foundObjective = nil
 				if objectives then
 					for i = 1, objectives do
-						local text, type, complete = GetQuestLogLeaderBoard(i, questId)
+						local text, type, complete = GetQuestLogLeaderBoard(i, questIndex)
 
 						if type == "monster" then
 							-- kill
@@ -235,7 +228,7 @@ function CodexMap:ShowTooltip(meta, tooltip)
 									foundObjective = true
 									local r, g, b = CodexMap:GetTooltipColor(objNum, objNeeded)
 									local sellCount = tonumber(meta["sellCount"]) > 0 and " |cff555555[|cffcccccc" .. meta["sellCount"] .. "x" .. "|cff555555]" or ""
-									tooltip:AddLine("|cffaaaaaa- |cffffffff" .. "购买" .. ": |r" .. itemName .. ": " .. objNum .. "/" .. objNeeded .. sellCount, r, g, b)
+									tooltip:AddLine("|cffaaaaaa- |cffffffff" .. L["Buy"] .. ": |r" .. itemName .. ": " .. objNum .. "/" .. objNeeded .. sellCount, r, g, b)
 								end
 							end
 						end
@@ -243,8 +236,8 @@ function CodexMap:ShowTooltip(meta, tooltip)
 				end
 
 				if not foundObjective and meta["questLevel"] and meta["texture"] then
-					local questLevelString = "等级: " .. CodexMap:HexDifficultyColor(meta["questLevel"]) .. meta["questLevel"] .. "|r"
-					local questMinString = meta["questMinimumLevel"] and " / 需要: " .. CodexMap:HexDifficultyColor(meta["questMinimumLevel"], true) .. meta["questMinimumLevel"] .. "|r" or ""
+					local questLevelString = L["Level"] .. ": " .. CodexMap:HexDifficultyColor(meta["questLevel"]) .. meta["questLevel"] .. "|r"
+					local questMinString = meta["questMinimumLevel"] and " / " .. L["Required"] .. ": " .. CodexMap:HexDifficultyColor(meta["questMinimumLevel"], true) .. meta["questMinimumLevel"] .. "|r" or ""
 					tooltip:AddLine("|cffaaaaaa- |r" .. questLevelString .. questMinString , .8,.8,.8)
 				end
 			end
@@ -259,7 +252,7 @@ function CodexMap:ShowTooltip(meta, tooltip)
 					catchFallback = true
 					local dr, dg, db = CodexMap:GetTooltipColor(tonumber(meta["dropRate"]), 100)
 					local lootColor = string.format("%02x%02x%02x", dr * 255,dg * 255, db * 255)
-					tooltip:AddLine("|cffaaaaaa- |r" .. "拾取: " .. item .. " |cff555555[|cff" .. lootColor .. meta["dropRate"] .. "%|cff555555]", 1, .5, .5)
+					tooltip:AddLine("|cffaaaaaa- |r" .. L["Loot"] .. ": " .. item .. " |cff555555[|cff" .. lootColor .. meta["dropRate"] .. "%|cff555555]", 1, .5, .5)
 				end
 			end
 
@@ -269,8 +262,8 @@ function CodexMap:ShowTooltip(meta, tooltip)
 			end
 
 			if not catchFallback and meta["texture"] and meta["questLevel"] then
-				local questLevelString = "等级: " .. CodexMap:HexDifficultyColor(meta["questLevel"]) .. meta["questLevel"] .. "|r"
-				local questMinString = meta["questMinimumLevel"] and " / " .. "需要: " .. CodexMap:HexDifficultyColor(meta["questMinimumLevel"], true) .. meta["questMinimumLevel"] .. "|r" or ""
+				local questLevelString = L["Level"] .. ": " .. CodexMap:HexDifficultyColor(meta["questLevel"]) .. meta["questLevel"] .. "|r"
+				local questMinString = meta["questMinimumLevel"] and " / " .. L["Required"] .. ": " .. CodexMap:HexDifficultyColor(meta["questMinimumLevel"], true) .. meta["questMinimumLevel"] .. "|r" or ""
 				tooltip:AddLine("|cffaaaaaa- |r" .. questLevelString .. questMinString , .8,.8,.8)
 			end
 		end
@@ -290,11 +283,11 @@ function CodexMap:ShowTooltip(meta, tooltip)
 		if meta["sellCount"] then
 			local item = meta["itemLink"] or "[" .. meta["item"][1] .. "]"
 			local sellCount = tonumber(meta["sellCount"]) > 0 and  " |cff555555[|cffcccccc" .. meta["sellCount"] .. "x" .. "|cff555555]" or ""
-			tooltip:AddLine("商贩: " .. item .. sellCount, 1, 1, 1)
+			tooltip:AddLine(L["Vendor"] .. ": " .. item .. sellCount, 1, 1, 1)
 		elseif meta["item"][1] then
 			local item = meta["itemLink"] or "[" .. meta["item"][1] .. "]"
 			local r, g, b = CodexMap:GetTooltipColor(tonumber(meta["dropRate"]), 100)
-			tooltip:AddLine("|cffffffff拾取: " .. item ..  " |cff555555[|r" .. meta["dropRate"] .. "%|cff555555]", r,g,b)
+			tooltip:AddLine("|cffffffff" .. L["Loot"] .. ": " .. item ..  " |cff555555[|r" .. meta["dropRate"] .. "%|cff555555]", r,g,b)
 		end
 	end
 
@@ -391,7 +384,7 @@ function CodexMap:CreateMapMarker(node)
 	marker:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR_LEFT")
 		GameTooltip:SetText(marker.spawn, .3, 1, .8)
-		GameTooltip:AddDoubleLine("等级: ", (marker.level or UNKNOWN), .8, .8, .8, 1, 1, 1)
+		GameTooltip:AddDoubleLine(L["Level"]..": ", (marker.level or UNKNOWN), .8, .8, .8, 1, 1, 1)
 
 		for title, meta in pairs(marker.node) do
 			CodexMap:ShowTooltip(meta, GameTooltip)
@@ -421,7 +414,7 @@ function CodexMap:CreateMinimapMarker(node)
 	marker:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR_LEFT")
 		GameTooltip:SetText(marker.spawn, .3, 1, .8)
-		GameTooltip:AddDoubleLine("等级: ", (marker.level or UNKNOWN), .8, .8, .8, 1, 1, 1)
+		GameTooltip:AddDoubleLine(L["Level"]..": ", (marker.level or UNKNOWN), .8, .8, .8, 1, 1, 1)
 
 		for title, meta in pairs(marker.node) do
 			CodexMap:ShowTooltip(meta, GameTooltip)
@@ -437,6 +430,7 @@ end
 
 function CodexMap:UpdateNode(frame, node)
 	frame.layer = 0
+	local markerSize = CodexConfig.spawnMarkerSize
 
 	for title, meta in pairs(node) do
 		meta.layer = GetLayerByTexture(meta.texture)
@@ -463,14 +457,18 @@ function CodexMap:UpdateNode(frame, node)
 			else
 				frame.color = meta.title
 			end
+
+			if meta.coordsNum == 1 then
+				markerSize = CodexConfig.bossMarkerSize
+			end
 		end
 	end
 
 	frame.tex:SetVertexColor(1, 1, 1, 1)
 	
 	if not frame.texture then
-		frame:SetWidth(CodexConfig.spawnMarkerSize)
-		frame:SetHeight(CodexConfig.spawnMarkerSize)
+		frame:SetWidth(markerSize)
+		frame:SetHeight(markerSize)
 		frame.tex:SetTexture("Interface\\Addons\\ClassicCodex\\img\\icon.tga")
 
 		local r, g, b = str2rgb(frame.color)
@@ -490,10 +488,20 @@ function CodexMap:UpdateNode(frame, node)
 	end
 
 	frame:SetScript("OnClick", function(self)
-		if IsShiftKeyDown() and self.questId and self.texture and self.layer < 5 then
-			-- mark questnode as done
+		if IsControlKeyDown() then
+			if TomTom and TomTom.AddWaypoint and TomTom.RemoveWaypoint then
+				local node = self.node[self.title]
+				if not node then return end
+
+				if CodexConfig._tom_waypoint then
+					TomTom:RemoveWaypoint(CodexConfig._tom_waypoint)
+				end
+				CodexConfig._tom_waypoint = TomTom:AddWaypoint(CodexMap.zones[node.zone], node.x/100, node.y/100,  {title = self.spawn, crazy = true})
+			end
+		elseif IsShiftKeyDown() and self.questId and self.texture and self.layer < 5 then
+			-- player hides the quest
 			CodexMap:DeleteNode(self.node[self.title].addon, self.title)
-			CodexHistory[self.questId] = true
+			CodexHiddenQuests[self.questId] = true
 			CodexMap:UpdateNodes()
 		elseif IsShiftKeyDown() then
 			CodexMap:DeleteNode(self.node[self.title].addon, self.title)
@@ -614,6 +622,13 @@ function CodexMap:UpdateNodes()
 	CodexMap.HBDP:RemoveAllWorldMapIcons("Map")
 	CodexMap.HBDP:RemoveAllMinimapIcons("Map")
 
+	local worldMapLevel = nil
+	if CodexConfig.continentIcon then 
+		worldMapLevel = HBD_PINS_WORLDMAP_SHOW_WORLD
+	elseif CodexConfig.zoneMapIcon then
+		worldMapLevel = HBD_PINS_WORLDMAP_SHOW_PARENT
+	end
+
 	-- refresh all nodes
 	for addon in pairs(CodexMap.nodes) do
 		for mapId in pairs(CodexMap.nodes[addon]) do
@@ -632,8 +647,12 @@ function CodexMap:UpdateNodes()
 					x = x / 100
 					y = y / 100
 				
-					CodexMap.HBDP:AddWorldMapIconMap("Map", CodexMap.markers[i], worldMapId, x, y, HBD_PINS_WORLDMAP_SHOW_PARENT)
-					CodexMap.HBDP:AddMinimapIconMap("Map", CodexMap.minimapMarkers[i], worldMapId, x, y, true, false)
+					if worldMapLevel then
+						CodexMap.HBDP:AddWorldMapIconMap("Map", CodexMap.markers[i], worldMapId, x, y, worldMapLevel)
+					end
+					if CodexConfig.miniMapIcon then
+						CodexMap.HBDP:AddMinimapIconMap("Map", CodexMap.minimapMarkers[i], worldMapId, x, y, true, false)
+					end
 
 					i = i + 1
 				end
@@ -643,8 +662,11 @@ function CodexMap:UpdateNodes()
 
 end
 
+-- Since UpdateNodes draws markers for all maps, it is no longer necessary to redraw when changing zones.
+--[[
 CodexMap:RegisterEvent("ZONE_CHANGED")
 CodexMap:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 CodexMap:SetScript("OnEvent", function(self, event, ...)
 	CodexMap:UpdateNodes()
 end)
+]]

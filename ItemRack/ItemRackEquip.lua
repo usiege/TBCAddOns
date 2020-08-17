@@ -2,7 +2,7 @@
 
 ItemRack.SwapList = {} -- table of item ids that want to swap in, indexed by slot
 ItemRack.AbortSwap = nil -- reasons: 1=not enough room, 2=item on cursor, 3=in spell targeting mode, 4=item lock
-ItemRack.AbortReasons = {"Not enough room.","Something is on the cursor.","In spell targeting mode.","Another swap is in progress."}
+ItemRack.AbortReasons = {"没有足够空间。","有物品在鼠标上。","正处于鼠标施法模式。","正在进行另一个交换。"}
 
 ItemRack.SetsWaiting = {} -- numerically indexed table of {"setname",func} ie {"pvp",ItemRack.EquipSet}
 
@@ -47,7 +47,7 @@ end
 
 function ItemRack.EquipSet(setname)
 	if not setname or not ItemRackUser.Sets[setname] then
-		ItemRack.Print("Set \""..tostring(setname).."\" doesn't exist.")
+		ItemRack.Print("套装 \""..tostring(setname).."\" 不存在。")
 		return
 	end
 	if ItemRack.NowCasting or ItemRack.AnythingLocked() then
@@ -67,8 +67,8 @@ function ItemRack.EquipSet(setname)
 			inv,bag,slot = ItemRack.FindItem(set.equip[i])
 			if not inv and not bag then
 				-- if not found at all, then start/add to list of items not found
-				couldntFind = couldntFind or "Could not find: "
-				couldntFind = couldntFind.."["..tostring(ItemRack.GetInfoByID(set.equip[i])).."] "
+					couldntFind = couldntFind or "无法找到: "
+					couldntFind = couldntFind.."["..tostring(ItemRack.GetInfoByID(set.equip[i])).."] "
 			elseif inv~=i then -- and finding intended item doesn't point to worn
 				swap[i] = set.equip[i] -- then note this item for a swap
 			end
@@ -89,7 +89,7 @@ function ItemRack.EquipSet(setname)
 		end
 		set.oldset = ItemRackUser.CurrentSet
 	end
-	
+
 	-- if in combat or dead, combat queue items wanting to equip and only let swappables through
 	if UnitAffectingCombat("player") or ItemRack.IsPlayerReallyDead() then
 		for i in pairs(swap) do
@@ -106,6 +106,22 @@ function ItemRack.EquipSet(setname)
 	end
 	if not next(swap) then
 		return
+	end
+
+	if ItemRackUser.Sets[setname].ShowHelm ~= nil then
+		if ItemRackUser.Sets[setname].ShowHelm == 1 then
+			ShowHelm(true)
+		else
+			ShowHelm(false)
+		end
+	end
+	
+	if ItemRackUser.Sets[setname].ShowCloak ~= nil then
+		if ItemRackUser.Sets[setname].ShowCloak == 1 then
+			ShowCloak(true)
+		else
+			ShowCloak(false)
+		end
 	end
 
 	ItemRack.IterateSwapList(setname) -- run SwapList swaps
@@ -215,7 +231,7 @@ function ItemRack.IterateSwapList(setname)
 		end
 	end
 	if ItemRack.AbortSwap then
-		ItemRack.Print("Swap stopped. "..(ItemRack.AbortReasons[ItemRack.AbortSwap] or ""))
+		ItemRack.Print("停止切换。 "..(ItemRack.AbortReasons[ItemRack.AbortSwap] or ""))
 	end
 end
 
@@ -234,6 +250,8 @@ function ItemRack.EndSetSwap(setname)
 		if ItemRackOptFrame and ItemRackOptFrame:IsVisible() then
 			ItemRackOpt.ChangeEditingSet()
 		end
+		
+		ItemRack.UpdateCombatQueue() -- update button gear icon if per set queues is active
 	end
 --	ItemRack.Print("End of set swap. CurrentSet: "..tostring(ItemRackUser.CurrentSet))
 end

@@ -23,29 +23,25 @@ class "RangeChecker"
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
+	function SetInRange(self, inRange)
+		if inRange then
+			self.Parent.Alpha = 1
+
+			self.Visible = false
+		else
+			self.Parent.Alpha = 0.5
+
+			if self.UseIndicator and (UnitInParty(self.Unit) or UnitInRaid(self.Unit)) then
+				self.Visible = true
+			else
+				self.Visible = false
+			end
+		end
+	end
 
 	------------------------------------------------------
 	-- Property
 	------------------------------------------------------
-	-- InRange
-	property "InRange" {
-		Set = function(self, value)
-			if value then
-				self.Parent.Alpha = 1
-
-				self.Visible = false
-			else
-				self.Parent.Alpha = 0.5
-
-				if self.UseIndicator and (UnitInParty(self.Unit) or UnitInRaid(self.Unit)) then
-					self.Visible = true
-				else
-					self.Visible = false
-				end
-			end
-		end,
-	}
-
 	__Doc__[[Whether use an indicator]]
 	property "UseIndicator" { Type = Boolean }
 
@@ -69,7 +65,7 @@ class "RangeChecker"
 		if UnitIsVisible(unit) then
 			local tarx, tary = GetPlayerMapPosition(unit)
 			local x, y = GetPlayerMapPosition("player")
-			local facing = 2 * pi - GetPlayerFacing()
+			local facing = 2 * pi - (GetPlayerFacing() or 0)
 			local rad = 0
 
 			if tarx and tary and x and y then

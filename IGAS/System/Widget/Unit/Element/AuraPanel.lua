@@ -3,7 +3,7 @@
 -- Change Log  :
 
 -- Check Version
-local version = 2
+local version = 3
 if not IGAS:NewAddon("IGAS.Widget.Unit.AuraPanel", version) then
 	return
 end
@@ -11,7 +11,7 @@ end
 __Doc__[[The aura panel to display buffs or debuffs]]
 class "AuraPanel"
 	inherit "Frame"
-	extend "IFElementPanel""IFAura"
+	extend "IFElementPanel" "IFAura"
 
 	_FILTER_LIST = {
 		CANCELABLE = true,
@@ -20,6 +20,7 @@ class "AuraPanel"
 		NOT_CANCELABLE = true,
 		PLAYER = true,
 		RAID = true,
+		INCLUDE_NAME_PLATE_ONLY = true,
 	}
 
 	local function CheckFilter(...)
@@ -47,6 +48,12 @@ class "AuraPanel"
 		inherit "Frame"
 		extend "IFCooldownIndicator"
 
+		local UnitAura = _G.UnitAura
+		local LCD = LibStub("LibClassicDurations")
+		if LCD then
+			LCD:Register("IGAS_AuraIcon")
+			UnitAura = LCD.UnitAuraDirect
+		end
 
 		_BorderColor = RAID_CLASS_COLORS[select(2, UnitClass("player"))]
 		_BackDrop = {
@@ -69,7 +76,7 @@ class "AuraPanel"
 			<param name="filter">string, the filiter token</param>
 			]]
 		function Refresh(self, unit, index, filter)
-			local name, rank, texture, count, dtype, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitAura(unit, index, filter)
+			local name, texture, count, dtype, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitAura(unit, index, filter)
 
 			if name then
 				self.Index = index
@@ -162,7 +169,7 @@ class "AuraPanel"
 		function AuraIcon(self, name, parent, ...)
 			Super(self, name, parent, ...)
 
-			self.MouseEnabled = false
+			self.MouseEnabled = true
 			self.MouseWheelEnabled = false
 
 			local icon = Texture("Icon", self, "BORDER")
@@ -191,13 +198,9 @@ class "AuraPanel"
 	endclass "AuraIcon"
 
 	------------------------------------------------------
-	-- Event
-	------------------------------------------------------
-
-	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
-	function Refresh(self)
+	function UpdateAuras(self)
 		local index = 1
 		local i = 1
 		local name
@@ -205,7 +208,7 @@ class "AuraPanel"
 		local filter = self.Filter
 
 		if unit then
-			while i < self.MaxCount do
+			while i <= self.MaxCount do
 				if UnitAura(unit, index, filter) then
 					if self:CustomFilter(unit, index, filter) then
 						self.Element[i]:Refresh(unit, index, filter)
@@ -263,10 +266,6 @@ class "AuraPanel"
 
 	__Doc__[[Whether should highlight auras that casted by the player]]
 	property "HighLightPlayer" { Type = Boolean }
-
-	------------------------------------------------------
-	-- Event Handler
-	------------------------------------------------------
 
 	------------------------------------------------------
 	-- Constructor

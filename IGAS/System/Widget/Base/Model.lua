@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.Model", version) then
 end
 
 __Doc__[[Model provide a rendering environment which is drawn into the backdrop of their frame, allowing you to display the contents of an .m2 file and set facing, scale, light and fog information, or run motions associated]]
+__AutoProperty__()
 class "Model"
 	inherit "Frame"
 
@@ -17,10 +18,10 @@ class "Model"
 	-- Event
 	------------------------------------------------------
 	__Doc__[[Run when the model's animation finishes]]
-	event "OnAnimFinished"
+	__WidgetEvent__() event "OnAnimFinished"
 
 	__Doc__[[Run when a model changes or animates]]
-	event "OnUpdateModel"
+	__WidgetEvent__() event "OnUpdateModel"
 
 	------------------------------------------------------
 	-- Method
@@ -244,5 +245,4 @@ class "Model"
 		end,
 		Type = LightType,
 	}
-
 endclass "Model"

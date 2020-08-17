@@ -101,7 +101,7 @@ hooksecurefunc("SetItemButtonQuality", function(self, quality, itemIDOrLink)
     SetItemSlot(self, itemIDOrLink)
 end)
 
---[[ PaperDoll ]]
+--[[ PaperDoll
 if (PaperDollItemSlotButton_OnShow) then
     hooksecurefunc("PaperDollItemSlotButton_OnShow", function(self, isBag)
         local id = self:GetID()
@@ -117,7 +117,8 @@ if (PaperDollItemSlotButton_OnEvent) then
         end
     end)
 end
-
+ ]]
+ 
 --[[观察成功后,设置slot文字]]
 LibEvent:attachTrigger("UNIT_INSPECT_READY", function(self, data)
     if (InspectFrame and InspectFrame.unit and UnitGUID(InspectFrame.unit) == data.guid) then
@@ -181,8 +182,8 @@ local function ChatItemSlot(Hyperlink)
     end
     if (slot) then
         Hyperlink = Hyperlink:gsub("|h%[(.-)%]|h", "|h[("..slot.."):"..name.."]|h")
+        Caches[Hyperlink] = Hyperlink
     end
-    Caches[Hyperlink] = Hyperlink
     return Hyperlink
 end
 

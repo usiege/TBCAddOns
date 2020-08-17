@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Buru", "DBM-AQ20", 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20190819220021")
+mod:SetRevision("20200716131113")
 mod:SetCreatureID(15370)
 mod:SetEncounterID(721)
 mod:SetModelID(15654)
@@ -19,7 +19,7 @@ local specWarnDismember			= mod:NewSpecialWarningStack(96, nil, 5, nil, nil, 1, 
 local specWarnDismemberTaunt	= mod:NewSpecialWarningTaunt(96, nil, nil, nil, 1, 2)
 local specWarnPursue			= mod:NewSpecialWarning("SpecWarnPursue", nil, nil, nil, 4, 2)
 
-local timerDismember			= mod:NewTargetTimer(10, 96, nil, "Tank", 2, 5, nil, DBM_CORE_TANK_ICON)
+local timerDismember			= mod:NewTargetTimer(10, 96, nil, "Tank", 2, 5, nil, DBM_CORE_L.TANK_ICON)
 
 function mod:OnCombatStart(delay)
 	if not self:IsTrivial(80) then
@@ -69,9 +69,8 @@ end
 
 function mod:CHAT_MSG_MONSTER_EMOTE(msg, _, _, _, target)
 	if not msg:find(L.PursueEmote) then return end
-	local target = DBM:GetUnitFullName(target)
-	if not target then return end
 	if target then
+		target = DBM:GetUnitFullName(target)
 		if target == UnitName("player") then
 			specWarnPursue:Show()
 			specWarnPursue:Play("justrun")

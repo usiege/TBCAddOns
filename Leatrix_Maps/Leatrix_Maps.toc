@@ -1,15 +1,13 @@
-## Interface: 11302
+## Interface: 11305
 
 ## Title: Leatrix Maps
-## Title-zhCN: Leatrix Maps-地图全亮
 ## Notes: Enhancements for your maps.
-## Title-zhTW: |cff4DFF4D[地圖]|r 世界地圖增強
-## Notes-zhTW: Leatrix Maps |n顯示未探索區域和副本入口。|n|cffffd200使用方法：輸入 /ltm 進行設定。
 
-## Version: 1.13.09
+## Version: 1.13.76
 ## Author: Leatrix
 ## SavedVariables: LeaMapsDB
 
+Leatrix_Maps_Library.lua
 Leatrix_Maps_Locale.lua
 Leatrix_Maps.xml
 Leatrix_Maps_Reveal.lua

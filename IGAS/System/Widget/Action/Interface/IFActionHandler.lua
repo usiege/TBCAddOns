@@ -3,7 +3,7 @@
 -- Change Log  :
 
 -- Check Version
-local version = 2
+local version = 3
 if not IGAS:NewAddon("IGAS.Widget.Action.IFActionHandler", version) then
 	return
 end
@@ -36,6 +36,7 @@ do
 	_AutoAttackButtons = setmetatable({}, {__mode = "k"})
 	_AutoRepeatButtons = setmetatable({}, getmetatable(_AutoAttackButtons))
 	_Spell4Buttons = setmetatable({}, getmetatable(_AutoAttackButtons))
+	_RangeCheckButtons = setmetatable({}, getmetatable(_AutoAttackButtons))
 
 	_GlobalGroup = "Global"
 
@@ -67,11 +68,19 @@ do
 	end
 end
 
+enum "FlyoutDirection" {
+	"UP",
+	"DOWN",
+	"LEFT",
+	"RIGHT",
+}
+
 ------------------------------------------------------
 -- IFActionTypeHandler
 --
 ------------------------------------------------------
 __Doc__[[Interface for action type handlers]]
+__AutoProperty__()
 interface "IFActionTypeHandler"
 
 	_RegisterSnippetTemplate = "%s[%q] = %q"
@@ -111,6 +120,9 @@ interface "IFActionTypeHandler"
 	------------------------------------------------------
 	-- Overridable Method
 	------------------------------------------------------
+	__Doc__[[Refresh the button]]
+	function RefreshButton(self) end
+
 	__Doc__[[
 		<desc>Get the actions's kind, target, detail</desc>
 		<return type="kind"></return>
@@ -333,6 +345,12 @@ interface "IFActionTypeHandler"
 	__Doc__[[The snippet used to clear action]]
 	property "ClearSnippet" { Type = String }
 
+	__Doc__[[The snippet used for pre click]]
+	property "PreClickSnippet" { Type = String }
+
+	__Doc__[[The snippet used for post click]]
+	property "PostClickSnippet" { Type = String }
+
 	------------------------------------------------------
 	-- Initialize
 	------------------------------------------------------
@@ -387,12 +405,20 @@ interface "IFActionTypeHandler"
 		-- Register PickupMap
 		if self.PickupMap then self:RunSnippet( _RegisterSnippetTemplate:format("_PickupMap", self.Name, self.PickupMap) ) end
 
+		-- Register PreClickMap
+		if self.PreClickSnippet then self:RunSnippet( _RegisterSnippetTemplate:format("_PreClickSnippet", self.Name, self.PreClickSnippet) ) end
+
+		-- Register PostClickMap
+		if self.PostClickSnippet then self:RunSnippet( _RegisterSnippetTemplate:format("_PostClickSnippet", self.Name, self.PostClickSnippet) ) end
+
 		-- Clear
 		self.InitSnippet = nil
 		self.PickupSnippet = nil
 		self.UpdateSnippet = nil
 		self.ReceiveSnippet = nil
 		self.ClearSnippet = nil
+		self.PreClickSnippet = nil
+		self.PostClickSnippet = nil
     end
 endinterface "IFActionTypeHandler"
 
@@ -401,7 +427,8 @@ endinterface "IFActionTypeHandler"
 --
 ------------------------------------------------------
 __Doc__[[The handler for each action types]]
-__Cache__() class "ActionTypeHandler"
+__AutoCache__() __AutoProperty__()
+class "ActionTypeHandler"
 	extend "IFActionTypeHandler"
 
 	------------------------------------------------------
@@ -420,6 +447,7 @@ endclass "ActionTypeHandler"
 -- ActionList
 --
 ------------------------------------------------------
+__AutoProperty__()
 class "ActionList"
 	import "System.Collections"
 	extend "IList"
@@ -616,6 +644,8 @@ do
 			_UpdateSnippet = newtable()
 			_PickupSnippet = newtable()
 			_ReceiveSnippet = newtable()
+			_PreClickSnippet = newtable()
+			_PostClickSnippet = newtable()
 
 			_DragStyle = newtable()
 			_ReceiveStyle = newtable()
@@ -840,16 +870,18 @@ do
 	]]
 
 	_IFActionHandler_WrapClickPrev = [[
-		if self:GetAttribute("type") == "action" or self:GetAttribute("type") == "pet" then
-			local type, action = GetActionInfo(self:GetAttribute("action"))
-			return nil, format("%s|%s", tostring(type), tostring(action))
+		local name = self:GetAttribute("actiontype")
+
+		if _PreClickSnippet[name] then
+			return Manager:RunFor(self, _PreClickSnippet[name], button, down)
 		end
 	]]
 
 	_IFActionHandler_WrapClickPost = [[
-		local type, action = GetActionInfo(self:GetAttribute("action"))
-		if message ~= format("%s|%s", tostring(type), tostring(action)) then
-			return Manager:RunFor(self, UpdateAction)
+		local name = self:GetAttribute("actiontype")
+
+		if _PostClickSnippet[name] then
+			return Manager:RunFor(self, _PostClickSnippet[name], message, button, down)
 		end
 	]]
 
@@ -1036,21 +1068,21 @@ do
 
 	function UpdateGrid(self)
 		local kind = self.ActionType
-
-		if _IFActionHandler_GridCounter > 0 or self.ShowGrid or _IFActionTypeHandler[kind].HasAction(self) then
-			self.Alpha = 1
+		local force = _IFActionHandler_GridCounter > 0
+		if force or self.ShowGrid or _IFActionTypeHandler[kind].HasAction(self) then
+			self:ShowButtonGrid(force)
 		else
-			self.Alpha = 0
+			self:HideButtonGrid()
 		end
 	end
 
 	function UpdatePetGrid(self)
 		local kind = self.ActionType
-
-		if _IFActionHandler_PetGridCounter > 0 or self.ShowGrid or _IFActionTypeHandler[kind].HasAction(self) then
-			self.Alpha = 1
+		local force = _IFActionHandler_PetGridCounter > 0
+		if force or self.ShowGrid or _IFActionTypeHandler[kind].HasAction(self) then
+			self:ShowButtonGrid(force)
 		else
-			self.Alpha = 0
+			self:HideButtonGrid()
 		end
 	end
 
@@ -1117,11 +1149,16 @@ do
 
 	function UpdateTooltip(self)
 		self = IGAS:GetWrapper(self)
+		local anchor = self.GameTooltipAnchor
 
-		if (GetCVar("UberTooltips") == "1") then
-			GameTooltip_SetDefaultAnchor(_GameTooltip, self)
+		if anchor then
+			_GameTooltip:SetOwner(self, anchor)
 		else
-			_GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			if (GetCVar("UberTooltips") == "1") then
+				GameTooltip_SetDefaultAnchor(_GameTooltip, self)
+			else
+				_GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			end
 		end
 		_IFActionTypeHandler[self.ActionType].SetTooltip(self, _GameTooltip)
 		_IFActionHandler_OnTooltip =self
@@ -1132,13 +1169,13 @@ do
 	end
 
 	function UpdateOverlayGlow(self)
-		local spellId = _IFActionTypeHandler[self.ActionType].GetSpellId(self)
+		--[[local spellId = _IFActionTypeHandler[self.ActionType].GetSpellId(self)
 
 		if spellId and IsSpellOverlayed(spellId) then
 			ShowOverlayGlow(self)
 		else
 			HideOverlayGlow(self)
-		end
+		end--]]
 	end
 
 	function ShowOverlayGlow(self)
@@ -1184,6 +1221,10 @@ do
 		self.AutoCasting = _IFActionTypeHandler[self.ActionType].IsAutoCasting(self)
 	end
 
+	function UpdateIcon(self)
+		self.Icon = _IFActionTypeHandler[self.ActionType].GetActionTexture(self)
+	end
+
 	function UpdateActionButton(self)
 		local kind = self.ActionType
 		local handler = _IFActionTypeHandler[kind]
@@ -1201,6 +1242,12 @@ do
 		end
 
 		_Spell4Buttons[self] = handler.GetSpellId(self)
+
+		if self.UseRangeCheck and handler.HasAction(self) then
+			_RangeCheckButtons[self] = true
+		elseif _RangeCheckButtons[self] then
+			_RangeCheckButtons[self] = nil
+		end
 
 		if handler.IsPlayerAction and handler.ReceiveStyle ~= "Block" then
 			UpdateGrid(self)
@@ -1231,11 +1278,13 @@ do
 		self.Icon = handler.GetActionTexture(self)
 
 		UpdateCount(self)
-		UpdateOverlayGlow(self)
+		-- UpdateOverlayGlow(self)
 
 		if _IFActionHandler_OnTooltip == self then
 			UpdateTooltip(self)
 		end
+
+		handler.RefreshButton(self)
 
 		return self:UpdateAction()
 	end
@@ -1262,6 +1311,7 @@ do
 		RefreshCount = UpdateCount
 		RefreshOverlayGlow = UpdateOverlayGlow
 		RefreshTooltip = RefreshTooltip
+		RefreshIcon = UpdateIcon
 	endinterface "ActionRefreshMode"
 
 	------------------------------------------------------
@@ -1310,10 +1360,6 @@ do
 		end
 	end
 
-	function _IFActionHandler_ManagerFrame:ARCHAEOLOGY_CLOSED()
-		_IFActionHandler_Buttons:Each(UpdateButtonState)
-	end
-
 	function _IFActionHandler_ManagerFrame:PET_BAR_SHOWGRID()
 		_IFActionHandler_PetGridCounter = _IFActionHandler_PetGridCounter + 1
 		if _IFActionHandler_PetGridCounter == 1 then
@@ -1354,7 +1400,7 @@ do
 		_IFActionHandler_UpdateRangeTimer:OnTimer()
 	end
 
-	function _IFActionHandler_ManagerFrame:SPELL_ACTIVATION_OVERLAY_GLOW_SHOW(spellId)
+	--[[function _IFActionHandler_ManagerFrame:SPELL_ACTIVATION_OVERLAY_GLOW_SHOW(spellId)
 		for button, id in pairs(_Spell4Buttons) do
 			if id == spellId then
 				ShowOverlayGlow(button)
@@ -1368,7 +1414,7 @@ do
 				HideOverlayGlow(button, true)
 			end
 		end
-	end
+	end--]]
 
 	function _IFActionHandler_ManagerFrame:SPELL_UPDATE_CHARGES()
 		for button in pairs(_Spell4Buttons) do
@@ -1400,18 +1446,6 @@ do
 		_IFActionHandler_Buttons:Each(UpdateButtonState)
 	end
 
-	function _IFActionHandler_ManagerFrame:UNIT_ENTERED_VEHICLE(unit)
-		if unit == "player" then
-			_IFActionHandler_Buttons:Each(UpdateButtonState)
-		end
-	end
-
-	function _IFActionHandler_ManagerFrame:UNIT_EXITED_VEHICLE(unit)
-		if unit == "player" then
-			_IFActionHandler_Buttons:Each(UpdateButtonState)
-		end
-	end
-
 	function _IFActionHandler_ManagerFrame:UNIT_INVENTORY_CHANGED(unit)
 		if unit == "player" then
 			return RefreshTooltip()
@@ -1419,7 +1453,9 @@ do
 	end
 
 	function _IFActionHandler_UpdateRangeTimer:OnTimer()
-		_IFActionHandler_Buttons:Each(UpdateRange)
+		for btn in pairs(_RangeCheckButtons) do
+			UpdateRange(btn)
+		end
 	end
 
 	function _IFActionHandler_FlashingTimer:OnTimer()
@@ -1450,9 +1486,21 @@ do
 end
 
 __Doc__[[IFActionHandler is used to manage action buttons]]
+__AutoProperty__()
 interface "IFActionHandler"
 	extend "IFSecureHandler" "IFCooldown"
 	require "CheckButton"
+
+	------------------------------------------------------
+	-- Event Handler
+	------------------------------------------------------
+	local function OnShow(self)
+		if _IFActionTypeHandler[self.ActionType].IsPlayerAction then
+			UpdateGrid(self)
+		else
+			UpdatePetGrid(self)
+		end
+	end
 
 	------------------------------------------------------
 	-- Event
@@ -1520,6 +1568,16 @@ interface "IFActionHandler"
 
 	__Doc__[[Refresh the button manually]]
 	Refresh = UpdateActionButton
+
+	__Doc__[[Show the button grid]]
+	function ShowButtonGrid(self, force)
+		self:SetAlpha(1)
+	end
+
+	__Doc__[[Hide the button grid]]
+	function HideButtonGrid(self)
+		self:SetAlpha(0)
+	end
 
 	------------------------------------------------------
 	-- Interface Method
@@ -1626,13 +1684,7 @@ interface "IFActionHandler"
 	-- Display Property
 	------------------------------------------------------
 	__Doc__[[Whether show the action button with no content, controlled by IFActionHandler]]
-	__Handler__( function (self, value)
-		if _IFActionTypeHandler[self.ActionType].IsPlayerAction then
-			UpdateGrid(self)
-		else
-			UpdatePetGrid(self)
-		end
-	end )
+	__Handler__( OnShow )
 	property "ShowGrid" { Type = Boolean }
 
 	__Doc__[[Whether show the action button's flyout icon, controlled by IFActionHandler]]
@@ -1665,7 +1717,7 @@ interface "IFActionHandler"
 	__Optional__() property "Text" { Type = String }
 
 	__Doc__[[The action's icon path, used to refresh the action count as a trigger]]
-	__Optional__() property "Icon" { Type = String }
+	__Optional__() property "Icon" { Type = String + Number }
 
 	__Doc__[[Whether the action is in range, used to refresh the action count as a trigger]]
 	__Optional__() property "InRange" { Type = BooleanNil_01 }
@@ -1682,8 +1734,17 @@ interface "IFActionHandler"
 	__Doc__[[Whether an indicator should be shown for equipped item]]
 	__Optional__() property "EquippedItemIndicator" { Type = Boolean }
 
+	__Doc__[[Whether the action should check the range]]
+	__Optional__() property "UseRangeCheck" { Type = Boolean }
+
+	__Doc__[[Whether the search overlay will be shown]]
+	property "ShowSearchOverlay" { Type = Boolean }
+
 	__Doc__[[Whether the action button's icon is locked]]
 	__Optional__() property "IconLocked" { Type = Boolean }
+
+	__Doc__[[The anchor point of the gametooltip]]
+	property "GameTooltipAnchor" { Type = AnchorType }
 
 	------------------------------------------------------
 	-- Dispose
@@ -1719,6 +1780,8 @@ interface "IFActionHandler"
 		_IFActionHandler_Buttons:Insert(self)
 
 		_IFActionHandler_Buttons[self] = self.ActionType
+
+		self.OnShow = self.OnShow + OnShow
 
 		return Task.NoCombatCall(SetupActionButton, self)
 	end

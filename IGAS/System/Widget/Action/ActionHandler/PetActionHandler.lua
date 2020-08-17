@@ -25,7 +25,6 @@ function OnEnable(self)
 	self:RegisterEvent("UNIT_FLAGS")
 	self:RegisterEvent("PET_BAR_UPDATE")
 	self:RegisterEvent("PET_UI_UPDATE")
-	self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR")
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("PET_BAR_UPDATE_COOLDOWN")
 	self:RegisterEvent("PET_BAR_UPDATE_USABLE")
@@ -76,10 +75,6 @@ function PET_UI_UPDATE(self)
 	return handler:Refresh()
 end
 
-function UPDATE_VEHICLE_ACTIONBAR(self)
-	return handler:Refresh()
-end
-
 function UNIT_AURA(self, unit)
 	if unit == "pet" then
 		return handler:Refresh()
@@ -125,6 +120,19 @@ handler = ActionTypeHandler {
 		self:SetAttribute("macrotext2", nil)
 	]],
 
+	PreClickSnippet = [[
+		local type, action = GetActionInfo(self:GetAttribute("action"))
+		return nil, format("%s|%s", tostring(type), tostring(action))
+	]],
+
+	PostClickSnippet = [[
+		local message = ...
+		local type, action = GetActionInfo(self:GetAttribute("action"))
+		if message ~= format("%s|%s", tostring(type), tostring(action)) then
+			return Manager:RunFor(self, UpdateAction)
+		end
+	]],
+
 	OnEnableChanged = function(self) _Enabled = self.Enabled end,
 }
 
@@ -138,7 +146,7 @@ function handler:HasAction()
 end
 
 function handler:GetActionTexture()
-	local name, _, texture, isToken = GetPetActionInfo(self.ActionTarget)
+	local name, texture, isToken = GetPetActionInfo(self.ActionTarget)
 	if name then
 		return isToken and _G[texture] or texture
 	end
@@ -153,15 +161,15 @@ function handler:IsUsableAction()
 end
 
 function handler:IsActivedAction()
-	return select(5, GetPetActionInfo(self.ActionTarget))
+	return select(4, GetPetActionInfo(self.ActionTarget))
 end
 
 function handler:IsAutoCastAction()
-	return select(6, GetPetActionInfo(self.ActionTarget))
+	return select(5, GetPetActionInfo(self.ActionTarget))
 end
 
 function handler:IsAutoCasting()
-	return select(7, GetPetActionInfo(self.ActionTarget))
+	return select(6, GetPetActionInfo(self.ActionTarget))
 end
 
 function handler:SetTooltip(GameTooltip)

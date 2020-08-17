@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.StatusBar", version) then
 end
 
 __Doc__[[StatusBars are similar to Sliders, but they are generally used for display as they don't offer any tools to receive user input.]]
+__AutoProperty__()
 class "StatusBar"
 	inherit "Frame"
 
@@ -21,13 +22,13 @@ class "StatusBar"
 		<param name="min">new minimun value of the status bar</param>
 		<param name="max">new maximum value of the status bar</param>
 	]]
-	event "OnMinMaxChanged"
+	__WidgetEvent__() event "OnMinMaxChanged"
 
 	__Doc__[[
 		<desc>Fired when the status bar's value changes</desc>
 		<param name="value">new value of the status bar</param>
 	]]
-	event "OnValueChanged"
+	__WidgetEvent__() event "OnValueChanged"
 
 	------------------------------------------------------
 	-- Method
@@ -194,5 +195,4 @@ class "StatusBar"
 
 	__Doc__[[Whether the status bar's texture is reverse filled]]
 	property "ReverseFill" { Type = Boolean }
-
 endclass "StatusBar"

@@ -9,6 +9,7 @@ if not IGAS:NewAddon("IGAS.Widget.DockLayoutPanel", version) then
 end
 
 __Doc__[[DockLayoutPanel is using to contain other widget elements and manager their size &amp; position with the dock settings.]]
+__AutoProperty__()
 class "DockLayoutPanel"
 	inherit "LayoutPanel"
 
@@ -192,11 +193,13 @@ class "DockLayoutPanel"
 	end
 
 	local function SecureUpdateLayout(self)
-		Super.SuspendLayout(self)
+		local isSus = self:IsSuspended()
+
+		if not isSus then Super.SuspendLayout(self) end
 
 		pcall(UpdateLayout, self)
 
-		Super.ResumeLayout(self)
+		if not isSus then Super.ResumeLayout(self) end
 	end
 
 	local function ValidateAdd(self, prefix, direction, before, widget, size, unit)

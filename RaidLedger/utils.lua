@@ -266,21 +266,13 @@ end
 
 ADDONSELF.genexport = function(items, n, conf)
 
-    if DEBUG then
-        for i,v in ipairs(items) do
-            print(i,v)
-        end
-        print(n)
-        
-    end
-
     -- TODO code struct
     if conf.format == "csv" then
         return csv(items, n)
     end
 
     local s = L["Raid Ledger"] .. CRLF
-    s = s .. L["Feedback"] .. ": wufaquhui@gmail.com" .. CRLF
+    s = s .. L["Feedback"] .. ": farmer1992@gmail.com" .. CRLF
     s = s .. CRLF
 
     local l = function(item, c)

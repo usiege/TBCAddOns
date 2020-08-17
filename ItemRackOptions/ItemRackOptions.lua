@@ -13,16 +13,18 @@ ItemRackOpt = {
 }
 
 ItemRack.CheckButtonLabels = {
-	["ItemRackOptItemStatsPriorityText"] = "优先级",
-	["ItemRackOptItemStatsKeepEquippedText"] = "暂停队列",
-	["ItemRackOptQueueEnableText"] = "自动队列此槽",
+	["ItemRackOptItemStatsPriorityText"] = "优先",
+	["ItemRackOptItemStatsKeepEquippedText"] = "暂停",
+	["ItemRackOptQueueEnableText"] = "自动执行",
 	["ItemRackOptSetsHideCheckButtonText"] = "隐藏",
-	["ItemRackOptEventEditBuffAnyMountText"] = "坐骑检查",
-	["ItemRackOptEventEditBuffUnequipText"] = "当Buff消失时解除装备",
-	["ItemRackOptEventEditBuffNotInPVPText"] = "在pvp场景中除外",
-	["ItemRackOptEventEditStanceUnequipText"] = "解除姿态时同时解除装备",
-	["ItemRackOptEventEditZoneUnequipText"] = "离开区域时解除装备",
-	["ItemRackOptEventEditStanceNotInPVPText"] = "在pvp场景中除外",
+	["ItemRackOptShowHelmText"] = "头盔",
+	["ItemRackOptShowCloakText"] = "披风",
+	["ItemRackOptEventEditBuffAnyMountText"] = "任意坐骑",
+	["ItemRackOptEventEditBuffUnequipText"] = "无增益还原",
+	["ItemRackOptEventEditBuffNotInPVPText"] = "战场除外",
+	["ItemRackOptEventEditStanceUnequipText"] = "切换姿态还原",
+	["ItemRackOptEventEditZoneUnequipText"] = "离开区域还原",
+	["ItemRackOptEventEditStanceNotInPVPText"] = "战场除外",
 }
 
 function ItemRackOpt.InvOnEnter(self)
@@ -73,57 +75,57 @@ function ItemRackOpt.OnLoad(self)
 	-- combatlock = 1/nil : whether option can be changed in combat (key bindings, hide when ooc, etc)
 	ItemRackOpt.OptInfo = {
 		{type="label",label=(UnitName("player")).."的设置"},
-		{type="check",optset=ItemRackUser,variable="Locked",label="锁定按钮",tooltip="Prevent buttons and menus from being moved."},
-		{type="check",optset=ItemRackUser,variable="EnableEvents",label="启用事件",tooltip="Enable events to automatically swap gear."},
-		{type="check",optset=ItemRackUser,variable="EnableQueues",label="启用自动队列",tooltip="Enables auto queues to automatically swap gear."},
-		{type="number",optset=ItemRackUser,variable="ButtonSpacing",button=ItemRackOptButtonSpacing,label="按钮间距",tooltip="Padding distance between buttons.",combatlock=1},
-		{type="slider",button=ItemRackOptButtonSpacingSlider,variable="ButtonSpacing",label="按钮间距",tooltip="Padding distance between buttons.", min=0, max=24, step=1, form="%d",combatlock=1},
-		{type="number",optset=ItemRackUser,variable="Alpha",button=ItemRackOptAlpha,label="透明度",tooltip="Transparency (alpha) of the buttons and menu."},
-		{type="slider",button=ItemRackOptAlphaSlider,variable="Alpha",label="透明度",tooltip="Transparency (alpha) of the buttons and menu.", min=.1, max=1, step=.05, form="%.2f"},
-		{type="number",optset=ItemRackUser,variable="MainScale",button=ItemRackOptMainScale,label="按钮大小",tooltip="Scale size of the item buttons.",combatlock=1},
-		{type="slider",button=ItemRackOptMainScaleSlider,variable="MainScale",label="按钮大小",tooltip="Scale size of the item buttons.", min=.5, max=2, step=.05, form="%.2f",combatlock=1},
+		{type="check",optset=ItemRackUser,variable="Locked",label="锁定",tooltip="锁定菜单和按键。"},
+		{type="check",optset=ItemRackUser,variable="EnableEvents",label="启用事件",tooltip="启用事件自动换装。"},
+		{type="check",optset=ItemRackUser,variable="EnableQueues",label="启用序列",tooltip="启用序列自动换装。"},
+		{type="number",optset=ItemRackUser,variable="ButtonSpacing",button=ItemRackOptButtonSpacing,label="间隔",tooltip="设置按键间隔。",combatlock=1},
+		{type="slider",button=ItemRackOptButtonSpacingSlider,variable="ButtonSpacing",label="间隔",tooltip="设置按键间隔。", min=0, max=24, step=1, form="%d",combatlock=1},
+		{type="number",optset=ItemRackUser,variable="Alpha",button=ItemRackOptAlpha,label="透明度",tooltip="设置菜单和按键透明度。"},
+		{type="slider",button=ItemRackOptAlphaSlider,variable="Alpha",label="透明度",tooltip="设置菜单和按键透明度。", min=.1, max=1, step=.05, form="%.2f"},
+		{type="number",optset=ItemRackUser,variable="MainScale",button=ItemRackOptMainScale,label="缩放",tooltip="调整物品按键大小。",combatlock=1},
+		{type="slider",button=ItemRackOptMainScaleSlider,variable="MainScale",label="缩放",tooltip="调整物品按键大小。", min=.5, max=2, step=.05, form="%.2f",combatlock=1},
 
-		{type="number",optset=ItemRackUser,variable="MenuScale",button=ItemRackOptMenuScale,label="菜单大小",tooltip="Scale size of the menu in relation to the button it's docked to."},
-		{type="slider",button=ItemRackOptMenuScaleSlider,variable="MenuScale",label="菜单大小",tooltip="Scale size of the menu.", min=.5, max=2, step=.05, form="%.2f"},
+		{type="number",optset=ItemRackUser,variable="MenuScale",button=ItemRackOptMenuScale,label="菜单缩放",tooltip="设置菜单栏缩放。"},
+		{type="slider",button=ItemRackOptMenuScaleSlider,variable="MenuScale",label="菜单缩放",tooltip="设置菜单栏尺寸。", min=.5, max=2, step=.05, form="%.2f"},
 
-		{type="check",optset=ItemRackUser,variable="SetMenuWrap",label="装备菜单换行",tooltip="Check this to set a fixed value when the menu wraps to a new row.  Uncheck to let ItemRack decide."},
+		{type="check",optset=ItemRackUser,variable="SetMenuWrap",label="文本换行",tooltip="设置每一行的长度，如果不选，则让ItemRack自行决定。"},
 
-		{type="number",optset=ItemRackUser,variable="SetMenuWrapValue",depend="SetMenuWrap",button=ItemRackOptSetMenuWrapValue,label="何时换行",tooltip="When 'Set menu wrap' checked, this is the number of menu items before wrapping to a new row/column."},
-		{type="slider",optset=ItemRackUser,button=ItemRackOptSetMenuWrapValueSlider,depend="SetMenuWrap",variable="SetMenuWrapValue",label="何时换行",tooltip="When 'Set menu wrap' checked, this is the number of menu items before wrapping to a new row/column.", min=1, max=30, step=1, form="%d"},
+		{type="number",optset=ItemRackUser,variable="SetMenuWrapValue",depend="SetMenuWrap",button=ItemRackOptSetMenuWrapValue,label="换行位置",tooltip="当勾选文本换行时，设置多少个字符后换行。"},
+		{type="slider",optset=ItemRackUser,button=ItemRackOptSetMenuWrapValueSlider,depend="SetMenuWrap",variable="SetMenuWrapValue",label="换行位置",tooltip="当勾选文本换行时，设置多少个字符后换行。", min=1, max=30, step=1, form="%d"},
 
-		{type="label",label="全局设置"},
-		{type="check",optset=ItemRackSettings,variable="MenuOnShift",label="转换菜单",tooltip="Only show menu while Shift is held down."},
-		{type="check",optset=ItemRackSettings,variable="MenuOnRight",label="右键菜单",tooltip="Open menu by right clicking buttons.",combatlock=1},
-		{type="check",optset=ItemRackSettings,variable="HideOOC",label="脱战隐藏",tooltip="Hide the buttons while out of combat.",combatlock=1},
-		{type="check",optset=ItemRackSettings,variable="HidePetBattle",label="在宠物战斗中隐藏",tooltip="Hide the buttons during a pet battle."},
-		{type="check",optset=ItemRackSettings,variable="Notify",label="就绪时通告",tooltip="Announce when an item you used comes off cooldown."},
-		{type="check",optset=ItemRackSettings,variable="NotifyThirty",label="30秒时通告",tooltip="Announce when an item you used is at 30 seconds cooldown."},
-		{type="check",optset=ItemRackSettings,variable="NotifyChatAlso",label="通告在聊天框",tooltip="Send cooldown notifications to chat also."},
-		{type="check",optset=ItemRackSettings,variable="ShowSetInTooltip",label="鼠标提示里显示套装信息",tooltip="Show which set an item belongs to in the tooltip."},
-		{type="check",optset=ItemRackSettings,variable="ShowTooltips",label="显示鼠标提示",tooltip="Show tooltips like the one you're reading now."},
-		{type="check",optset=ItemRackSettings,variable="TinyTooltips",depend="ShowTooltips",label="迷你鼠标提示",tooltip="Shrink item tooltips to display only name, cooldown and durability."},
-		{type="check",optset=ItemRackSettings,variable="TooltipFollow",depend="ShowTooltips",label="鼠标提示跟随",tooltip="Show tooltips near the mouse."},
-		{type="check",optset=ItemRackSettings,variable="CooldownCount",label="冷却数字",tooltip="Display the cooldown time as a number over items."},
-		{type="check",optset=ItemRackSettings,variable="LargeNumbers",depend="CooldownCount",label="大数字",tooltip="Use a larger font for cooldown numbers."},
-		{type="check",optset=ItemRackSettings,variable="Cooldown90",depend="CooldownCount",label="90秒CD倒计时",tooltip="Use seconds instead of minutes starting at 90 seconds remaining."},
-		{type="check",optset=ItemRackSettings,variable="AllowEmpty",label="允许空槽",tooltip="Add an empty slot to menus of equipped items."},
-		{type="check",optset=ItemRackSettings,variable="AllowHidden",label="允许隐藏装备",tooltip="Enable Alt+clicking of menu items to hide/show them in the menu.  Hold Alt as you enter a menu to show all."},
-		{type="check",optset=ItemRackSettings,variable="HideTradables",label="隐藏可交易物",tooltip="Prevent tradable items from showing up in the menu."},
-		{type="check",optset=ItemRackSettings,variable="ShowMinimap",label="显示小地图按钮",tooltip="Show the minimap button to access options or change sets."},
-		{type="check",optset=ItemRackSettings,variable="SquareMinimap",depend="ShowMinimap",label="方形小地图",tooltip="If you use a square minimap, make the button drag along square edge."},
-		{type="check",optset=ItemRackSettings,variable="MinimapTooltip",depend="ShowMinimap",label="显示小地图鼠标提示",tooltip="If tooltips enabled, show what mouse clicks will do when clicking the minimap button."},
-		{type="check",optset=ItemRackSettings,variable="TrinketMenuMode",label="TrinketMenu(饰品)模式",tooltip="When mouseover of either trinket slot, open anchored to the top trinket.  Left click of a menu item will equip to the top trinket.  Right click will equip to the bottom trinket."},
-		{type="check",optset=ItemRackSettings,variable="AnchorOther",depend="TrinketMenuMode",label="锚定其他饰品",tooltip="In TrinketMenu mode, trinket menus dock to the top trinket.  Check this to anchor them to the bottom trinket."},
-		{type="check",optset=ItemRackSettings,variable="EquipToggle",label="装备集切换",tooltip="When a set is equipped, if it's already equipped, unequip it."},
-		{type="check",optset=ItemRackSettings,variable="ShowHotKeys",label="显示快捷绑键",tooltip="Display key bindings on buttons"},
-		{type="check",optset=ItemRackSettings,variable="EquipOnSetPick",label="选项中就装备",tooltip="Check this to equip sets and items when selecting items in options or from the dropdown in the Sets tab."},
-		{type="check",optset=ItemRackSettings,variable="CharacterSheetMenus",label="C键时可查看装备集",tooltip="While this is checked, mouseover of slots on the character sheet will pop out a menu of items that can go in that slot."},
-		{type="check",optset=ItemRackSettings,variable="DisableAltClick",label="禁用Alt点击",tooltip="Alt+Click on buttons dragged from the character sheet toggles auto queue for that slot.  Check this to disable that behavior. (ie to use Alt+click to self cast instead.)",combatlock=1},
+		{type="label",label="全局设定"},
+		{type="check",optset=ItemRackSettings,variable="MenuOnShift",label="Shift开启设置",tooltip="只有按住Shift才打开设置窗口。"},
+		{type="check",optset=ItemRackSettings,variable="MenuOnRight",label="右键开启设置",tooltip="右键打开设置窗口。",combatlock=1},
+		{type="check",optset=ItemRackSettings,variable="HideOOC",label="非战斗状态隐藏",tooltip="脱战后隐藏按钮。",combatlock=1},
+		{type="check",optset=ItemRackSettings,variable="HidePetBattle",label="宠物战斗时隐藏",tooltip="宠物战斗时隐藏按钮。"},
+		{type="check",optset=ItemRackSettings,variable="Notify",label="物品可用提示",tooltip="物品冷却完成后发出提示。"},
+		{type="check",optset=ItemRackSettings,variable="NotifyThirty",label="30秒提示",tooltip="物品冷却时间低于30秒时发出提示。"},
+		{type="check",optset=ItemRackSettings,variable="NotifyChatAlso",label="聊天窗口提示",tooltip="同时在聊天窗口发出提示。"},
+		{type="check",optset=ItemRackSettings,variable="ShowSetInTooltip",label="在提示窗口显示套装信息",tooltip="在提示窗口显示物品被应用于哪些套装中。"},
+		{type="check",optset=ItemRackSettings,variable="ShowTooltips",label="显示提示",tooltip="在你当前的提示窗口提示。"},
+		{type="check",optset=ItemRackSettings,variable="TinyTooltips",depend="ShowTooltips",label="简易提示",tooltip="仅提示物品名称、冷却计时和持续时间。"},
+		{type="check",optset=ItemRackSettings,variable="TooltipFollow",depend="ShowTooltips",label="鼠标位置提示",tooltip="在鼠标位置显示提示。"},
+		{type="check",optset=ItemRackSettings,variable="CooldownCount",label="冷却计时",tooltip="在物品上显示冷却计时。"},
+		{type="check",optset=ItemRackSettings,variable="LargeNumbers",depend="CooldownCount",label="更大数字",tooltip="使用更大字号数字。"},
+		{type="check",optset=ItemRackSettings,variable="Cooldown90",depend="CooldownCount",label="90秒倒计时",tooltip="冷却时间小于90秒时，不再显示分钟，而按秒倒计时。"},
+		{type="check",optset=ItemRackSettings,variable="AllowEmpty",label="允许空栏",tooltip="允许在套装中添加空装备。"},
+		{type="check",optset=ItemRackSettings,variable="AllowHidden",label="允许隐藏物品",tooltip="按住Alt+点击后隐藏或显示装备，按住Alt显示所有装备。"},
+		{type="check",optset=ItemRackSettings,variable="HideTradables",label="隐藏可交易物品",tooltip="不显示尚未绑定的装备。"},
+		{type="check",optset=ItemRackSettings,variable="ShowMinimap",label="小地图按钮",tooltip="在小地图上显示快速换装按钮。"},
+		{type="check",optset=ItemRackSettings,variable="SquareMinimap",depend="ShowMinimap",label="方形地图",tooltip="如果使用方形小地图，选中该项可以让小地图按钮更符合小地图框。"},
+		{type="check",optset=ItemRackSettings,variable="MinimapTooltip",depend="ShowMinimap",label="小地图按钮提示",tooltip="启用后，鼠标经过小地图按钮时显示提示。"},
+		{type="check",optset=ItemRackSettings,variable="TrinketMenuMode",label="饰品菜单",tooltip="鼠标经过任意饰品格时，在上饰品栏旁弹出饰品菜单，左键装备至上饰品栏，右键装备至下饰品栏。"},
+		{type="check",optset=ItemRackSettings,variable="AnchorOther",depend="TrinketMenuMode",label="更改位置",tooltip="在下饰品栏旁弹出菜单。"},
+		{type="check",optset=ItemRackSettings,variable="EquipToggle",label="套装切换",tooltip="当一个套装已经装备时，再次选择该套装将解除套装。"},
+		{type="check",optset=ItemRackSettings,variable="ShowHotKeys",label="显示绑键",tooltip="显示已绑定的快捷键。"},
+		{type="check",optset=ItemRackSettings,variable="EquipOnSetPick",label="快速套装",tooltip="选中启用快速套装，可以直接在设置页面或通过拖动快速修改套装。"},
+		{type="check",optset=ItemRackSettings,variable="CharacterSheetMenus",label="人物界面菜单",tooltip="增强人物界面，在每个装备栏旁显示可替换装备。"},
+		{type="check",optset=ItemRackSettings,variable="DisableAltClick",label="禁用ALt点击",tooltip="禁用Alt+点击装备栏启用序列装备。（当你设置了Alt自我施法时请勾选）",combatlock=1},
 		{type="label",label=""},
-		{type="button",button=ItemRackOptKeyBindings,label="槽键绑定",tooltip="Set key bindings to use slots.",combatlock=1},
-		{type="button",button=ItemRackOptResetBar,label="重置按钮",tooltip="Remove all buttons and restore to default alpha and scale.",combatlock=1},
-		{type="button",button=ItemRackOptResetEvents,label="重置事件",tooltip="Restore default events or wipe all events to default settings."},
-		{type="button",button=ItemRackOptResetEverything,label="重置所有",tooltip="Wipe all settings, sets and events to restore mod to a default state.",combatlock=1},
+		{type="button",button=ItemRackOptKeyBindings,label="绑定按键",tooltip="为一个装备栏设置一个快捷键。",combatlock=1},
+		{type="button",button=ItemRackOptResetBar,label="重设按键",tooltip="删除所有快捷键，并重设按键大小和透明度。",combatlock=1},
+		{type="button",button=ItemRackOptResetEvents,label="重设事件",tooltip="删除所有自定义事件，并还原默认值。"},
+		{type="button",button=ItemRackOptResetEverything,label="全部重置",tooltip="还原默认状态。",combatlock=1},
 	}
 
 	ItemRackOpt.InitializeSliders()
@@ -138,6 +140,8 @@ function ItemRackOpt.OnLoad(self)
 		_G[i]:SetTextColor(1,1,1,1)
 	end
 
+	ItemRackOpt.TriStateCheckSetState(ItemRackOptShowHelm,nil)
+	ItemRackOpt.TriStateCheckSetState(ItemRackOptShowCloak,nil)
 end
 
 function ItemRackOpt.InitializeSliders()
@@ -416,6 +420,11 @@ function ItemRackOpt.ValidateSetButtons()
 	ItemRackOptSetsHideCheckButton:Disable()
 	ItemRackOptSetsHideCheckButtonText:SetTextColor(.5,.5,.5,1)
 	ItemRackOptSetsHideCheckButton:SetChecked(false)
+	ItemRackOpt.TriStateCheckSetState(ItemRackOptShowHelm,nil)
+	ItemRackOpt.TriStateCheckSetState(ItemRackOptShowCloak,nil)
+	ItemRackOptShowHelm:Disable()
+	ItemRackOptShowCloak:Disable()
+
 	local setname = ItemRackOptSetsName:GetText()
 	if string.len(setname)>0 then
 		for i=0,19 do
@@ -431,9 +440,45 @@ function ItemRackOpt.ValidateSetButtons()
 		ItemRackOptSetsHideCheckButton:Enable()
 		ItemRackOptSetsHideCheckButtonText:SetTextColor(1,1,1,1)
 		ItemRackOptSetsHideCheckButton:SetChecked(ItemRack.IsHidden(setname))
+
+		ItemRackOpt.TriStateCheckSetState(ItemRackOptShowHelm,ItemRackUser.Sets[setname].ShowHelm)
+		ItemRackOpt.TriStateCheckSetState(ItemRackOptShowCloak,ItemRackUser.Sets[setname].ShowCloak)
+		ItemRackOptShowHelm:Enable()
+		ItemRackOptShowCloak:Enable()
+
 		ItemRackOptSetsCurrentSetIcon:SetTexture(ItemRackUser.Sets[setname].icon)
 	end
 end
+
+function ItemRackOpt.ShowCloakHelm()
+	local setname = ItemRackOptSetsName:GetText()
+
+	if setname ~= ItemRackUser.CurrentSet then
+		return
+	end
+
+	if ItemRackUser.Sets[setname] == nil then
+		return
+	end
+
+	if ItemRackUser.Sets[setname].ShowHelm ~= nil then
+		if ItemRackUser.Sets[setname].ShowHelm == 1 then
+			ShowHelm(true)
+		else
+			ShowHelm(false)
+		end
+	end
+
+	if ItemRackUser.Sets[setname].ShowCloak ~= nil then
+		if ItemRackUser.Sets[setname].ShowCloak == 1 then
+			ShowCloak(true)
+		else
+			ShowCloak(false)
+		end
+	end
+end
+
+
 
 function ItemRackOpt.LoadSet()
 	ItemRackOptSetsName:ClearFocus()
@@ -779,7 +824,7 @@ function ItemRackOpt.OptListCheckButtonOnClick(self,override)
 		ItemRack.ReflectCooldownFont()
 	elseif opt.variable=="ShowMinimap" or opt.variable=="SquareMinimap" then
 		ItemRack.MoveMinimap()
-	elseif opt.variable=="EnableQueues" then
+	elseif opt.variable=="EnableQueues" or opt.variable=="EnablePerSetQueues" then
 		ItemRack.UpdateCombatQueue()
 	elseif opt.variable=="ShowHotKeys" then
 		ItemRack.KeyBindingsChanged()
@@ -864,7 +909,7 @@ end
 
 function ItemRackOpt.BindSet()
 	local setname = ItemRackOptSetsName:GetText()
-	ItemRackOpt.Binding = { type="Set", name="Set \""..setname.."\"", buttonName="ItemRack"..UnitName("player")..GetRealmName()..setname }
+	ItemRackOpt.Binding = { type="Set", name="套装\""..setname.."\"", buttonName="ItemRack"..UnitName("player")..GetRealmName()..setname }
 	ItemRackOpt.Binding.button = _G[buttonName] or CreateFrame("Button",ItemRackOpt.Binding.buttonName,nil,"SecureActionButtonTemplate")
 	ItemRackOptBindFrame:Show()	
 end
@@ -872,9 +917,9 @@ end
 function ItemRackOpt.BindFrameOnShow()
 	if not ItemRackOpt.Binding then return end
 	ItemRackOpt.HideCurrentSubFrame()
-	ItemRackOpt.Binding.currentKey=GetBindingKey("CLICK "..ItemRackOpt.Binding.buttonName..":LeftButton") or "无绑定"
+	ItemRackOpt.Binding.currentKey=GetBindingKey("CLICK "..ItemRackOpt.Binding.buttonName..":LeftButton") or "未绑定"
 	ItemRackOptBindFrameBindee:SetText(ItemRackOpt.Binding.name)
-	ItemRackOptBindFrameCurrently:SetText("当前: "..ItemRackOpt.Binding.currentKey)
+	ItemRackOptBindFrameCurrently:SetText("Currently: "..ItemRackOpt.Binding.currentKey)
 end
 
 function ItemRackOpt.BindFrameOnHide()
@@ -932,9 +977,9 @@ function ItemRackOpt.BindFrameOnKeyDown(self,key)
 		local oldAction = GetBindingAction(keyPressed)
 		if oldAction~="" and keyPressed~=ItemRackOpt.Binding.currentKey then
 			StaticPopupDialogs["ItemRackCONFIRMBINDING"] = {
-				text = NORMAL_FONT_COLOR_CODE..ItemRackOpt.Binding.keyPressed..FONT_COLOR_CODE_CLOSE.." is currently bound to "..NORMAL_FONT_COLOR_CODE..(GetBindingText(oldAction,"BINDING_NAME_") or "")..FONT_COLOR_CODE_CLOSE.."\n\nDo you want to bind "..NORMAL_FONT_COLOR_CODE..keyPressed..FONT_COLOR_CODE_CLOSE.." to "..NORMAL_FONT_COLOR_CODE..ItemRackOpt.Binding.name..FONT_COLOR_CODE_CLOSE.."?",
-				button1 = "Yes",
-				button2 = "No",
+				text = NORMAL_FONT_COLOR_CODE..ItemRackOpt.Binding.keyPressed..FONT_COLOR_CODE_CLOSE.."已绑定到"..NORMAL_FONT_COLOR_CODE..(GetBindingText(oldAction,"BINDING_NAME_") or "")..FONT_COLOR_CODE_CLOSE.."上\n\n你希望将"..NORMAL_FONT_COLOR_CODE..keyPressed..FONT_COLOR_CODE_CLOSE.."绑定到"..NORMAL_FONT_COLOR_CODE..ItemRackOpt.Binding.name..FONT_COLOR_CODE_CLOSE.."上吗？",
+				button1 = "是",
+				button2 = "否",
 				timeout = 0,
 				hideOnEscape = 1,
 				OnAccept = ItemRackOpt.SetKeyBinding,
@@ -956,7 +1001,7 @@ function ItemRackOpt.SetKeyBinding()
 		ItemRackOpt.UnbindKey()
 		SetBindingClick(ItemRackOpt.Binding.keyPressed,ItemRackOpt.Binding.buttonName)
 	else
-		ItemRack.Print("Sorry, you can't bind keys while in combat.")
+		ItemRack.Print("对不起，不能在战斗中绑定按键。")
 	end
 	ItemRackOpt.ResetBindFrame()
 	ItemRackOptBindFrame:Hide()
@@ -1075,6 +1120,16 @@ function ItemRackOpt.SetupQueue(id)
 	if not ItemRackUser.Queues[id] then
 		ItemRackUser.Queues[id] = {}
 	end
+	for name, set in pairs(ItemRackUser.Sets) do
+		if not set.Queues then
+			set.Queues = {}
+		end
+	
+		if not set.Queues[id] then
+			set.Queues[id] = {}
+		end
+	end
+	
 	ItemRackOpt.SelectedSlot = id
 	ItemRackOpt.SortSelected = nil
 	ItemRackOptSlotQueueName:SetText(ItemRack.SlotInfo[id].real)
@@ -1084,7 +1139,7 @@ function ItemRackOpt.SetupQueue(id)
 end
 
 function ItemRackOpt.PopulateSortList(slot)
-	local sortList = ItemRackUser.Queues[slot]
+	local sortList = ItemRack.GetQueues()[slot]
 	ItemRack.DockWindows("TOPLEFT",ItemRackOptInv1,"TOPRIGHT")
 	ItemRack.BuildMenu(slot,1) -- make a dummy menu to fetch all wearable items for that slot
 	ItemRackMenuFrame:Hide()
@@ -1109,7 +1164,7 @@ function ItemRackOpt.SortListScrollFrameUpdate()
 
 	local item, name, texture, quality, idx
 	local slot = ItemRackOpt.SelectedSlot
-	local sortList = slot and ItemRackUser.Queues[slot]
+	local sortList = slot and ItemRack.GetQueues()[slot]
 	local offset = FauxScrollFrame_GetOffset(ItemRackOptSortListScrollFrame)
 
 	FauxScrollFrame_Update(ItemRackOptSortListScrollFrame, sortList and #(sortList) or 0, 11, 24)
@@ -1119,7 +1174,7 @@ function ItemRackOpt.SortListScrollFrameUpdate()
 		idx = offset + i
 		if sortList and idx<=#(sortList) then
 			if sortList[idx]==0 then
-				name,texture,quality = "-- stop queue here --","Interface\\Buttons\\UI-GroupLoot-Pass-Up",1
+				name,texture,quality = "-- 以下不参与队列 --","Interface\\Buttons\\UI-GroupLoot-Pass-Up",1
 			else
 				name,texture,_,quality = ItemRack.GetInfoByID(sortList[idx])
 			end
@@ -1166,7 +1221,7 @@ end
 
 function ItemRackOpt.ValidateSortButtons()
 	local selected = ItemRackOpt.SortSelected
-	local list = ItemRackUser.Queues[ItemRackOpt.SelectedSlot]
+	local list = ItemRack.GetQueues()[ItemRackOpt.SelectedSlot]
 	ItemRackOptSortMoveTop:Enable()
 	ItemRackOptSortMoveUp:Enable()
 	ItemRackOptSortMoveDown:Enable()
@@ -1213,12 +1268,12 @@ function ItemRackOpt.ValidateSortButtons()
 			PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON);
 		end
 	end
-	ItemRackOptQueueEnable:SetChecked(ItemRackUser.QueuesEnabled[ItemRackOpt.SelectedSlot])
+	ItemRackOptQueueEnable:SetChecked(ItemRack.GetQueuesEnabled()[ItemRackOpt.SelectedSlot])
 end
 
 function ItemRackOpt.SortMove(self)
 	local dir = ((self==ItemRackOptSortMoveUp) and -1) or ((self==ItemRackOptSortMoveTop) and "top") or ((self==ItemRackOptSortMoveDown) and 1) or ((self==ItemRackOptSortMoveBottom) and "bottom")
-	local list = ItemRackUser.Queues[ItemRackOpt.SelectedSlot]
+	local list = ItemRack.GetQueues()[ItemRackOpt.SelectedSlot]
 	local idx1 = ItemRackOpt.SortSelected
 	if dir then
 		local idx2 = ((dir=="top") and 1) or ((dir=="bottom") and #(list)) or idx1+dir
@@ -1245,10 +1300,10 @@ end
 function ItemRackOpt.SortListOnEnter(self)
 	_G[self:GetName().."Highlight"]:Show()
 	local idx = FauxScrollFrame_GetOffset(ItemRackOptSortListScrollFrame) + self:GetID()
-	local list = ItemRackUser.Queues[ItemRackOpt.SelectedSlot]
+	local list = ItemRack.GetQueues()[ItemRackOpt.SelectedSlot]
 	if list[idx] then
 		if list[idx]==0 then
-			ItemRack.OnTooltip(self,"Stop Queue Here","Move this to mark an explicit end to an order. ie, if you have a clickable trinket with a passive effect, and would like to use the passive effect if no better trinkets are off cooldown.")
+			ItemRack.OnTooltip(self,"在此处停止队列","移动此标志到队列末尾。例如，你有一个带有被动效果的主动饰品，你想在没有可用主动饰品时装备它，可以将它放在队尾。")
 		else
 			ItemRack.IDTooltip(self,list[idx])
 		end
@@ -1273,7 +1328,7 @@ function ItemRackOpt.ItemStatsCleanup(id)
 end
 
 function ItemRackOpt.ItemStatsDelayOnTextChanged(self)
-	local baseID = ItemRack.GetIRString(ItemRackUser.Queues[ItemRackOpt.SelectedSlot][ItemRackOpt.SortSelected],true)
+	local baseID = ItemRack.GetIRString(ItemRack.GetQueues()[ItemRackOpt.SelectedSlot][ItemRackOpt.SortSelected],true)
 	local value = tonumber(self:GetText() or "") or 0
 	if value~=0 then
 		if not ItemRackItems[baseID] then
@@ -1289,7 +1344,7 @@ function ItemRackOpt.ItemStatsDelayOnTextChanged(self)
 end
 
 function ItemRackOpt.ItemStatsCheckOnClick(self)
-	local baseID = ItemRack.GetIRString(ItemRackUser.Queues[ItemRackOpt.SelectedSlot][ItemRackOpt.SortSelected],true)
+	local baseID = ItemRack.GetIRString(ItemRack.GetQueues()[ItemRackOpt.SelectedSlot][ItemRackOpt.SortSelected],true)
 	local value = self:GetChecked()
 	local which = self==ItemRackOptItemStatsPriority and "priority" or "keep"
 	if value then
@@ -1306,8 +1361,54 @@ function ItemRackOpt.ItemStatsCheckOnClick(self)
 end
 
 function ItemRackOpt.QueueEnableSlotOnClick(self)
-	ItemRackUser.QueuesEnabled[ItemRackOpt.SelectedSlot] = self:GetChecked()
+	ItemRack.GetQueuesEnabled()[ItemRackOpt.SelectedSlot] = self:GetChecked()
 	ItemRack.UpdateCombatQueue()
+end
+
+--[[ Show/Hide/Ignore Helm/Cloak tristate checkbuttons ]]
+
+-- sets the state of a checkbutton to nil, 0 or 1
+function ItemRackOpt.TriStateCheckSetState(button,value)
+	local label = _G[button:GetName().."Text"]
+	button.tristate = value
+	if not value then
+		button:SetCheckedTexture("Interface\\Buttons\\UI-CheckBox-Up")
+		button:SetChecked(false)
+		label:SetTextColor(.5,.5,.5)
+	elseif value==0 then
+		button:SetCheckedTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+		button:SetChecked(true)
+		label:SetTextColor(1,1,1)
+	elseif value==1 then
+		button:SetCheckedTexture("Interface\\Buttons\\UI-CheckBox-Check")
+		button:SetChecked(true)
+		label:SetTextColor(1,1,1)
+	end
+end
+
+-- rotates a checkbutton from indeterminate->unchecked->checked (for show helm/cloak)
+function ItemRackOpt.TriStateCheckOnClick(self)
+	local newstate
+	if not self.tristate then
+		newstate = 1 -- nil->1 (show)
+	elseif self.tristate==0 then
+		newstate = nil -- 0->nil (ignore)
+	elseif self.tristate==1 then
+		newstate = 0 -- 1->0 (hide)
+	end
+	ItemRackOpt.TriStateCheckSetState(self,newstate)
+	local setname = ItemRackOptSetsName:GetText()
+	if setname and ItemRackUser.Sets[setname] then
+		local which = self==ItemRackOptShowHelm and "ShowHelm" or "ShowCloak"
+		ItemRackUser.Sets[setname][which] = newstate
+	end
+	ItemRackOpt.TriStateCheckTooltip(self)
+end
+
+function ItemRackOpt.TriStateCheckTooltip(self)
+	local tristate_names = { ["nil"] = "忽略", ["0"] = "隐藏", ["1"] = "显示" }
+	local which = self==ItemRackOptShowHelm and "头盔" or "披风"
+	ItemRack.OnTooltip(self,which..": "..tristate_names[tostring(self.tristate)],"这将决定\""..which.."\"在装备时是显示还是隐藏。\n\124TInterface\\Buttons\\UI-CheckBox-Up:22\124t = 忽略\n\124TInterface\\Buttons\\UI-CheckBox-Check:22\124t = 显示\n\124TInterface\\RAIDFRAME\\ReadyCheck-NotReady:22\124t = 隐藏")
 end
 
 --[[ Events ]]
@@ -1431,36 +1532,36 @@ function ItemRackOpt.EventListOnEnter(self,child)
 	local eventName = ItemRackOpt.EventList[idx][1]
 	local eventType = ItemRackOpt.EventList[idx][2]
 	local event = ItemRackEvents[eventName]
-	local desc = "|cFFBBBBBBEquips a set when "
+	local desc = "|cFFBBBBBB切换套装："
 	if eventType=="Buff" then
 		if event.Anymount then
-			desc = desc.."riding any mount."
+			desc = "骑乘时"..desc
 		else
-			desc = desc.."gaining the buff "..event.Buff
+			desc = "获得Buff"..event.Buff.."时"..desc
 		end
 	elseif eventType=="Stance" then
 		if event.Stance == 0 then
-			desc = desc.."leaving forms."
+			desc = "取消变形时"..desc
 		else
-			desc = desc.."entering stance:"..event.Stance.."."
+			desc = "切换至姿态/形态"..event.Stance.."时"..desc
 		end
 	elseif eventType=="Zone" then
-		desc = desc.."entering one of the following zones:"
+		desc = "进入下列区域时"..desc
 		for i in pairs(event.Zones) do
 			desc = desc.."\n"..i
 		end
 	else
-		desc = "|cFFBBBBBBScript event triggered on "..event.Trigger
+		desc = "|cFFBBBBBB触发"..event.Trigger.."事件时："
 		local comment = string.match(event.Script,"--%[%[(.+)%]%]")
 		if comment then
 			desc = desc.."\n"..comment
 		end
 	end
 	if event.NotInPVP then
-		desc = desc.."\n|cFF888888Except in PVP instances."
+		desc = desc.."\n|cFF888888战场除外"
 	end
 	if event.Unequip then
-		desc = desc.."\n|cFF888888Unequips when condition ends."
+		desc = desc.."\n|cFF888888结束后还原"
 	end
 	ItemRack.OnTooltip(self,eventName,desc)	
 	_G[(child and self:GetParent():GetName() or self:GetName()).."Highlight"]:Show()
@@ -1534,7 +1635,7 @@ end
 
 function ItemRackOpt.EventEditClearFrame()
 	ItemRackOptEventEditNameEdit:SetText("")
-	ItemRackOptEventEditTypeDropText:SetText("选择一个")
+	ItemRackOptEventEditTypeDropText:SetText("Pick one")
 	ItemRackOptEventEditBuffName:SetText("")
 	ItemRackOptEventEditBuffAnyMount:SetChecked(false)
 	ItemRackOptEventEditBuffUnequip:SetChecked(false)
@@ -1561,7 +1662,7 @@ function ItemRackOpt.EventEditPopulateFrame()
 		ItemRackOptEventEditBuffName:SetCursorPosition(0)
 		if event.Anymount then
 			ItemRackOptEventEditBuffAnyMount:SetChecked(true)
-			ItemRackOptEventEditBuffName:SetText("任何坐骑")
+			ItemRackOptEventEditBuffName:SetText("Any mount")
 		end
 		ItemRackOptEventEditBuffUnequip:SetChecked(event.Unequip)
 		ItemRackOptEventEditBuffNotInPVP:SetChecked(event.NotInPVP)
@@ -1697,8 +1798,8 @@ function ItemRackOpt.EventEditSave(override)
 		local oldName = ItemRackOpt.EventSelected and ItemRackOpt.EventList[ItemRackOpt.EventSelected][1] or ""
 		if (not ItemRackOpt.EventSelected and ItemRackEvents[eventName]) or (ItemRackEvents[eventName] and oldName~=eventName) then
 			StaticPopupDialogs["ItemRackConfirmEventOverwrite"] = {
-				text = "An event with that name already exists.\nDo you want to overwrite it?",
-				button1 = "Yes", button2 = "No", timeout = 0, hideOnEscape = 1, whileDead = 1,
+				text = "存在同名事件。\n是否覆盖?",
+				button1 = "是", button2 = "否", timeout = 0, hideOnEscape = 1, whileDead = 1,
 				OnAccept = function() StaticPopupDialogs["ItemRackConfirmEventOverwrite"].OnCancel() ItemRackOpt.EventEditSave(1) end,
 				OnCancel = function() ItemRackOptEventEditSave:Enable() ItemRackOptEventEditCancel:Enable() end
 			}
@@ -1734,7 +1835,7 @@ function ItemRackOpt.EventEditSave(override)
 		ItemRackUser.EnableEvents = "ON"
 		ItemRack.ReflectEventsRunning()
 	end
-	ItemRack.Print("Event \""..eventName.."\" saved.")
+	ItemRack.Print("事件\""..eventName.."\"已保存。")
 	ItemRackOptSubFrame8:Hide()     
 	ItemRackOpt.PopulateEventList()
 	-- select this new event in the event list
@@ -1759,8 +1860,8 @@ function ItemRackOpt.EventEditDelete(override)
 	end
 	if not override then
 		StaticPopupDialogs["ItemRackConfirmEventDelete"] = {
-			text = "Are you sure you want to delete the event \""..eventName.."\"?",
-			button1 = "Yes", button2 = "No", timeout = 0, hideOnEscape = 1, whileDead = 1,
+			text = "确定要删除事件\""..eventName.."\"吗？",
+			button1 = "是", button2 = "否", timeout = 0, hideOnEscape = 1, whileDead = 1,
 			OnAccept = function() StaticPopupDialogs["ItemRackConfirmEventDelete"].OnCancel() ItemRackOpt.EventEditDelete(1) end,
 			OnCancel = function() ItemRackOptEventNew:Enable() ItemRackOpt.ValidateEventListButtons() end
 		}
@@ -1774,7 +1875,7 @@ function ItemRackOpt.EventEditDelete(override)
 	ItemRackOpt.EventSelected = nil
 	ItemRack.CleanupEvents()
 	ItemRackOpt.PopulateEventList()
-	ItemRack.Print("Event \""..eventName.."\" deleted.")
+	ItemRack.Print("事件\""..eventName.."\"已删除。")
 end
 
 function ItemRackOpt.ToggleEventEditor()

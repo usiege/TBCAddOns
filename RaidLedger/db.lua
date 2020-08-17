@@ -5,7 +5,7 @@ local RegEvent = ADDONSELF.regevent
 
 RegEvent("ADDON_LOADED", function()
     if not RaidLedgerDatabase then
-        RaidLedgerDatabase = {}  
+        RaidLedgerDatabase = {}
     end
 end)
 
@@ -117,7 +117,6 @@ function db:AddEntry(type, detail, beneficiary, cost, costtype)
         detail = detail or {},
         beneficiary = beneficiary or "",
         cost = cost or 0,
-        payment = (cost > 0),
         costtype = costtype or "GOLD",
     })
 
@@ -190,7 +189,6 @@ function db:AddLoot(item, count, beneficiary, cost, force)
     if not itemLink then
         return
     end
-
 
     if force then
         self:AddEntry(TYPE_CREDIT, {

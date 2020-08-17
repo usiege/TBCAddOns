@@ -1,14 +1,14 @@
 local mod	= DBM:NewMod("Noth", "DBM-Naxx", 3)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision("20190901045350")
+mod:SetRevision("20200716131113")
 mod:SetCreatureID(15954)
 mod:SetEncounterID(1117)
 mod:SetModelID(16590)
 mod:RegisterCombat("combat_yell", L.Pull)
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_SUCCESS 29213 54835 29212",
+	"SPELL_CAST_SUCCESS 29213 29212",--54835 Add in wrath
 	--"CHAT_MSG_MONSTER_YELL",
 	"CHAT_MSG_RAID_BOSS_EMOTE",
 	"UNIT_SPELLCAST_SUCCEEDED"
@@ -23,7 +23,7 @@ local specWarnAdds		= mod:NewSpecialWarningAdds(29212, "-Healer", nil, nil, 1, 2
 
 local timerTeleport		= mod:NewTimer(90, "TimerTeleport", "135736", nil, nil, 6)
 local timerTeleportBack	= mod:NewTimer(70, "TimerTeleportBack", "135736", nil, nil, 6)
-local timerCurseCD		= mod:NewCDTimer(53.3, 29213, nil, nil, nil, 5, nil, DBM_CORE_CURSE_ICON)
+local timerCurseCD		= mod:NewCDTimer(53.3, 29213, nil, nil, nil, 5, nil, DBM_CORE_L.CURSE_ICON)
 local timerAddsCD		= mod:NewAddsTimer(30, 29212, nil, "-Healer")
 
 mod.vb.teleCount = 0

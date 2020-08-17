@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.LayoutPanel", version) then
 end
 
 __Doc__[[LayoutPanel is used to manage its children's layout]]
+__AutoProperty__()
 class "LayoutPanel"
 	inherit "Frame"
 
@@ -24,6 +25,17 @@ class "LayoutPanel"
 	_Error_Zero = "%s%s can't be less than 0."
 	_Error_Size = "%s%s can't be greater than parent's %s."
 	_Error_Combine = "%sthe settings are oversize."
+
+	local abs = math.abs
+	local floor = math.floor
+
+	local function mround(v)
+		local a = abs(v)
+		local f = floor(v)
+		if (a-f) >= 0.5 then f = f + 1 end
+		if v < 0 then return -f end
+		return f
+	end
 
 	local function CalcMixValue(self, param, value)
 		return floor(self[param] * floor(value * 100 % 100) / 100) + floor(value)
@@ -652,6 +664,11 @@ class "LayoutPanel"
 		Layout(self)
 	end
 
+	__Doc__[[Whether the panel is suspended]]
+	function IsSuspended(self)
+		return self.__SuspendLayout
+	end
+
 	------------------------------------------------------
 	-- Property
 	------------------------------------------------------
@@ -665,8 +682,18 @@ class "LayoutPanel"
 	------------------------------------------------------
 	-- Event Handler
 	------------------------------------------------------
-	local function OnSizeChanged(self)
-		self:Layout()
+	local function OnSizeChanged(self, width, height)
+		local owidth = self._ChkWidth or 0
+		local oheight = self._ChkHeight or 0
+
+		width = mround(width)
+		height = mround(height)
+
+		if abs(width - owidth) >= 1 or abs(height - oheight) >= 1 then
+			self._ChkWidth = width
+			self._ChkHeight = height
+			return self:Layout()
+		end
 	end
 
 	------------------------------------------------------

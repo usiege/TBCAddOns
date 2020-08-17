@@ -18,9 +18,9 @@ function OnEnable(self)
 	self:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 	self:RegisterEvent("ACTIONBAR_UPDATE_USABLE")
 	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
-	self:RegisterEvent("UPDATE_SUMMONPETS_ACTION")
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
+	self:RegisterEvent("UNIT_AURA")
 
 	OnEnable = nil
 
@@ -69,6 +69,12 @@ function UPDATE_SHAPESHIFT_FORMS(self)
 	return handler:Refresh()
 end
 
+function UNIT_AURA(self, unit)
+	if unit == "player" then
+		handler:Refresh()
+	end
+end
+
 -- Action type handler
 handler = ActionTypeHandler {
 	Name = "action",
@@ -86,19 +92,18 @@ handler = ActionTypeHandler {
 
 		UpdateMainActionBar = [=[
 			local page = ...
-			if page == "tempshapeshift" then
-				if HasTempShapeshiftActionBar() then
+			if not page then page = GetActionBarPage() end
+			if type(page) ~= "number" then
+				if HasVehicleActionBar() then
+					page = GetVehicleBarIndex()
+				elseif HasOverrideActionBar() then
+					page = GetOverrideBarIndex()
+				elseif HasTempShapeshiftActionBar() then
 					page = GetTempShapeshiftBarIndex()
+				elseif HasBonusActionBar() then
+					page = GetBonusBarIndex()
 				else
-					page = 1
-				end
-			elseif page == "possess" then
-				page = Manager:GetFrameRef("MainMenuBarArtFrame"):GetAttribute("actionpage")
-				if page <= 10 then
-					page = Manager:GetFrameRef("OverrideActionBar"):GetAttribute("actionpage")
-				end
-				if page <= 10 then
-					page = 12
+					page = GetActionBarPage()
 				end
 			end
 			MainPage[0] = page
@@ -119,18 +124,31 @@ handler = ActionTypeHandler {
 		return "action", target
 	]],
 
+	PreClickSnippet = [[
+		local type, action = GetActionInfo(self:GetAttribute("action"))
+		return nil, format("%s|%s", tostring(type), tostring(action))
+	]],
+
+	PostClickSnippet = [[
+		local message = ...
+		local type, action = GetActionInfo(self:GetAttribute("action"))
+		if message ~= format("%s|%s", tostring(type), tostring(action)) then
+			return Manager:RunFor(self, UpdateAction)
+		end
+	]],
+
 	OnEnableChanged = function(self) _Enabled = self.Enabled end,
 }
 
 do
-	handler.Manager:SetFrameRef("MainMenuBarArtFrame", MainMenuBarArtFrame)
-	handler.Manager:SetFrameRef("OverrideActionBar", OverrideActionBar)
-
 	-- ActionBar swap register
 	local state = {}
 
 	-- special using
-	tinsert(state, "[overridebar][possessbar]possess")
+	tinsert(state, "[possessbar]possess")
+	tinsert(state, "[shapeshift]tempshapeshift")
+	tinsert(state, "[overridebar]override")
+	tinsert(state, "[vehicleui]vehicle")
 
 	-- action bar swap
 	for i = 2, 6 do
@@ -154,7 +172,7 @@ do
 	end
 
 	-- Fix for temp shape shift bar
-	tinsert(state, "[shapeshift]tempshapeshift")
+	-- tinsert(state, "[shapeshift]tempshapeshift")
 
 	tinsert(state, "1")
 
@@ -253,7 +271,7 @@ function handler:GetSpellId()
 	if type == "spell" then
 		return id
 	elseif type == "macro" then
-		return (select(3, GetMacroSpell(id)))
+		return GetMacroSpell(id)
 	end
 end
 

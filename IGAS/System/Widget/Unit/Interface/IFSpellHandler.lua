@@ -118,7 +118,7 @@ do
 	function ParseSpell(spell)
 		if (type(spell) == "string" or type(spell) == "number") and GetSpellInfo(spell) then
 			-- Only keep spell id
-			return tonumber(GetSpellLink(spell):match('spell:(%d+)')), IsHarmfulSpell(spell)
+			return select(7, GetSpellInfo(spell)), IsHarmfulSpell(spell)
 		end
 
 		error("Invalid spell name|id - "..tostring(spell), 3)
@@ -200,11 +200,15 @@ do
 	end
 
 	function TransSpell2Macro(spell, with)
-		return ("/%s %%unit\n/cast %s"):format(with, GetSpellInfo(spell))
+		if GetSpellInfo(spell) then
+			return ("/%s %%unit\n/cast %s"):format(with, GetSpellInfo(spell))
+		end
 	end
 
 	function TransItem2Macro(item, with)
-		return ("/%s %%unit\n/use %s"):format(with, GetItemInfo(item))
+		if GetItemInfo(item) then
+			return ("/%s %%unit\n/use %s"):format(with, GetItemInfo(item))
+		end
 	end
 
 	_IFSPellHandler_ActionType = {
@@ -401,7 +405,7 @@ do
 					tinsert(setup, _IFSpellHandler_SetupTemplate:format(prev .. "type" .. virtualKey, actionSet.type))
 					tinsert(clear, _IFSpellHandler_ClearTemplate:format(prev .. "type" .. virtualKey))
 
-					if actionSet.content then
+					if actionSet.content and tranContent then
 						tinsert(setup, _IFSpellHandler_SetupTemplate:format(prev .. actionSet.content .. virtualKey, tranContent))
 						tinsert(clear, _IFSpellHandler_ClearTemplate:format(prev .. actionSet.content .. virtualKey))
 					end
@@ -427,7 +431,7 @@ do
 					tinsert(setup, _IFSpellHandler_SetupTemplate:format(prev .. "type" .. virtualKey, actionSet.type))
 					tinsert(clear, _IFSpellHandler_ClearTemplate:format(prev .. "type" .. virtualKey))
 
-					if actionSet.content then
+					if actionSet.content and tranContent then
 						tinsert(setup, _IFSpellHandler_SetupTemplate:format(prev .. actionSet.content .. virtualKey, tranContent))
 						tinsert(clear, _IFSpellHandler_ClearTemplate:format(prev .. actionSet.content .. virtualKey))
 					end
@@ -483,6 +487,9 @@ do
 		_GroupMap[disposeFrame] = nil
 
 		if _HoverOnUnitFrame == disposeFrame then
+			if _HoverOnUnitFrameLeaveSnippet then
+				_HoverOnUnitFrame:UnregisterAutoHide()
+			end
 			_HoverOnUnitFrame = nil
 			_HoverOnUnitFrameLeaveSnippet = nil
 		end
@@ -502,7 +509,11 @@ do
 		local unit = self:GetAttribute("unit")
 
 		if _HoverOnUnitFrame and _HoverOnUnitFrameLeaveSnippet and _HoverOnUnitFrame ~= self then
+			_HoverOnUnitFrame:UnregisterAutoHide()
 			control:RunFor(_HoverOnUnitFrame, _HoverOnUnitFrameLeaveSnippet)
+			if _HoverOnUnitFrame:GetAttribute("unit") then
+				_HoverOnUnitFrame:Show()
+			end
 		end
 
 		if _SetupSnippet[group] and _UnitMap[self] ~= unit then
@@ -516,12 +527,22 @@ do
 		if _EnterSnippet[group] then
 			control:RunFor(self, _EnterSnippet[group])
 		end
+
+		if _HoverOnUnitFrameLeaveSnippet then
+			_HoverOnUnitFrame:RegisterAutoHide(0.25)
+		end
 	]]
 	-- OnLeave Snippet
 	_IFSpellHandler_OnLeaveSnippet = [[
 		local group = "%s"
 
 		if _HoverOnUnitFrame == self then
+			if _HoverOnUnitFrameLeaveSnippet then
+				_HoverOnUnitFrame:UnregisterAutoHide()
+				if _HoverOnUnitFrame:GetAttribute("unit") then
+					_HoverOnUnitFrame:Show()
+				end
+			end
 			_HoverOnUnitFrame = nil
 			_HoverOnUnitFrameLeaveSnippet = nil
 		end
@@ -538,6 +559,13 @@ do
 			return
 		end
 
+		if _HoverOnUnitFrameLeaveSnippet then
+			self:UnregisterAutoHide()
+			if self:GetAttribute("unit") then
+				self:Show()
+			end
+		end
+
 		_HoverOnUnitFrame = nil
 		_HoverOnUnitFrameLeaveSnippet = nil
 
@@ -551,6 +579,7 @@ do
 
 		if _HoverOnUnitFrame and _GroupMap[_HoverOnUnitFrame] == group then
 			if _HoverOnUnitFrameLeaveSnippet then
+				_HoverOnUnitFrame:UnregisterAutoHide()
 				control:RunFor(_HoverOnUnitFrame, _HoverOnUnitFrameLeaveSnippet)
 			end
 			_HoverOnUnitFrame = nil

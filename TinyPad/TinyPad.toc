@@ -1,8 +1,27 @@
-## Interface: 80000
+## Interface: 80300
 ## Title: TinyPad
-## Notes: A notepad mod.
+## Notes: TinyPad is a notepad addon
 ## Author: Gello
-## Version: 2.1.8
-## SavedVariables: TinyPadPages, TinyPadSettings
-TinyPad.xml
-TinyPad.lua
+## Version: 3.0.3
+## SavedVariables: TinyPadSettings, TinyPadPages
+
+init.lua
+settings.lua
+main.lua
+
+misc\constants.lua
+misc\pages.lua
+misc\layout.lua
+misc\minimap.lua
+
+templates\templates.xml
+templates\buttons.lua
+
+panels\toolbar.lua
+panels\editor.lua
+panels\extrabar.lua
+panels\bookmarks.lua
+panels\confirmbar.lua
+panels\fontbar.lua
+
+misc\external.lua

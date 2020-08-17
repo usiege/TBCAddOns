@@ -9,7 +9,7 @@ local Tooltip = AtlasLoot.Tooltip
 
 -- lua
 local type = _G.type
-local next, pairs, tblconcat = _G.next, _G.pairs, _G.table.concat
+local next, pairs, tblconcat, tblsort = _G.next, _G.pairs, _G.table.concat, _G.table.sort
 local format, strsub, strmatch, strgmatch, strsplit = _G.format, _G.strsub, _G.strmatch, _G.gmatch, _G.strsplit
 
 -- WoW
@@ -189,7 +189,7 @@ local function CleanUpShownLists(db, globalDb, activeSubLists, isGlobalList)
 end
 
 local function OnTooltipSetItem_Hook(self)
-    if not Favourites.db.enabled or (not Favourites.db.showIconInTT and not Favourites.db.showListInTT) then return end
+    if self:IsForbidden() or not Favourites.db.enabled or (not Favourites.db.showIconInTT and not Favourites.db.showListInTT) then return end
     local _, item = self:GetItem()
     if not item then return end
     if not TooltipCache[item] then
@@ -229,6 +229,11 @@ local function InitTooltips()
     Tooltip:AddHookFunction("OnTooltipSetItem", OnTooltipSetItem_Hook)
     TooltipsHooked = true
 end
+
+local function SlashCommand()
+    Favourites.GUI:Toggle()
+end
+AtlasLoot.SlashCommands:Add("fav", SlashCommand, "/al fav - "..AL["Open Favourites"])
 
 function Favourites:UpdateDb()
     self.db = self:GetDb()
@@ -369,12 +374,37 @@ function Favourites:GetIconForActiveItemID(itemID)
     return icon
 end
 
-function Favourites:GetProfileLists()
-    return self.db.lists
+local function SortedListFunc(a,b)
+    return a.name:lower() < b.name:lower()
 end
 
-function Favourites:GetGlobaleLists()
-    return self.globalDb.lists
+local function GetSortedList(list, isGlobal)
+    local new = {}
+    for k,v in pairs(list) do
+        new[#new+1] = {
+            id = k,
+            name = Favourites:GetListName(k, isGlobal, false),
+            nameIcon = Favourites:GetListName(k, isGlobal, true),
+        }
+    end
+    tblsort(new, SortedListFunc)
+    return new
+end
+
+function Favourites:GetProfileLists(sorted)
+    if sorted then
+        return GetSortedList(self.db.lists, false)
+    else
+        return self.db.lists
+    end
+end
+
+function Favourites:GetGlobaleLists(sorted)
+    if sorted then
+        return GetSortedList(self.globalDb.lists, true)
+    else
+        return self.globalDb.lists
+    end
 end
 
 function Favourites:GetListByID(listID, isGlobalList)

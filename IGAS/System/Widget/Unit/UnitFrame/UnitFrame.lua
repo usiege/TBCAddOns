@@ -15,6 +15,7 @@ if not IGAS:NewAddon("IGAS.Widget.Unit.UnitFrame", version) then
 end
 
 __Doc__[[UnitFrame is used to display information about an unit, and can be used to do the common actions on the unit]]
+__AutoProperty__()
 class "UnitFrame"
 	inherit "Button"
 	extend "IFContainer" "IFSecureHandler"
@@ -236,14 +237,6 @@ class "UnitFrame"
 		else
 			self:UnregisterEvent("UPDATE_MOUSEOVER_UNIT")
 			self.UPDATE_MOUSEOVER_UNIT = nil
-		end
-
-		if unit == "focus" then
-			self:RegisterEvent("PLAYER_FOCUS_CHANGED")
-			self.PLAYER_FOCUS_CHANGED = UpdateElements
-		else
-			self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
-			self.PLAYER_FOCUS_CHANGED = nil
 		end
 
 		if unit and (unit:match("^party%d") or unit:match("^raid%d")) then

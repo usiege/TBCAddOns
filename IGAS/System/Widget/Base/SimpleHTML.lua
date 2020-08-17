@@ -10,6 +10,7 @@ if not IGAS:NewAddon("IGAS.Widget.SimpleHTML", version) then
 end
 
 __Doc__[[The most sophisticated control over text display is offered by SimpleHTML widgets. When its text is set to a string containing valid HTML markup, a SimpleHTML widget will parse the content into its various blocks and sections, and lay the text out. While it supports most common text commands, a SimpleHTML widget accepts an additional argument to most of these; if provided, the element argument will specify the HTML elements to which the new style information should apply, such as formattedText:SetTextColor("h2", 1, 0.3, 0.1) which will cause all level 2 headers to display in red. If no element name is specified, the settings apply to the SimpleHTML widget's default font.]]
+__AutoProperty__()
 class "SimpleHTML"
 	inherit "Frame"
 
@@ -22,21 +23,21 @@ class "SimpleHTML"
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 		<param name="button">string, name of the mouse button responsible for the click action</param>
 	]]
-	event "OnHyperlinkClick"
+	__WidgetEvent__() event "OnHyperlinkClick"
 
 	__Doc__[[
 		<desc>Run when the mouse moves over a hyperlink in the SimpleHTML frame</desc>
 		<param name="linkData">string, essential data (linktype:linkdata portion) of the hyperlink (e.g. "quest:982:17")</param>
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 	]]
-	event "OnHyperlinkEnter"
+	__WidgetEvent__() event "OnHyperlinkEnter"
 
 	__Doc__[[
 		<desc>Run when the mouse moves away from a hyperlink in the SimpleHTML frame</desc>
 		<param name="linkData">string, essential data (linktype:linkdata portion) of the hyperlink (e.g. "quest:982:17")</param>
 		<param name="link">string, complete hyperlink text (e.g. "|cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r")</param>
 	]]
-	event "OnHyperlinkLeave"
+	__WidgetEvent__() event "OnHyperlinkLeave"
 
 	------------------------------------------------------
 	-- Method
@@ -501,5 +502,4 @@ class "SimpleHTML"
 		end,
 		Type = Element
 	}
-
 endclass "SimpleHTML"

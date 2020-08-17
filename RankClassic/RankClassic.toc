@@ -1,0 +1,6 @@
+## Title: RankClassic
+## Interface: 11303
+## Notes: Shows PvP Rank Progress | /rank
+## Version: 1.4
+
+core.lua

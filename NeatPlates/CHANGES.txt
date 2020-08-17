@@ -1,0 +1,12 @@
+lightweight tag 95825e410c383a761db7ef1d7c3459363016e444 1.13.5.10
+Author:	Luxocracy <luxor355@gmail.com>
+Date:	Fri Aug 14 20:47:56 2020 +0200
+
+commit 95825e410c383a761db7ef1d7c3459363016e444
+Author: Luxocracy <luxor355@gmail.com>
+Date:   Fri Aug 14 20:46:34 2020 +0200
+
+    Fix to safe color while solo
+    
+    - Fixed safe color while solo also being active while in party/having a pet
+

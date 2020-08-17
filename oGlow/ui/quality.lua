@@ -20,7 +20,7 @@ function frame:CreateOptions()
 
 	local thresLabel = ns.createFontString(self, 'GameFontNormalSmall')
 	thresLabel:SetPoint('TOPLEFT', title, 'BOTTOMLEFT', 0, -16)
-	thresLabel:SetText('Quality Threshold')
+	thresLabel:SetText('品质阈值')
 
 	local thesDDown = CreateFrame('Button', 'oGlowOptFQualityThreshold', self, 'UIDropDownMenuTemplate')
 	thesDDown:SetPoint('TOPLEFT', thresLabel, 'BOTTOMLEFT', -16, 0)

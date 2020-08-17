@@ -8,12 +8,30 @@ if not IGAS:NewAddon("IGAS.Widget.Unit.IFAura", version) then
 	return
 end
 
+local LCD = LibStub("LibClassicDurations")
+if LCD then
+	-- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
+	LCD.RegisterCallback(_M, "UNIT_BUFF", function(event, unit)
+	    _IFAuraUnitList:ParseEvent("UNIT_AURA", unit)
+	end)
+end
+
 _IFAuraUnitList = _IFAuraUnitList or UnitList(_Name)
 
 function _IFAuraUnitList:OnUnitListChanged()
 	self:RegisterEvent("UNIT_AURA")
 
 	self.OnUnitListChanged = nil
+end
+
+function _IFAuraUnitList:ParseEvent(event, unit)
+	if unit and self:HasUnit(unit) then
+		self:EachK(unit, OnForceRefresh)
+	end
+end
+
+function OnForceRefresh(self)
+	self:UpdateAuras()
 end
 
 __Doc__[[IFAura is used to handle the unit's aura updating]]
@@ -28,6 +46,12 @@ interface "IFAura"
 	end
 
 	------------------------------------------------------
+	-- Method
+	------------------------------------------------------
+	__Doc__[[Update the auras, overridable]]
+	__Optional__() function UpdateAuras(self) end
+
+	------------------------------------------------------
 	-- Dispose
 	------------------------------------------------------
 	function Dispose(self)
@@ -39,5 +63,6 @@ interface "IFAura"
 	------------------------------------------------------
 	function IFAura(self)
 		self.OnUnitChanged = self.OnUnitChanged + OnUnitChanged
+		self.OnForceRefresh = self.OnForceRefresh + OnForceRefresh
 	end
 endinterface "IFAura"
