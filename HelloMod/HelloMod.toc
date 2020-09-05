@@ -1,0 +1,11 @@
+# 什么都不要写也可以被识别
+# Toc文件只在开始时加载一次；
+# .toc修改后必须重启游戏，reloading interface won't work
+
+## Interface: 11305
+## Title: Hello Mod
+## Notes: This is a start of addons.
+
+## SavedVariables: Hello_Text
+
+hello.lua

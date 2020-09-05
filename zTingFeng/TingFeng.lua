@@ -76,4 +76,4 @@ DEFAULT_CHAT_FRAME:AddMessage("/y 这是一个测试")
 DEFAULT_CHAT_FRAME:AddMessage("/cast 恶魔皮肤")
 
 --SendChatMessage("cast 恶魔皮肤","channel",nil,"SAY")
-SendChatMessage("/cast 恶魔皮肤","SAY",nil)
+--SendChatMessage("/cast 恶魔皮肤","SAY",nil)

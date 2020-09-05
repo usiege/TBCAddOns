@@ -1,5 +1,4 @@
-           1-	13.05.2020
-           
+--	13.05.2020
 
 local GlobalAddonName, ExRT = ...
 
