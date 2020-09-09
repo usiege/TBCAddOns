@@ -15,6 +15,7 @@ tex:SetWidth(main_width/2.0)
 tex:SetHeight(64)
 tex:SetPoint("TOP", main_frame, 0, 15)
 main_frame.texture = tex
+main_frame:Hide()
 
 --  给标题添加文字
 local title = main_frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
