@@ -1,7 +1,0 @@
-package-as: IGAS
-enable-nolib-creation: no
-
-required-dependencies:
-    - ploop
-
-manual-changelog: CHANGELOG.txt

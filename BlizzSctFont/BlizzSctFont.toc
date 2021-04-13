@@ -1,8 +1,0 @@
-## Interface: 30300
-## Title: |cff3366CCBlizzard |cff00DBBASCT|r Font Switcher
-## Title-zhCN: BlizzSctFont-伤害字体
-## DefaultState: Enabled
-## Notes: Switches default blizzard sct font (everywhere).
-## Author: Balkeep
-## Version: 1.1
-BlizzSctFont.lua

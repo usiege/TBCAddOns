@@ -1,9 +1,0 @@
-﻿## Interface: 11302
-## Title: |cFF0dea38EZ|r Quest
-## Author: thisbarker
-## SavedVariables: EZQuest_SavedVars
-## Notes: Automatically accepts, tracks, and turns in quests
-## Version: 1.0.0
-
-Config.xml
-Main.xml

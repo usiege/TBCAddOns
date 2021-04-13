@@ -1,9 +1,0 @@
-<Bindings>
-   <Binding name="ALAEGUILD_TOGGLE" category="ADDONS" description="Toggle" header="ALAEGUILD">
-      alaEGuild_Toggle();
-   </Binding>
-   <!-- <Binding name="CLASSICGUIDE_PREV_STEP" category="ADDONS">
-      ClassicGuide_PrevStep();
-   </Binding> -->
-
-</Bindings>

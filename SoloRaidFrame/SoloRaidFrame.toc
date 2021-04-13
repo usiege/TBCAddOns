@@ -1,8 +1,0 @@
-## Interface: 80000
-## Title: Blizzard Raid Frames - Solo Frame
-## Title-zhCN: Solo Frame-暴雪团队框架（个人）
-## Author: Nokami
-## Version: 1.2
-code.lua
-
-

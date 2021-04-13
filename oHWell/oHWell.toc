@@ -1,8 +1,0 @@
-## Interface: 11302
-## Title: oHWell
-## Notes: Dismount, cancel form, stand up
-## Version: C1.2
-## Author: EK
-
-oHWell.lua
-## Q-CAT-Version: 101
